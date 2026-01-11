@@ -1,0 +1,8 @@
+flask
+flask-restx
+flask-cors
+python-dotenv
+google-generativeai
+google.genai
+marshmallow
+flasgger
