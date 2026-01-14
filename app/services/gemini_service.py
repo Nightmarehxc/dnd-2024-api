@@ -1,7 +1,9 @@
 import json
+import re  # <--- IMPORTANTE
 from flask import current_app
 from google import genai
 from google.genai import types
+
 
 class BaseService:
     def __init__(self):
@@ -13,21 +15,31 @@ class BaseService:
         return self.client
 
     def _clean_response(self, response):
-        """Limpia la respuesta de Markdown y la convierte a dict"""
+        """Busca el primer objeto JSON válido dentro de la respuesta usando Regex"""
+        text = response.text.strip()
         try:
-            text = response.text.strip()
-            if text.startswith("```json"):
-                text = text.replace("```json", "").replace("```", "")
+            # 1. Intentar carga directa
             return json.loads(text)
-        except Exception as e:
-            print(f"Error parseando JSON: {text}") # Log para debug
-            return {"error": "Formato JSON inválido recibido de la IA", "raw": text}
+        except json.JSONDecodeError:
+            # 2. Si falla, buscar patrón { ... }
+            # Esto captura desde el primer '{' hasta el último '}' ignorando texto extra
+            match = re.search(r'\{.*\}', text, re.DOTALL)
+            if match:
+                clean_json = match.group(0)
+                try:
+                    return json.loads(clean_json)
+                except json.JSONDecodeError:
+                    pass
+
+            # 3. Si todo falla, devolver error legible
+            print(f"FALLO PARSEO JSON. Respuesta cruda: {text}")
+            return {"error": "La IA generó una respuesta que no es JSON válido", "raw_content": text}
 
     def _generate_content(self, system_instruction, user_prompt):
         client = self._get_client()
         try:
             response = client.models.generate_content(
-                model='gemini-2.0-flash', # Modelo rápido y potente
+                model='gemini-2.5-flash',
                 contents=f"{system_instruction}\n\nTarea: {user_prompt}",
                 config=types.GenerateContentConfig(
                     response_mime_type='application/json',
