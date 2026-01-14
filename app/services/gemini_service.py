@@ -1,53 +1,66 @@
-import google.generativeai as genai
 import json
 from flask import current_app
+from google import genai
+from google.genai import types
 
 
 class GeminiService:
     def __init__(self):
-        # Se inicializa cuando se crea la instancia, usando la config de Flask
-        # Nota: En un entorno real, pasamos la API key al instanciar o usamos current_app dentro de los métodos
-        pass
+        self.client = None
 
-    def _configure(self):
-        # Lazy loading de la configuración para evitar problemas de contexto
-        if not getattr(self, 'configured', False):
-            genai.configure(api_key=current_app.config['GOOGLE_API_KEY'])
-            self.model = genai.GenerativeModel(
-                'gemini-1.5-flash',
-                generation_config={"response_mime_type": "application/json"}
-            )
-            self.configured = True
+    def _get_client(self):
+        if not self.client:
+            self.client = genai.Client(api_key=current_app.config['GOOGLE_API_KEY'])
+        return self.client
 
     def generate(self, prompt_type, user_input):
-        self._configure()
+        client = self._get_client()
 
-        # PROMPTS DEL SISTEMA (Reglas D&D 2024)
+        # Añadimos "daño" a la lista de claves requeridas
         system_instruction = """
-        Actúa como un motor de reglas experto en D&D 5e (Revisión 2024).
-        Reglas clave a respetar:
-        1. Backgrounds otorgan Stats y Origin Feat.
-        2. Especies no otorgan Stats.
-        3. Armas tienen propiedades de Mastery (Nick, Sap, Vex, etc.).
-        4. Clases y Hechizos usan versiones 2024.
-        Devuelve SOLO JSON válido.
+        Eres un experto en D&D 5e (2024). Responde SIEMPRE con un objeto JSON válido.
+
+        IMPORTANTE - Estructura de claves requerida (en español):
+
+        1. ITEMS (Objetos/Armas):
+           - "nombre": String
+           - "tipo": String (Arma, Objeto Maravilloso, etc.)
+           - "rareza": String
+           - "requiere_sintonizacion": Boolean
+           - "dano": Objeto o null (Ej: {"formula": "1d8 + 2", "tipo": "slashing"}). SOLO si es arma.
+           - "weapon_mastery": String o null
+           - "propiedades_base": String (Ej: Versátil, Sutil)
+           - "efecto_mecanico": String
+           - "descripcion_vis": String
+
+        2. NPCs: "nombre", "rol", "raza", "personalidad", "gancho_trama", "habilidad_especial".
+        3. PERSONAJES: "nombre", "especie", "clase", "nivel", "trasfondo", "estadisticas", "equipo_destacado", "resumen_historia".
         """
 
-        # Mapeo de prompts específicos
         specific_prompts = {
-            "character": f"Genera un PJ completo (JSON) basado en: {user_input}. Incluye: Nombre, Especie, Clase, Nivel, Trasfondo (con Origin Feat), Stats, Equipo (con Weapon Mastery).",
-            "npc": f"Genera un NPC (JSON) para DM basado en: {user_input}. Incluye: Rol, Apariencia, Personalidad (Ideal/Bond/Flaw), Gancho de trama.",
-            "item": f"Genera un Objeto (JSON) basado en: {user_input}. Si es arma, incluye propiedad Mastery. Incluye rareza y mecánica 2024."
+            "character": f"Genera un PJ: {user_input}. Reglas 2024.",
+            "npc": f"Genera un NPC: {user_input}. Reglas 2024.",
+            "item": f"Genera un Objeto: {user_input}. Si es un arma, INCLUYE fórmula de daño (ej: 2d6) y tipo. Reglas 2024."
         }
 
-        full_prompt = f"{system_instruction}\n\nTarea: {specific_prompts.get(prompt_type, user_input)}"
-
         try:
-            response = self.model.generate_content(full_prompt)
-            return json.loads(response.text)
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=f"{system_instruction}\n\nTarea: {specific_prompts.get(prompt_type, user_input)}",
+                config=types.GenerateContentConfig(
+                    response_mime_type='application/json',
+                    temperature=0.7
+                )
+            )
+
+            clean_text = response.text.strip()
+            if clean_text.startswith("```json"):
+                clean_text = clean_text.replace("```json", "").replace("```", "")
+
+            return json.loads(clean_text)
+
         except Exception as e:
             return {"error": "Error generando contenido", "details": str(e)}
 
 
-# Instancia singleton para ser importada
 ai_service = GeminiService()

@@ -12,4 +12,4 @@ if __name__ == '__main__':
         print(f"{rule.endpoint}: {rule}")
     print("-------------------------\n")
     # -------------------------------------
-    app.run(port=5000)
+    app.run(host='0.0.0.0', port=5001, debug=True)
