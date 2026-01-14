@@ -3,7 +3,6 @@ const API_URL = "http://localhost:5001/api";
 let currentMode = 'character';
 let currentData = null;
 
-// ELEMENTOS DOM
 const els = {
     title: document.getElementById('panelTitle'),
     desc: document.getElementById('description'),
@@ -16,7 +15,6 @@ const els = {
     menuBtns: document.querySelectorAll('.menu-btn')
 };
 
-// --- SIDEBAR ---
 function setMode(mode) {
     currentMode = mode;
     els.menuBtns.forEach(btn => btn.classList.remove('active'));
@@ -27,23 +25,19 @@ function setMode(mode) {
 
     if (mode === 'character') {
         els.title.innerText = "Generador de Personajes";
-        els.desc.placeholder = "Ej: Un bardo tiefling del colegio del valor...";
         els.levelGroup.style.display = 'block';
     } else if (mode === 'npc') {
         els.title.innerText = "Generador de NPCs (Combate)";
-        els.desc.placeholder = "Ej: Un jefe bandido orco muy fuerte...";
         els.levelGroup.style.display = 'none';
-    } else if (mode === 'item') {
+    } else {
         els.title.innerText = "Generador de Objetos";
-        els.desc.placeholder = "Ej: Una espada legendaria de hielo...";
         els.levelGroup.style.display = 'none';
     }
 }
 
-// --- GENERAR ---
 els.btnGen.addEventListener('click', async () => {
     const description = els.desc.value;
-    if (!description) return alert("Por favor, escribe una descripción.");
+    if (!description) return alert("Describe lo que quieres generar.");
 
     els.content.innerHTML = '';
     els.loader.style.display = 'block';
@@ -51,17 +45,11 @@ els.btnGen.addEventListener('click', async () => {
     els.btnExp.style.display = 'none';
 
     let payload = { description: description };
-    let endpoint = '';
+    let endpoint = currentMode === 'character' ? '/characters/generate' :
+                   currentMode === 'npc' ? '/npcs/generate' : '/items/generate';
 
-    if (currentMode === 'character') {
-        endpoint = '/characters/generate';
-        payload.level = parseInt(els.level.value);
-    } else if (currentMode === 'npc') {
-        endpoint = '/npcs/generate';
-    } else {
-        endpoint = '/items/generate';
-        payload.type = "Cualquiera";
-    }
+    if (currentMode === 'character') payload.level = parseInt(els.level.value);
+    if (currentMode === 'item') payload.type = "Cualquiera";
 
     try {
         const response = await fetch(API_URL + endpoint, {
@@ -72,34 +60,28 @@ els.btnGen.addEventListener('click', async () => {
 
         const data = await response.json();
 
-        // MANEJO DE ERRORES MEJORADO
         if (data.error) {
-            els.content.innerHTML = `<div style="color:var(--accent); text-align:center;">
-                <h3>⚠️ Error Arcano</h3>
-                <p>${data.error}</p>
-                ${data.raw_content ? `<small>La IA devolvió: ${data.raw_content.substring(0, 100)}...</small>` : ''}
-            </div>`;
-        } else if (response.ok) {
+            els.content.innerHTML = `<p style="color:var(--accent)">Error: ${data.error}</p>`;
+        } else {
             currentData = { ...data, genType: currentMode };
             renderResult(data);
             els.btnExp.style.display = 'block';
         }
 
     } catch (error) {
-        els.content.innerHTML = `<p style="color:var(--accent)">Error de conexión: ${error.message}</p>`;
+        els.content.innerHTML = `<p style="color:var(--accent)">Error: ${error.message}</p>`;
     } finally {
         els.loader.style.display = 'none';
         els.btnGen.disabled = false;
     }
 });
 
-// --- RENDERIZADO VISUAL ---
 function renderResult(data) {
     const safe = (val) => val || '---';
     let html = '';
 
     if (currentMode === 'npc') {
-        // MODO NPC AVANZADO (Stats y Ataques)
+        // --- VISUALIZACIÓN DE NPC ---
         html = `
             <div class="sheet-header">
                 <h1 class="sheet-title">${safe(data.nombre)}</h1>
@@ -126,18 +108,17 @@ function renderResult(data) {
                 </div>
             `).join('') : '<p>No tiene ataques.</p>'}
 
-            <h3 class="section-title">Detalles</h3>
-            <p><strong>Personalidad:</strong> ${safe(data.personalidad?.rasgo)}</p>
+            <h3 class="section-title">Rasgos</h3>
+            <p><strong>Especial:</strong> ${safe(data.habilidad_especial)}</p>
             <p><strong>Gancho:</strong> ${safe(data.gancho_trama)}</p>
         `;
     } else if (currentMode === 'item') {
-        // MODO ITEM
+        // --- VISUALIZACIÓN DE ITEM ---
         html = `
             <div class="sheet-header">
                 <h1 class="sheet-title">${safe(data.nombre)}</h1>
                 <div class="sheet-subtitle">${safe(data.rareza)} - ${safe(data.tipo)}</div>
             </div>
-            ${data.weapon_mastery ? `<span class="tag mastery">⚔️ Mastery: ${data.weapon_mastery}</span>` : ''}
             ${data.dano ? `<span class="tag damage">💥 ${data.dano.formula} ${data.dano.tipo}</span>` : ''}
             <h3 class="section-title">Mecánica</h3>
             <p>${safe(data.efecto_mecanico)}</p>
@@ -145,27 +126,24 @@ function renderResult(data) {
             <p style="font-style:italic;">${safe(data.descripcion_vis)}</p>
         `;
     } else {
-        // MODO PERSONAJE
+        // --- VISUALIZACIÓN DE PERSONAJE ---
         html = `
             <div class="sheet-header">
                 <h1 class="sheet-title">${safe(data.nombre)}</h1>
-                <div class="sheet-subtitle">Nivel ${data.nivel} ${data.especie} ${data.clase}</div>
+                <div class="sheet-subtitle">Nivel ${data.nivel} ${data.clase}</div>
             </div>
             <div class="stats-grid">
                 ${data.estadisticas ? Object.entries(data.estadisticas).map(([k, v]) => `
                     <div class="stat-box"><span class="stat-label">${k}</span><span class="stat-value">${v}</span></div>
                 `).join('') : ''}
             </div>
-            <h3 class="section-title">Trasfondo</h3>
-            <p>${safe(data.trasfondo?.nombre)}</p>
-            <h3 class="section-title">Historia</h3>
             <p>${safe(data.resumen_historia)}</p>
         `;
     }
     els.content.innerHTML = html;
 }
 
-// --- EXPORTACIÓN FOUNDRY VTT ---
+// --- EXPORTACIÓN FOUNDRY ---
 function exportToFoundry() {
     if (!currentData) return;
 
@@ -178,7 +156,7 @@ function exportToFoundry() {
     if (currentData.genType === 'npc') {
         foundryJSON.type = "npc";
 
-        // 1. Mapeo de Atributos
+        // 1. MAPEO DE ATRIBUTOS (FUE -> str)
         const statsMap = { "FUE": "str", "DES": "dex", "CON": "con", "INT": "int", "SAB": "wis", "CAR": "cha" };
         let abilities = {};
         if (currentData.estadisticas) {
@@ -187,6 +165,7 @@ function exportToFoundry() {
             }
         }
 
+        // 2. ESTRUCTURA DEL SISTEMA D&D 5E
         foundryJSON.system = {
             "abilities": abilities,
             "attributes": {
@@ -196,14 +175,14 @@ function exportToFoundry() {
             },
             "details": {
                 "alignment": currentData.alineamiento || "Neutral",
-                "biography": { "value": `<p>${currentData.gancho_trama}</p>` },
+                "biography": { "value": `<p>${currentData.gancho_trama}</p><p><strong>Rasgo:</strong> ${currentData.habilidad_especial}</p>` },
                 "race": currentData.raza,
                 "type": { "value": "humanoid" },
                 "cr": 1
             }
         };
 
-        // 2. ITEMS (Ataques) para Foundry
+        // 3. CREAR ITEMS PARA LOS ATAQUES
         foundryJSON.items = [];
         if (currentData.ataques) {
             currentData.ataques.forEach(atk => {
@@ -213,19 +192,21 @@ function exportToFoundry() {
                     "img": "icons/svg/sword.svg",
                     "system": {
                         "actionType": atk.tipo === 'ranged' ? 'rwak' : 'mwak',
+                        "ability": "", // Usa default
                         "damage": {
                             "parts": [[atk.formula_dano + " + @mod", atk.tipo_dano.toLowerCase()]]
                         },
                         "equipped": true,
-                        "activation": { "type": "action", "cost": 1 }
+                        "activation": { "type": "action", "cost": 1 },
+                        "range": { "value": atk.tipo === 'ranged' ? 60 : 5, "units": "ft" }
                     }
                 });
             });
         }
 
     } else if (currentData.genType === 'item') {
-        // Exportación de ITEMS
-        const isWeapon = (currentData.tipo || "").toLowerCase().includes('arma') || !!currentData.dano;
+        // Lógica de exportación de Items (mantenida igual)
+        const isWeapon = !!currentData.dano;
         foundryJSON.type = isWeapon ? "weapon" : "equipment";
         foundryJSON.img = isWeapon ? "icons/svg/sword.svg" : "icons/svg/item-bag.svg";
 
@@ -243,7 +224,6 @@ function exportToFoundry() {
             };
         }
     } else {
-        // Exportación de Personaje
         foundryJSON.type = "character";
         foundryJSON.system = { "details": { "biography": { "value": currentData.resumen_historia }, "race": currentData.especie } };
     }

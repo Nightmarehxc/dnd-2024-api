@@ -1,15 +1,14 @@
-from  app.services.gemini_service import BaseService
-
+from app.services.gemini_service import BaseService
 
 class NPCService(BaseService):
     def generate(self, description):
         system_instruction = """
         Eres un experto diseñador de monstruos para D&D 5e (2024).
-        Genera un JSON válido para Foundry VTT con estas claves EXACTAS:
+        Genera un JSON válido con estas claves EXACTAS:
 
         {
             "nombre": "Nombre",
-            "rol": "Ocupación o arquetipo",
+            "rol": "Ocupación",
             "raza": "Especie",
             "alineamiento": "Ej: Neutral Evil",
             "ca": 15 (Entero),
@@ -25,14 +24,13 @@ class NPCService(BaseService):
                     "tipo_dano": "slashing"
                 }
             ],
-            "habilidad_especial": "Descripción de rasgo único",
+            "habilidad_especial": "Rasgo único o reacción",
             "personalidad": { "rasgo": "...", "ideal": "...", "vinculo": "...", "defecto": "..." },
             "gancho_trama": "..."
         }
         """
 
-        prompt = f"Genera un NPC completo con stats de combate basado en: {description}."
+        prompt = f"Genera un NPC completo con stats de combate (HP, CA, Ataques) basado en: {description}."
         return self._generate_content(system_instruction, prompt)
-
 
 npc_service = NPCService()

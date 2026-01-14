@@ -1,5 +1,5 @@
 import json
-import re  # <--- IMPORTANTE
+import re
 from flask import current_app
 from google import genai
 from google.genai import types
@@ -15,14 +15,13 @@ class BaseService:
         return self.client
 
     def _clean_response(self, response):
-        """Busca el primer objeto JSON válido dentro de la respuesta usando Regex"""
+        """Busca y extrae el JSON válido de la respuesta usando Regex"""
         text = response.text.strip()
         try:
-            # 1. Intentar carga directa
+            # 1. Intento directo
             return json.loads(text)
         except json.JSONDecodeError:
-            # 2. Si falla, buscar patrón { ... }
-            # Esto captura desde el primer '{' hasta el último '}' ignorando texto extra
+            # 2. Búsqueda de patrón { ... }
             match = re.search(r'\{.*\}', text, re.DOTALL)
             if match:
                 clean_json = match.group(0)
@@ -31,15 +30,14 @@ class BaseService:
                 except json.JSONDecodeError:
                     pass
 
-            # 3. Si todo falla, devolver error legible
-            print(f"FALLO PARSEO JSON. Respuesta cruda: {text}")
-            return {"error": "La IA generó una respuesta que no es JSON válido", "raw_content": text}
+            print(f"ERROR JSON: {text}")
+            return {"error": "La IA no generó un JSON válido", "raw": text}
 
     def _generate_content(self, system_instruction, user_prompt):
         client = self._get_client()
         try:
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-2.0-flash',
                 contents=f"{system_instruction}\n\nTarea: {user_prompt}",
                 config=types.GenerateContentConfig(
                     response_mime_type='application/json',
