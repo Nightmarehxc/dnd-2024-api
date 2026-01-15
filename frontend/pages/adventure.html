@@ -8,13 +8,14 @@
 <body>
     <header>
         <div class="brand">🗺️ Gestor de Aventuras</div>
-        <a href="../index.html" class="back-btn">⬅ Volver</a>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
     </header>
 
     <div class="generator-layout">
         <div class="panel">
-            <label>Temática / Concepto</label>
-            <textarea id="theme" rows="4" placeholder="Ej: Un misterio de asesinato en una mansión flotante..."></textarea>
+            <h2>Parámetros de la Aventura</h2>
+            <label>Temática / Sinopsis</label>
+            <textarea id="theme" rows="5" placeholder="Ej: Un misterio de asesinato en una mansión flotante durante una tormenta..."></textarea>
 
             <div style="display: flex; gap: 10px;">
                 <div style="flex:1">
@@ -32,11 +33,19 @@
         </div>
 
         <div class="panel result-panel">
-            <div id="loader" class="loader">📜 Redactando la leyenda...</div>
-            <div id="resultContent"></div>
+            <div id="loader" class="loader">📜 Consultando los astros...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">La aventura se escribirá aquí</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📚 Biblioteca de Crónicas</div>
+            <div class="history-list" id="historyList"></div>
         </div>
     </div>
 
+    <script src="../js/history.js"></script>
     <script src="../js/adventure.js"></script>
 </body>
 </html>

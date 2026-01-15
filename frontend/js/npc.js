@@ -109,4 +109,5 @@ els.btnExp.addEventListener('click', () => {
     a.href = URL.createObjectURL(blob);
     a.download = `${currentData.nombre}_foundry.json`;
     a.click();
+
 });

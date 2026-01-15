@@ -13,8 +13,9 @@
 
     <div class="generator-layout">
         <div class="panel">
+            <h2>Configuración</h2>
             <label>Descripción / Concepto</label>
-            <textarea id="desc" rows="6" placeholder="Ej: Un capitán de la guardia corrupto que acepta sobornos..."></textarea>
+            <textarea id="desc" rows="6" placeholder="Ej: Un capitán de la guardia corrupto que acepta sobornos pero protege a los suyos..."></textarea>
 
             <button class="btn-generate" id="btnGen">Invocar NPC</button>
             <button class="btn-export" id="btnExp">Exportar a Foundry VTT</button>
@@ -22,10 +23,19 @@
 
         <div class="panel result-panel">
             <div id="loader" class="loader">🔮 Creando vida...</div>
-            <div id="resultContent"></div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">El NPC aparecerá aquí</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📚 Historial de NPCs</div>
+            <div class="history-list" id="historyList">
+                </div>
         </div>
     </div>
 
+    <script src="../js/history.js"></script>
     <script src="../js/npc.js"></script>
 </body>
 </html>

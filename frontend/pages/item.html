@@ -7,27 +7,43 @@
 </head>
 <body>
     <header>
-        <div class="brand">⚔️ Objetos Mágicos</div>
-        <a href="../index.html" class="back-btn">⬅ Volver</a>
+        <div class="brand">⚔️ Forja de Objetos</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
     </header>
+
     <div class="generator-layout">
         <div class="panel">
-            <label>Tipo</label>
+            <h2>Detalles del Objeto</h2>
+            <label>Tipo de Objeto</label>
             <select id="itemType">
                 <option value="Arma">Arma</option>
-                <option value="Objeto Maravilloso">Objeto Maravilloso</option>
+                <option value="Armadura">Armadura</option>
                 <option value="Poción">Poción</option>
+                <option value="Anillo">Anillo</option>
+                <option value="Objeto Maravilloso">Objeto Maravilloso</option>
             </select>
-            <label>Descripción</label>
-            <textarea id="desc" rows="6" placeholder="Ej: Una espada de fuego..."></textarea>
+
+            <label>Descripción Visual / Efecto</label>
+            <textarea id="desc" rows="6" placeholder="Ej: Una espada larga hecha de cristal que vibra cuando hay mentiras cerca..."></textarea>
+
             <button class="btn-generate" id="btnGen">Forjar Objeto</button>
-            <button class="btn-export" id="btnExp">Exportar</button>
+            <button class="btn-export" id="btnExp">Exportar a Foundry VTT</button>
         </div>
+
         <div class="panel result-panel">
-            <div id="loader" class="loader">🔮 Forjando...</div>
-            <div id="resultContent"></div>
+            <div id="loader" class="loader">🔥 Forjando en el yunque...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">El objeto aparecerá aquí</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">💎 Armería (Historial)</div>
+            <div class="history-list" id="historyList"></div>
         </div>
     </div>
+
+    <script src="../js/history.js"></script>
     <script src="../js/item.js"></script>
 </body>
 </html>

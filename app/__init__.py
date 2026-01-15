@@ -3,8 +3,7 @@ from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from marshmallow import ValidationError
 from flasgger import Swagger
-
-from app.routes import adventures
+from app.routes import characters, npcs, items, adventures, history # <--- IMPORTAR
 from config import config
 
 def create_app(config_name='default'):
@@ -45,6 +44,7 @@ def create_app(config_name='default'):
     app.register_blueprint(npcs.bp)
     app.register_blueprint(items.bp)
     app.register_blueprint(adventures.bp)
+    app.register_blueprint(history.bp)
     # --- SERVIR FRONTEND (NUEVO) ---
     # Calculamos la ruta absoluta a la carpeta 'frontend'
     # app.root_path apunta a /tu/proyecto/app
