@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generador de NPCs</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="brand">🎭 Generador de NPCs</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <label>Descripción / Concepto</label>
+            <textarea id="desc" rows="6" placeholder="Ej: Un capitán de la guardia corrupto que acepta sobornos..."></textarea>
+
+            <button class="btn-generate" id="btnGen">Invocar NPC</button>
+            <button class="btn-export" id="btnExp">Exportar a Foundry VTT</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🔮 Creando vida...</div>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script src="../js/npc.js"></script>
+</body>
+</html>

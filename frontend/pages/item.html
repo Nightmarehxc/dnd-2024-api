@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generador de Objetos</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="brand">⚔️ Objetos Mágicos</div>
+        <a href="../index.html" class="back-btn">⬅ Volver</a>
+    </header>
+    <div class="generator-layout">
+        <div class="panel">
+            <label>Tipo</label>
+            <select id="itemType">
+                <option value="Arma">Arma</option>
+                <option value="Objeto Maravilloso">Objeto Maravilloso</option>
+                <option value="Poción">Poción</option>
+            </select>
+            <label>Descripción</label>
+            <textarea id="desc" rows="6" placeholder="Ej: Una espada de fuego..."></textarea>
+            <button class="btn-generate" id="btnGen">Forjar Objeto</button>
+            <button class="btn-export" id="btnExp">Exportar</button>
+        </div>
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🔮 Forjando...</div>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+    <script src="../js/item.js"></script>
+</body>
+</html>

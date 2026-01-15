@@ -2,62 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D 2024 AI Forge</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>AI Forge - Home</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <div style="text-align: center; margin-top: 50px;">
+        <h1 style="font-size: 3rem; color: #c0392b;">🐉 AI Forge D&D 2024</h1>
+        <p>Selecciona una herramienta para comenzar</p>
+    </div>
 
-    <nav class="sidebar">
-        <div class="brand">
-            <span>🐉</span> AI Forge
-        </div>
-        <button class="menu-btn active" onclick="setMode('character')">
-            <span>👤</span> Personajes
-        </button>
-        <button class="menu-btn" onclick="setMode('npc')">
-            <span>🎭</span> NPCs
-        </button>
-        <button class="menu-btn" onclick="setMode('item')">
-            <span>⚔️</span> Objetos
-        </button>
-    </nav>
-
-    <main class="main-content">
-        <div class="generator-container">
-
-            <div class="controls-panel">
-                <h2 id="panelTitle">Generador de Personajes</h2>
-
-                <div class="input-group">
-                    <label>Descripción / Concepto</label>
-                    <textarea id="description" rows="5" placeholder="Ej: Un paladín dragonborn que rompió su juramento..."></textarea>
-                </div>
-
-                <div class="input-group" id="levelGroup">
-                    <label>Nivel</label>
-                    <input type="number" id="level" value="1" min="1" max="20">
-                </div>
-
-                <button class="btn-generate" id="btnGenerate">✨ Invocar Contenido</button>
-                <button class="btn-foundry" id="btnExport" onclick="exportToFoundry()">🎲 Exportar a Foundry</button>
-            </div>
-
-            <div class="result-panel">
-                <div id="loader" class="loader">
-                    <p>🔮 Consultando los planos arcanos...</p>
-                </div>
-                <div id="resultContent">
-                    <div style="text-align: center; margin-top: 150px; color: #aaa;">
-                        <p style="font-size: 3rem; margin: 0;">📜</p>
-                        <p>Selecciona un modo y genera contenido.</p>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <script src="script.js"></script>
+    <div class="menu-grid">
+        <a href="pages/character.html" class="menu-card">
+            <span class="menu-icon">👤</span>
+            <span class="menu-title">Personajes</span>
+            <p>Genera aventureros completos de nivel 1-20.</p>
+        </a>
+        <a href="pages/npc.html" class="menu-card">
+            <span class="menu-icon">🎭</span>
+            <span class="menu-title">NPCs & Monstruos</span>
+            <p>Bloques de estadísticas listos para combate.</p>
+        </a>
+        <a href="pages/item.html" class="menu-card">
+            <span class="menu-icon">⚔️</span>
+            <span class="menu-title">Objetos Mágicos</span>
+            <p>Armas, pociones y tesoros con reglas 2024.</p>
+        </a>
+    </div>
 </body>
 </html>
