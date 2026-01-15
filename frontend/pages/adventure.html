@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generador de Aventuras</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="brand">🗺️ Gestor de Aventuras</div>
+        <a href="../index.html" class="back-btn">⬅ Volver</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <label>Temática / Concepto</label>
+            <textarea id="theme" rows="4" placeholder="Ej: Un misterio de asesinato en una mansión flotante..."></textarea>
+
+            <div style="display: flex; gap: 10px;">
+                <div style="flex:1">
+                    <label>Jugadores</label>
+                    <input type="number" id="players" value="4" min="1" max="8">
+                </div>
+                <div style="flex:1">
+                    <label>Nivel Party</label>
+                    <input type="number" id="level" value="3" min="1" max="20">
+                </div>
+            </div>
+
+            <button class="btn-generate" id="btnGen">Escribir Crónica</button>
+            <button class="btn-export" id="btnExp">Exportar Journal (Foundry)</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">📜 Redactando la leyenda...</div>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script src="../js/adventure.js"></script>
+</body>
+</html>

@@ -21,3 +21,18 @@ class ItemRequestSchema(Schema):
         load_default="Cualquiera",
         validate=validate.OneOf(["Arma", "Armadura", "Poción", "Objeto Maravilloso", "Cualquiera"])
     )
+
+# Esquema para Aventuras (CORREGIDO)
+class AdventureRequestSchema(Schema):
+    theme = fields.String(required=True, validate=validate.Length(min=5))
+    # Cambiado required=True por required=False porque tienen load_default
+    players = fields.Integer(
+        required=False,
+        load_default=4,
+        validate=validate.Range(min=1, max=10)
+    )
+    level = fields.Integer(
+        required=False,
+        load_default=1,
+        validate=validate.Range(min=1, max=20)
+    )
