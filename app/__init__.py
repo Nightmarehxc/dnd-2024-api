@@ -1,29 +1,29 @@
-from flask import Flask, jsonify
+import os
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from marshmallow import ValidationError
-from flasgger import Swagger  # <--- IMPORTAR
+from flasgger import Swagger
 from config import config
-
 
 def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
     CORS(app)
 
-    # --- CONFIGURACIÓN DE SWAGGER ---
+    # --- CONFIGURACIÓN SWAGGER ---
     swagger_config = {
         "headers": [],
         "specs": [
             {
                 "endpoint": 'apispec',
                 "route": '/apispec.json',
-                "rule_filter": lambda rule: True,  # incluir todas las reglas
-                "model_filter": lambda tag: True,  # incluir todos los modelos
+                "rule_filter": lambda rule: True,
+                "model_filter": lambda tag: True,
             }
         ],
         "static_url_path": "/flasgger_static",
         "swagger_ui": True,
-        "specs_route": "/apidocs/"  # <--- URL donde verás la documentación
+        "specs_route": "/apidocs/"
     }
 
     template = {
@@ -35,15 +35,30 @@ def create_app(config_name='default'):
         }
     }
 
-    Swagger(app, config=swagger_config, template=template)  # <--- INICIALIZAR
+    Swagger(app, config=swagger_config, template=template)
 
-    # Registrar Blueprints
+    # Registrar Blueprints (API)
     from app.routes import characters, npcs, items
     app.register_blueprint(characters.bp)
     app.register_blueprint(npcs.bp)
     app.register_blueprint(items.bp)
 
-    # Manejadores de errores (igual que antes)
+    # --- SERVIR FRONTEND (NUEVO) ---
+    # Calculamos la ruta absoluta a la carpeta 'frontend'
+    # app.root_path apunta a /tu/proyecto/app
+    frontend_folder = os.path.join(app.root_path, '../frontend')
+
+    @app.route('/')
+    def index():
+        """Sirve el dashboard principal"""
+        return send_from_directory(frontend_folder, 'index.html')
+
+    @app.route('/<path:path>')
+    def serve_frontend_files(path):
+        """Sirve CSS, JS y subpáginas automáticamente"""
+        return send_from_directory(frontend_folder, path)
+
+    # Manejadores de errores
     @app.errorhandler(ValidationError)
     def handle_marshmallow_validation(err):
         return jsonify({"error": "Error de validación", "messages": err.messages}), 400
