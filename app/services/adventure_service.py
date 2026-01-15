@@ -1,4 +1,4 @@
-from  app.services.gemini_service import BaseService
+from app.services.gemini_service import BaseService
 
 
 class AdventureService(BaseService):
@@ -28,7 +28,8 @@ class AdventureService(BaseService):
         La aventura debe ser dinámica, con un gancho fuerte y dividida en 3-5 capítulos esquemáticos.
         """
 
-        return self._generate(system_instruction, prompt)
+        # CORRECCIÓN AQUÍ: Cambiado self._generate por self._generate_content
+        return self._generate_content(system_instruction, prompt)
 
 
 adventure_service = AdventureService()
