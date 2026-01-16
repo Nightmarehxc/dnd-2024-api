@@ -18,7 +18,7 @@ const ICONS = {
     'character': '👤',
     'npc': '🎭',
     'item': '⚔️',
-    'adventure': '🗺️'
+    'adventure': '🗺️',
     'shop': '💰' // <--- NUEVO
 };
 
