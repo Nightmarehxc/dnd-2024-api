@@ -9,6 +9,7 @@ function getCurrentType() {
     if (path.includes('item.html')) return 'item';
     if (path.includes('character.html')) return 'character';
     if (path.includes('adventure.html')) return 'adventure';
+    if (path.includes('shop.html')) return 'shop';
     return null; // Si estamos en index u otro lado
 }
 
@@ -20,6 +21,7 @@ const ICONS = {
     'npc': '🎭',
     'item': '⚔️',
     'adventure': '🗺️'
+    'shop': '💰'
 };
 
 // 1. CARGAR HISTORIAL (Solo del tipo actual)
@@ -103,7 +105,7 @@ function restoreItem(id) {
         if (PAGE_TYPE === 'item' && typeof renderItem === 'function') renderItem(data);
         if (PAGE_TYPE === 'character' && typeof renderCharacter === 'function') renderCharacter(data); // Asegúrate de tener renderCharacter
         if (PAGE_TYPE === 'adventure' && typeof renderAdventure === 'function') renderAdventure(data);
-
+        if (PAGE_TYPE === 'shop' && typeof renderShop === 'function') renderShop(data); // <--- NUEVO
         // Mostrar botón exportar si existe
         const btnExp = document.getElementById('btnExp');
         if (btnExp) btnExp.style.display = 'block';
