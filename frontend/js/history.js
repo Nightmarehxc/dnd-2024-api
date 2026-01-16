@@ -1,44 +1,42 @@
 const HISTORY_API_BASE = "http://localhost:5001/api/history";
 const historyContainer = document.getElementById('historyList');
 
-// 1. DETECTAR EL TIPO DE PÁGINA (Añadido 'shop')
+// Detectar automáticamente el tipo de generador según la URL
 function getCurrentType() {
     const path = window.location.pathname;
     if (path.includes('npc.html')) return 'npc';
     if (path.includes('item.html')) return 'item';
     if (path.includes('character.html')) return 'character';
     if (path.includes('adventure.html')) return 'adventure';
-    if (path.includes('shop.html')) return 'shop'; // <--- ESTO FALTABA
+    if (path.includes('shop.html')) return 'shop'; // <--- NUEVO
     return null;
 }
 
 const PAGE_TYPE = getCurrentType();
 
-// 2. AÑADIR ICONO
 const ICONS = {
     'character': '👤',
     'npc': '🎭',
     'item': '⚔️',
-    'adventure': '🗺️',
-    'shop': '💰' // <--- ESTO FALTABA
+    'adventure': '🗺️'
+    'shop': '💰' // <--- NUEVO
 };
 
+// --- 1. CARGAR LISTA ---
 async function loadHistory() {
     if (!historyContainer || !PAGE_TYPE) return;
-
     try {
         const res = await fetch(`${HISTORY_API_BASE}/${PAGE_TYPE}`);
         const history = await res.json();
         renderHistoryList(history);
     } catch (e) {
-        console.error("Error cargando historial:", e);
-        historyContainer.innerHTML = '<p style="text-align:center; color:red; font-size:0.8rem">Error de conexión</p>';
+        console.error("Error historial:", e);
+        historyContainer.innerHTML = '<p style="color:red; text-align:center;">Error de conexión</p>';
     }
 }
 
 function renderHistoryList(history) {
     historyContainer.innerHTML = '';
-
     if (history.length === 0) {
         historyContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">Sin registros</p>';
         return;
@@ -57,29 +55,29 @@ function renderHistoryList(history) {
             </div>
             <button class="h-delete" onclick="deleteItem('${item.id}')">🗑️</button>
         `;
+        // Guardamos los datos en el elemento para recuperarlos sin fetch extra
         div.dataset.json = JSON.stringify(item.data);
         div.dataset.id = item.id;
         historyContainer.appendChild(div);
     });
 }
 
-async function addToHistory(data, type) {
-    const targetType = type || PAGE_TYPE;
-    if (!targetType) return;
-
+// --- 2. GUARDAR (Usado por item.js, character.js...) ---
+async function addToHistory(data) {
+    if (!PAGE_TYPE) return;
     try {
-        await fetch(`${HISTORY_API_BASE}/${targetType}`, {
+        await fetch(`${HISTORY_API_BASE}/${PAGE_TYPE}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ data: data })
         });
-        loadHistory();
+        loadHistory(); // Recargar la lista para ver el nuevo ítem
     } catch (e) {
         console.error("Error guardando:", e);
     }
 }
 
-// 3. AÑADIR RESTAURACIÓN DE TIENDA
+// --- 3. RESTAURAR Y BORRAR ---
 function restoreItem(id) {
     const itemDiv = Array.from(document.querySelectorAll('.history-item'))
         .find(div => div.dataset.id === id);
@@ -87,15 +85,25 @@ function restoreItem(id) {
     if (itemDiv) {
         const data = JSON.parse(itemDiv.dataset.json);
 
+        // Actualizar variable global y renderizar según la función disponible
         if (typeof currentData !== 'undefined') currentData = data;
 
-        // Llamadas a renderizadores específicos
-        if (PAGE_TYPE === 'npc' && typeof renderNPC === 'function') renderNPC(data);
-        if (PAGE_TYPE === 'item' && typeof renderItem === 'function') renderItem(data);
-        if (PAGE_TYPE === 'character' && typeof renderCharacter === 'function') renderCharacter(data);
-        if (PAGE_TYPE === 'adventure' && typeof renderAdventure === 'function') renderAdventure(data);
-        if (PAGE_TYPE === 'shop' && typeof renderShop === 'function') renderShop(data); // <--- ESTO FALTABA
+        if (typeof renderItem === 'function') renderItem(data);
+        if (typeof renderCharacter === 'function') renderCharacter(data);
+        if (typeof renderNPC === 'function') renderNPC(data);
+        if (typeof renderAdventure === 'function') renderAdventure(data);
+        if (PAGE_TYPE === 'shop' && typeof renderShop === 'function') renderShop(data);
 
         const btnExp = document.getElementById('btnExp');
         if (btnExp) btnExp.style.display = 'block';
     }
+}
+
+async function deleteItem(id) {
+    if (!confirm("¿Borrar esta entrada?")) return;
+    await fetch(`${HISTORY_API_BASE}/${PAGE_TYPE}/${id}`, { method: 'DELETE' });
+    loadHistory();
+}
+
+// Inicializar al cargar la página
+document.addEventListener('DOMContentLoaded', loadHistory);
