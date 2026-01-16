@@ -4,6 +4,7 @@ let currentData = null;
 const els = {
     shopType: document.getElementById('shopType'),
     location: document.getElementById('location'),
+    vendorRace: document.getElementById('vendorRace'),
     level: document.getElementById('level'),
     btnGen: document.getElementById('btnGen'),
     btnExp: document.getElementById('btnExp'),
@@ -23,6 +24,7 @@ els.btnGen.addEventListener('click', async () => {
         const payload = {
             shop_type: els.shopType.value,
             location: els.location.value || "Ciudad Genérica",
+            vendor_race: els.vendorRace.value,
             level: parseInt(els.level.value)
         };
 

@@ -15,7 +15,11 @@ def generate_shop():
     except ValidationError as err:
         return jsonify({"error": "Datos inválidos", "detalles": err.messages}), 400
 
-    result = shop_service.generate_shop(data['shop_type'], data['location'], data['level'])
+    result = shop_service.generate_shop(data['shop_type'],
+                                        data['location'],
+                                        data['level'],
+                                        data.get('vendor_race')
+                                        )
 
     # Si hay error en la IA, lo devolvemos
     if "error" in result:

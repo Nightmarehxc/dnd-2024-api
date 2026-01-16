@@ -42,3 +42,4 @@ class ShopRequestSchema(Schema):
     shop_type = fields.String(required=True, validate=validate.Length(min=3))
     location = fields.String(required=False, load_default="Ciudad Genérica")
     level = fields.Integer(required=False, load_default=1, validate=validate.Range(min=1, max=20))
+    vendor_race = fields.String(required=False, load_default=None)

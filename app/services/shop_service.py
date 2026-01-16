@@ -2,7 +2,7 @@ from app.services.gemini_service import BaseService
 
 
 class ShopService(BaseService):
-    def generate_shop(self, shop_type, location, level):
+    def generate_shop(self, shop_type, location, level,vendor_race=None):
         system_instruction = """
         Eres un experto Dungeon Master. Genera una Tienda de D&D 5e (2024).
         Devuelve JSON válido con esta estructura EXACTA:
@@ -29,9 +29,11 @@ class ShopService(BaseService):
             ]
         }
         """
-
+        race_instruction = f"El vendedor DEBE ser de raza: {vendor_race}." if vendor_race else "Elige una raza adecuada para el contexto."
         prompt = f"""
+        
         Crea una tienda de tipo '{shop_type}' ubicada en '{location}'.
+        {race_instruction}
         El nivel promedio de los objetos debe ser adecuado para aventureros de nivel {level}.
         Genera al menos 5 objetos interesantes en el inventario.
         """
