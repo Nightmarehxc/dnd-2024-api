@@ -32,6 +32,7 @@ els.btnGen.addEventListener('click', async () => {
         currentData = data;
         renderNPC(data);
         els.btnExp.style.display = 'block';
+        if (typeof addToHistory === 'function') addToHistory(data);
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;

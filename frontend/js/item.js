@@ -22,7 +22,10 @@ els.btnGen.addEventListener('click', async () => {
         const res = await fetch(API_URL, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ description: els.desc.value, type: els.type.value })
+            body: JSON.stringify({
+                description: els.desc.value,
+                type: els.type ? els.type.value : "Cualquiera"
+            })
         });
         const data = await res.json();
 
@@ -31,6 +34,10 @@ els.btnGen.addEventListener('click', async () => {
         currentData = data;
         renderItem(data);
         els.btnExp.style.display = 'block';
+
+        // --- GUARDAR EN HISTORIAL ---
+        if (typeof addToHistory === 'function') addToHistory(data);
+
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
     } finally {
@@ -43,18 +50,22 @@ function renderItem(data) {
     els.content.innerHTML = `
         <h1 style="color:var(--accent); margin:0;">${data.nombre}</h1>
         <p style="font-style:italic;">${data.rareza} - ${data.tipo}</p>
-        ${data.dano ? `<p class="tag">💥 ${data.dano.formula} ${data.dano.tipo}</p>` : ''}
-        ${data.weapon_mastery ? `<p class="tag" style="background:#fadbd8; color:#922b21;">⚔️ Mastery: ${data.weapon_mastery}</p>` : ''}
+
+        ${data.dano ? `<span class="tag" style="background:#ddd; padding:2px 8px; border-radius:10px; margin-right:5px;">💥 ${data.dano.formula} ${data.dano.tipo}</span>` : ''}
+        ${data.weapon_mastery ? `<span class="tag" style="background:#fadbd8; color:#922b21; padding:2px 8px; border-radius:10px;">⚔️ Mastery: ${data.weapon_mastery}</span>` : ''}
+
         <h3>Mecánica</h3>
         <p>${data.efecto_mecanico}</p>
+
         <h3>Descripción</h3>
-        <p>${data.descripcion_vis}</p>
+        <p style="font-style:italic;">${data.descripcion_vis}</p>
     `;
 }
 
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
     const isWeapon = !!currentData.dano;
+
     const json = {
         name: currentData.nombre,
         type: isWeapon ? "weapon" : "equipment",
@@ -66,14 +77,17 @@ els.btnExp.addEventListener('click', () => {
             identified: true
         }
     };
+
     if(isWeapon && currentData.dano) {
         json.system.actionType = "mwak";
-        json.system.damage = { parts: [[currentData.dano.formula + " + @mod", currentData.dano.tipo]] };
+        json.system.damage = {
+            parts: [[currentData.dano.formula + " + @mod", currentData.dano.tipo]]
+        };
     }
 
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `${currentData.nombre}_foundry.json`;
+    a.download = `${currentData.nombre}_Foundry.json`;
     a.click();
 });

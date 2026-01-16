@@ -14,6 +14,7 @@ const els = {
 els.btnGen.addEventListener('click', async () => {
     if (!els.theme.value) return alert("Define una temática.");
 
+    // UI Reset
     els.content.innerHTML = '';
     els.loader.style.display = 'block';
     els.btnGen.disabled = true;
@@ -39,6 +40,9 @@ els.btnGen.addEventListener('click', async () => {
         renderAdventure(data);
         els.btnExp.style.display = 'block';
 
+        // --- GUARDAR EN HISTORIAL (NUEVO) ---
+        if (typeof addToHistory === 'function') addToHistory(data);
+
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
     } finally {
@@ -50,56 +54,55 @@ els.btnGen.addEventListener('click', async () => {
 function renderAdventure(data) {
     const s = (val) => val || '---';
 
-    // Renderizado HTML
-    let chaptersHtml = data.capitulos.map((cap, i) => `
+    let chaptersHtml = data.capitulos ? data.capitulos.map((cap, i) => `
         <div style="margin-bottom:15px; border-left: 3px solid var(--accent); padding-left:10px;">
             <strong>Capítulo ${i+1}: ${cap.titulo}</strong>
             <p style="margin:5px 0 0 0;">${cap.descripcion}</p>
         </div>
-    `).join('');
+    `).join('') : '<p>Sin capítulos definidos</p>';
 
-    let npcsHtml = data.npcs_notables.map(npc => `
+    let npcsHtml = data.npcs_notables ? data.npcs_notables.map(npc => `
         <li><strong>${npc.nombre}</strong> (${npc.rol}): ${npc.breve_descripcion}</li>
-    `).join('');
+    `).join('') : '';
 
-    let placesHtml = data.lugares.map(l => `
+    let placesHtml = data.lugares ? data.lugares.map(l => `
         <li><strong>${l.nombre}</strong>: ${l.descripcion}</li>
-    `).join('');
+    `).join('') : '';
 
     els.content.innerHTML = `
         <h1 style="color:var(--accent); text-align:center;">${s(data.titulo)}</h1>
         <p><strong>Sinopsis:</strong> ${s(data.sinopsis)}</p>
 
         <div style="background:#eee; padding:10px; border-radius:5px; margin-bottom:20px;">
-            <strong>🎣 Gancho de Aventura:</strong><br>
-            ${s(data.gancho)}
+            <strong>🎣 Gancho:</strong><br>${s(data.gancho)}
         </div>
 
-        <h3>📜 Estructura de la Aventura</h3>
+        <h3>📜 Estructura</h3>
         ${chaptersHtml}
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">
             <div>
-                <h4 style="border-bottom:1px solid #ccc;">Personajes Clave</h4>
+                <h4 style="border-bottom:1px solid #ccc;">Personajes</h4>
                 <ul style="padding-left:20px; font-size:0.9rem;">${npcsHtml}</ul>
             </div>
             <div>
-                <h4 style="border-bottom:1px solid #ccc;">Lugares Importantes</h4>
+                <h4 style="border-bottom:1px solid #ccc;">Lugares</h4>
                 <ul style="padding-left:20px; font-size:0.9rem;">${placesHtml}</ul>
             </div>
         </div>
     `;
 }
 
-// Exportar como Journal Entry para Foundry VTT
+// Exportar Journal (Foundry VTT)
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
 
-    const contentHTML = els.content.innerHTML; // Reusamos el HTML generado para el Journal
+    // Usamos el HTML generado como contenido del Journal
+    const contentHTML = els.content.innerHTML;
 
     const json = {
         name: currentData.titulo,
-        type: "journal", // Tipo JournalEntry
+        type: "journal",
         pages: [
             {
                 name: "Resumen de Aventura",
