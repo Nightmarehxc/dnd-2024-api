@@ -47,3 +47,23 @@ class BaseService:
             return self._clean_response(response)
         except Exception as e:
             return {"error": str(e)}
+
+    def _generate_image_content(self, user_prompt):
+        """Generación de IMAGEN (Bytes) - NUEVO MÉTODO"""
+        client = self._get_client()
+        try:
+            response = client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=user_prompt,
+                config=types.GenerateContentConfig(
+                    response_modalities=["IMAGE"],  # <--- CLAVE PARA IMÁGENES
+                    temperature=0.9  # Más creatividad para arte
+                )
+            )
+            # Extraer los bytes de la primera parte de la respuesta
+            for part in response.candidates[0].content.parts:
+                if part.inline_data:
+                    return {"image_bytes": part.inline_data.data}
+            return {"error": "No se generó ninguna imagen"}
+        except Exception as e:
+            return {"error": str(e)}

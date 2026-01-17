@@ -1,19 +1,28 @@
 const API_URL = "http://localhost:5001/api/npcs/generate";
+const IMAGE_API_URL = "http://localhost:5001/api/images/generate";
 let currentData = null;
 
 const els = {
     desc: document.getElementById('desc'),
     btnGen: document.getElementById('btnGen'),
+    btnImg: document.getElementById('btnImg'),
     btnExp: document.getElementById('btnExp'),
     content: document.getElementById('resultContent'),
-    loader: document.getElementById('loader')
+    loader: document.getElementById('loader'),
+    imgContainer: document.getElementById('imgContainer'),
+    generatedImg: document.getElementById('generatedImg')
 };
 
+// --- GENERAR NPC (TEXTO) ---
 els.btnGen.addEventListener('click', async () => {
     if (!els.desc.value) return alert("Escribe una descripción.");
 
     // Reset UI
     els.content.innerHTML = '';
+    els.imgContainer.style.display = 'none';
+    els.generatedImg.src = '';
+    els.btnImg.style.display = 'none';
+
     els.loader.style.display = 'block';
     els.btnGen.disabled = true;
     els.btnExp.style.display = 'none';
@@ -32,6 +41,12 @@ els.btnGen.addEventListener('click', async () => {
         currentData = data;
         renderNPC(data);
         els.btnExp.style.display = 'block';
+
+        // Mostrar botón de imagen
+        els.btnImg.style.display = 'block';
+        els.btnImg.disabled = false;
+        els.btnImg.innerText = "🎨 Generar Retrato";
+
         if (typeof addToHistory === 'function') addToHistory(data);
 
     } catch (err) {
@@ -39,6 +54,48 @@ els.btnGen.addEventListener('click', async () => {
     } finally {
         els.loader.style.display = 'none';
         els.btnGen.disabled = false;
+    }
+});
+
+// --- GENERAR IMAGEN (CON DETECCIÓN DE ERROR REGIONAL) ---
+els.btnImg.addEventListener('click', async () => {
+    if (!currentData) return;
+
+    els.btnImg.disabled = true;
+    els.btnImg.innerText = "🎨 Pintando (espera unos segundos)...";
+
+    try {
+        const prompt = `Fantasy character portrait, D&D style, ${currentData.raza} ${currentData.rol}. ${currentData.apariencia || currentData.descripcion_fisica || ""} ${currentData.personalidad || ""}`;
+
+        const res = await fetch(IMAGE_API_URL, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                description: prompt,
+                type: 'npc'
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.error) throw new Error(data.error);
+
+        els.generatedImg.src = "../" + data.url;
+        els.imgContainer.style.display = 'block';
+        els.btnImg.style.display = 'none';
+
+    } catch (err) {
+        // --- MANEJO DE ERROR MEJORADO ---
+        console.error(err);
+
+        if (err.message.includes("not available in your country")) {
+            alert("⚠️ BLOQUEO REGIONAL DETECTADO\n\nGoogle no permite generar imágenes con Gemini desde tu país (Europa).\n\nSOLUCIÓN: Activa una VPN (EE.UU) para usar esta función.");
+            els.btnImg.innerText = "⚠️ No disponible en tu región";
+        } else {
+            alert("Error generando imagen: " + err.message);
+            els.btnImg.innerText = "❌ Error (Intentar de nuevo)";
+            els.btnImg.disabled = false;
+        }
     }
 });
 
@@ -68,19 +125,20 @@ function renderNPC(data) {
             </div>
         `).join('') || '<p>Sin ataques</p>'}
 
-        <h3>Historia</h3>
-        <p>${s(data.gancho_trama)}</p>
+        <h3>Historia y Rasgos</h3>
+        <p><strong>Personalidad:</strong> ${s(data.personalidad?.rasgo || data.personalidad)}</p>
+        <p><strong>Apariencia:</strong> ${s(data.apariencia)}</p>
+        <p><strong>Gancho:</strong> ${s(data.gancho_trama)}</p>
     `;
 }
 
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
 
-    // Mapeo básico de Foundry
     const json = {
         name: currentData.nombre,
         type: "npc",
-        img: "icons/svg/mystery-man.svg",
+        img: els.generatedImg.src.includes('generated') ? els.generatedImg.src : "icons/svg/mystery-man.svg",
         system: {
             attributes: {
                 ac: { value: currentData.ca, calc: "natural" },
@@ -89,7 +147,7 @@ els.btnExp.addEventListener('click', () => {
             },
             details: {
                 race: currentData.raza,
-                biography: { value: currentData.gancho_trama }
+                biography: { value: `<p>${currentData.gancho_trama}</p><p>${currentData.apariencia}</p>` }
             }
         },
         items: currentData.ataques?.map(atk => ({
@@ -110,5 +168,4 @@ els.btnExp.addEventListener('click', () => {
     a.href = URL.createObjectURL(blob);
     a.download = `${currentData.nombre}_foundry.json`;
     a.click();
-
 });
