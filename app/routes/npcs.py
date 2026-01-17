@@ -10,3 +10,18 @@ def generate_npc():
 
     result = npc_service.generate(description)
     return jsonify(result)
+
+
+@bp.route('/chat', methods=['POST'])
+def chat_npc():
+    data = request.json or {}
+    npc_data = data.get('npc_data')
+    history = data.get('history', [])
+    user_message = data.get('message')
+
+    if not npc_data or not user_message:
+        return jsonify({"error": "Faltan datos"}), 400
+
+    response_text = npc_service.chat(npc_data, history, user_message)
+
+    return jsonify({"response": response_text})

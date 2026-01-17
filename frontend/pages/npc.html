@@ -4,6 +4,111 @@
     <meta charset="UTF-8">
     <title>Generador de NPCs</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Estilos específicos para el Chat Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 0;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            height: 60vh;
+        }
+
+        .modal-header {
+            padding: 15px;
+            background: var(--accent);
+            color: white;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-modal {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .chat-history {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            background-color: #3498db;
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .msg-npc {
+            align-self: flex-start;
+            background-color: #e0e0e0;
+            color: #333;
+            border-bottom-left-radius: 2px;
+            border: 1px solid #ccc;
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            background: white;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input-area input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .chat-input-area button {
+            width: auto;
+            margin: 0;
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -19,6 +124,7 @@
 
             <button class="btn-generate" id="btnGen">Invocar NPC</button>
 
+            <button class="btn-generate" id="btnChat" style="background-color: #2980b9; display: none; margin-top: 10px;">💬 Hablar con NPC</button>
             <button class="btn-generate" id="btnImg" style="background-color: #8e44ad; display: none; margin-top: 10px;">🎨 Generar Retrato</button>
 
             <button class="btn-export" id="btnExp">Exportar a Foundry VTT</button>
@@ -37,8 +143,22 @@
 
         <div class="history-panel">
             <div class="history-header">📚 Historial de NPCs</div>
-            <div class="history-list" id="historyList">
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <div id="chatModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0">💬 Interrogatorio</h3>
+                <span class="close-modal" id="closeModal">&times;</span>
+            </div>
+            <div id="chatHistory" class="chat-history">
                 </div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Escribe tu pregunta..." autocomplete="off">
+                <button id="btnSend">Enviar</button>
+            </div>
         </div>
     </div>
 
