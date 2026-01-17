@@ -51,3 +51,9 @@ class CityRequestSchema(Schema):
 class RiddleRequestSchema(Schema):
     theme = fields.String(required=True)  # Ej: "Biblioteca arcana", "Tumba egipcia"
     difficulty = fields.String(required=False, load_default="Normal") # Fácil, Mortal, etc.
+
+class EncounterRequestSchema(Schema):
+    level = fields.Integer(required=True, validate=validate.Range(min=1, max=20))
+    difficulty = fields.String(required=True, validate=validate.OneOf(["Fácil", "Medio", "Difícil", "Mortal"]))
+    environment = fields.String(required=True, validate=validate.Length(min=3))
+    players = fields.Integer(required=False, load_default=4)

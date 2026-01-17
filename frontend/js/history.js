@@ -11,6 +11,7 @@ function getCurrentType() {
     if (path.includes('shop.html')) return 'shop';
     if (path.includes('city.html')) return 'city';
     if (path.includes('riddle.html')) return 'riddle';
+    if (path.includes('encounter.html')) return 'encounter';
     return null;
 }
 
@@ -23,7 +24,8 @@ const ICONS = {
     'adventure': '🗺️',
     'shop': '💰',
     'city': '🏰',
-    'riddle': '🧩'
+    'riddle': '🧩',
+    'encounter': '⚔️'
 };
 
 // --- 1. CARGAR LISTA ---
@@ -98,7 +100,8 @@ function restoreItem(id) {
         if (typeof renderAdventure === 'function') renderAdventure(data);
         if (PAGE_TYPE === 'shop' && typeof renderShop === 'function') renderShop(data);
         if (typeof renderCity === 'function' && PAGE_TYPE === 'city') renderCity(data);
-        if (typeof renderRiddle === 'function' && PAGE_TYPE === 'riddle') renderRiddle(data); // <--- NUEVO
+        if (typeof renderRiddle === 'function' && PAGE_TYPE === 'riddle') renderRiddle(data);
+        if (typeof renderEncounter === 'function' && PAGE_TYPE === 'encounter') renderEncounter(data);
 
         const btnExp = document.getElementById('btnExp');
         if (btnExp) btnExp.style.display = 'block';
