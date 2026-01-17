@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Acertijos y Trampas</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="brand">🧩 Sala de los Enigmas</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Diseño del Desafío</h2>
+            <label>Contexto / Temática</label>
+            <textarea id="theme" rows="4" placeholder="Ej: Una puerta parlante en una torre de magos, un cofre en una cueva de piratas..."></textarea>
+
+            <label>Dificultad / Letalidad</label>
+            <select id="difficulty">
+                <option value="Fácil (Nivel 1-4)">Fácil (Nivel 1-4)</option>
+                <option value="Moderado (Nivel 5-10)">Moderado (Nivel 5-10)</option>
+                <option value="Mortal (Nivel 11+)">Mortal (Nivel 11+)</option>
+                <option value="Acertijo Puro (Sin daño)">Acertijo Puro (Sin daño)</option>
+            </select>
+
+            <button class="btn-generate" id="btnGen">Diseñar Trampa</button>
+            <button class="btn-export" id="btnExp">Exportar Journal (Foundry)</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">⚙️ Ajustando mecanismos...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">El enigma aparecerá aquí</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📜 Archivo de Trampas</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="../js/history.js"></script>
+    <script src="../js/riddle.js"></script>
+</body>
+</html>
