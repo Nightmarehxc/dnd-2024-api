@@ -43,3 +43,11 @@ class ShopRequestSchema(Schema):
     location = fields.String(required=False, load_default="Ciudad Genérica")
     level = fields.Integer(required=False, load_default=1, validate=validate.Range(min=1, max=20))
     vendor_race = fields.String(required=False, load_default=None)
+
+class CityRequestSchema(Schema):
+    city_type = fields.String(required=True) # Ej: Villa, Ciudad, Fortaleza
+    theme = fields.String(required=False, load_default="Fantasía Genérica")
+
+class RiddleRequestSchema(Schema):
+    theme = fields.String(required=True)  # Ej: "Biblioteca arcana", "Tumba egipcia"
+    difficulty = fields.String(required=False, load_default="Normal") # Fácil, Mortal, etc.

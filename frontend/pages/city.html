@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generador de Ciudades</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="brand">🏰 Arquitecto de Ciudades</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Parámetros</h2>
+            <label>Tipo de Asentamiento</label>
+            <select id="cityType">
+                <option value="Aldea Pequeña">Aldea Pequeña</option>
+                <option value="Pueblo Fronterizo">Pueblo Fronterizo</option>
+                <option value="Ciudad Comercial">Ciudad Comercial</option>
+                <option value="Metrópolis">Metrópolis</option>
+                <option value="Fortaleza Enana">Fortaleza Enana</option>
+                <option value="Ciudad Flotante">Ciudad Flotante</option>
+            </select>
+
+            <label>Temática / Ambiente</label>
+            <input type="text" id="theme" placeholder="Ej: Gótica, Industrial, Alta Magia, Desértica...">
+
+            <button class="btn-generate" id="btnGen">Fundar Ciudad</button>
+            <button class="btn-export" id="btnExp">Exportar Journal (Foundry)</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🏗️ Levantando murallas...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">El mapa se dibujará aquí</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📜 Mapoteca</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="../js/history.js"></script>
+    <script src="../js/city.js"></script>
+</body>
+</html>
