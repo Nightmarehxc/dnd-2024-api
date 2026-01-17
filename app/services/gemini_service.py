@@ -33,21 +33,33 @@ class BaseService:
             print(f"ERROR JSON: {text}")
             return {"error": "La IA no generó un JSON válido", "raw": text}
 
-    def _generate_text(self, system_instruction, user_prompt):
-        """NUEVO: Genera texto libre para diálogos (Chat)"""
+    def _generate_text(self, system_instruction, user_input, audio_bytes=None):
+        """Genera respuesta de texto, aceptando texto O audio input"""
         client = self._get_client()
         try:
-            # Para chat usamos texto plano, no JSON
+            contents = [system_instruction]
+
+            # Si hay audio, añadimos el blob binario nativo
+            if audio_bytes:
+                contents.append(types.Part.from_bytes(
+                    data=audio_bytes,
+                    mime_type="audio/webm"  # Formato típico del navegador
+                ))
+
+            # Añadimos el texto (prompt o historial)
+            if user_input:
+                contents.append(user_input)
+
             response = client.models.generate_content(
                 model='gemini-2.5-flash',
-                contents=f"{system_instruction}\n\n{user_prompt}",
+                contents=contents,
                 config=types.GenerateContentConfig(
-                    temperature=0.8  # Un poco más creativo para hablar
+                    temperature=0.8
                 )
             )
             return response.text
         except Exception as e:
-            return f"Error de conexión: {str(e)}"
+            return f"Error con Gemini: {str(e)}"
 
     def _generate_content(self, system_instruction, user_prompt):
         client = self._get_client()

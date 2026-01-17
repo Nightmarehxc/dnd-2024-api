@@ -34,38 +34,38 @@ class NPCService(BaseService):
         return self._generate_content(system_instruction, prompt)
 
 
-    # Agregar a NPCService
-    def chat(self, npc_data, history, user_message):
-        # 1. Construir la "System Instruction" dinámica con los datos del NPC
+
+    def chat(self, npc_data, history, user_message=None, audio_bytes=None):
+        """Maneja chat de texto O voz"""
+
         system_instruction = f"""
         Eres {npc_data['nombre']}, un NPC en un juego de D&D 5e.
         Tu rol/ocupación es: {npc_data['rol']}.
         Tu personalidad es: {npc_data.get('personalidad', 'Neutral')}.
         Tu apariencia es: {npc_data.get('apariencia', 'Desconocida')}.
-    
+
         INSTRUCCIONES DE ACTUACIÓN:
         - Responde SIEMPRE en primera persona ("Yo...").
         - Mantén tu personalidad (si eres rudo, sé rudo; si eres tímido, tartamudea).
         - No rompas el personaje (no menciones que eres una IA).
         - Responde de forma concisa (máximo 2-3 oraciones) a menos que te pidan una historia.
         - Sabes lo que sabe un habitante de tu mundo, no sabes reglas de juego ni stats.
+        - Si recibes audio, responde como si te hubieran hablado.
         """
 
-        # 2. Formatear historial para Gemini (simplificado)
-        # Gemini espera lista de contenidos o un string largo. Para chat simple, un string funciona bien.
-        chat_log = ""
-        for msg in history:
-            role = "Jugador" if msg['role'] == 'user' else npc_data['nombre']
+        # Construimos el historial como texto para contexto
+        chat_log = "HISTORIAL RECIENTE:\n"
+        recent_history = history[-6:] if history else []
+        for msg in recent_history:
+            role = "Viajero" if msg['role'] == 'user' else "Tú"
             chat_log += f"{role}: {msg['content']}\n"
 
-        chat_log += f"Jugador: {user_message}\n{npc_data['nombre']}:"
+        prompt = chat_log + "\nResponde al viajero (que puede haberte hablado o escrito):"
+        if user_message:
+            prompt += f"\nViajero dice: {user_message}"
 
-        # 3. Llamar al modelo
-        # Nota: Usamos generate_content estándar, no JSON, porque queremos texto libre (diálogo).
-        prompt = f"{chat_log}"
+        # Llamamos a Gemini pasando el audio si existe
+        return self._generate_text(system_instruction, prompt, audio_bytes)
 
-        # Aquí llamamos a un método raw (sin forzar JSON) que deberíamos añadir a GeminiService
-        # o simplemente usar el existente y parsear el texto.
-        return self._generate_text(system_instruction, prompt)
 
 npc_service = NPCService()
