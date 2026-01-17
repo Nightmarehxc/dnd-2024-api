@@ -155,13 +155,15 @@
             </div>
             <div id="chatHistory" class="chat-history">
                 </div>
+
             <div class="chat-input-area">
-                <input type="text" id="chatInput" placeholder="Escribe tu pregunta..." autocomplete="off">
+                <button id="btnMic" style="background:#e74c3c; width:50px; border-radius:50%;">🎤</button>
+                <input type="text" id="chatInput" placeholder="Escribe o pulsa el micro para hablar..." autocomplete="off">
                 <button id="btnSend">Enviar</button>
             </div>
+            <div id="recordingStatus" style="display:none; text-align:center; color:red; font-weight:bold; padding:5px; background:#fff;">🔴 Grabando... (Suelta para enviar)</div>
         </div>
     </div>
-
     <script src="../js/history.js"></script>
     <script src="../js/npc.js"></script>
 </body>

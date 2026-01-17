@@ -1,11 +1,14 @@
 const API_URL = "http://localhost:5001/api/npcs/generate";
-const IMAGE_API_URL = "http://localhost:5001/api/images/generate";
 const CHAT_API_URL = "http://localhost:5001/api/npcs/chat";
+const AUDIO_API_URL = "http://localhost:5001/api/npcs/chat/audio";
+const IMAGE_API_URL = "http://localhost:5001/api/images/generate";
 
 let currentData = null;
 let chatHistoryLog = []; // Historial de la conversación activa
 
+// Elementos del DOM
 const els = {
+    // Panel Principal
     desc: document.getElementById('desc'),
     btnGen: document.getElementById('btnGen'),
     btnImg: document.getElementById('btnImg'),
@@ -21,10 +24,20 @@ const els = {
     closeModal: document.getElementById('closeModal'),
     chatHistory: document.getElementById('chatHistory'),
     chatInput: document.getElementById('chatInput'),
-    btnSend: document.getElementById('btnSend')
+    btnSend: document.getElementById('btnSend'),
+
+    // Elementos de Audio
+    btnMic: document.getElementById('btnMic'),
+    recStatus: document.getElementById('recordingStatus')
 };
 
-// --- GENERAR NPC (TEXTO) ---
+// --- VARIABLES DE GRABACIÓN ---
+let mediaRecorder;
+let audioChunks = [];
+
+// ==========================================
+// 1. GENERAR NPC (TEXTO)
+// ==========================================
 els.btnGen.addEventListener('click', async () => {
     if (!els.desc.value) return alert("Escribe una descripción.");
 
@@ -63,7 +76,9 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-// --- LÓGICA DEL CHAT ---
+// ==========================================
+// 2. GESTIÓN DEL MODAL DE CHAT
+// ==========================================
 els.btnChat.addEventListener('click', () => {
     els.modal.style.display = 'block';
     els.chatInput.focus();
@@ -71,6 +86,8 @@ els.btnChat.addEventListener('click', () => {
 
 els.closeModal.addEventListener('click', () => {
     els.modal.style.display = 'none';
+    // Cancelar audio si se cierra
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
 });
 
 window.onclick = function(event) {
@@ -79,7 +96,9 @@ window.onclick = function(event) {
     }
 }
 
-// Enviar mensaje
+// ==========================================
+// 3. CHAT DE TEXTO
+// ==========================================
 els.btnSend.addEventListener('click', sendMessage);
 els.chatInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
@@ -122,6 +141,127 @@ async function sendMessage() {
     }
 }
 
+// ==========================================
+// 4. CHAT DE VOZ (Push-to-Talk)
+// ==========================================
+
+// Iniciar grabación
+els.btnMic.addEventListener('mousedown', startRecording);
+els.btnMic.addEventListener('touchstart', startRecording);
+
+// Detener y enviar
+els.btnMic.addEventListener('mouseup', stopRecording);
+els.btnMic.addEventListener('touchend', stopRecording);
+
+async function startRecording(e) {
+    e.preventDefault();
+    if (window.speechSynthesis) window.speechSynthesis.cancel(); // Callar al NPC si hablo yo
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = event => {
+            if (event.data.size > 0) audioChunks.push(event.data);
+        };
+
+        mediaRecorder.start();
+        els.recStatus.style.display = 'block';
+        els.btnMic.style.transform = "scale(1.1)";
+        els.btnMic.style.background = "#c0392b"; // Rojo más oscuro
+    } catch (err) {
+        alert("No se pudo acceder al micrófono: " + err.message);
+    }
+}
+
+async function stopRecording(e) {
+    if (!mediaRecorder || mediaRecorder.state === "inactive") return;
+
+    e.preventDefault();
+    mediaRecorder.stop();
+    els.recStatus.style.display = 'none';
+    els.btnMic.style.transform = "scale(1)";
+    els.btnMic.style.background = "#e74c3c"; // Volver a rojo normal
+
+    mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+
+        // Evitar envíos accidentales muy cortos (< 0.5 seg)
+        if (audioBlob.size < 3000) return;
+
+        await sendAudioMessage(audioBlob);
+
+        // Liberar micrófono
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    };
+}
+
+async function sendAudioMessage(audioBlob) {
+    addMessageToUI("user", "🎤 (Audio enviado...)");
+
+    const loadingId = "loading-" + Date.now();
+    els.chatHistory.innerHTML += `<div id="${loadingId}" class="message msg-npc">👂 Escuchando...</div>`;
+    els.chatHistory.scrollTop = els.chatHistory.scrollHeight;
+
+    const formData = new FormData();
+    formData.append('audio', audioBlob);
+    // Enviamos JSONs como strings dentro del Form-Data
+    formData.append('npc_data', JSON.stringify(currentData));
+    formData.append('history', JSON.stringify(chatHistoryLog));
+
+    try {
+        const res = await fetch(AUDIO_API_URL, {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await res.json();
+
+        const loader = document.getElementById(loadingId);
+        if(loader) loader.remove();
+
+        if (data.error) throw new Error(data.error);
+
+        // Mostrar texto y HABLAR
+        addMessageToUI("npc", data.response);
+        speakText(data.response);
+
+    } catch (err) {
+        const loader = document.getElementById(loadingId);
+        if(loader) loader.remove();
+        addMessageToUI("npc", "Error: " + err.message);
+    }
+}
+
+// ==========================================
+// 5. TEXT-TO-SPEECH (Navegador)
+// ==========================================
+function speakText(text) {
+    if (!window.speechSynthesis) return;
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "es-ES";
+    utterance.rate = 1.0;
+
+    // Ajuste simple de tono según raza (Flavor)
+    const raza = (currentData.raza || "").toLowerCase();
+    if (raza.includes('orco') || raza.includes('enano') || raza.includes('dragonborn')) {
+        utterance.pitch = 0.6; // Voz grave
+    } else if (raza.includes('elfo') || raza.includes('gnomo') || raza.includes('halfling')) {
+        utterance.pitch = 1.2; // Voz aguda
+    } else {
+        utterance.pitch = 1.0; // Voz normal
+    }
+
+    window.speechSynthesis.speak(utterance);
+}
+
+// ==========================================
+// 6. UTILIDADES DE UI
+// ==========================================
 function addMessageToUI(role, text) {
     const div = document.createElement('div');
     div.className = `message ${role === 'user' ? 'msg-user' : 'msg-npc'}`;
@@ -133,7 +273,9 @@ function addMessageToUI(role, text) {
     chatHistoryLog.push({ role: role, content: text });
 }
 
-// --- GENERAR IMAGEN ---
+// ==========================================
+// 7. GENERAR IMAGEN
+// ==========================================
 els.btnImg.addEventListener('click', async () => {
     if (!currentData) return;
 
@@ -172,32 +314,29 @@ els.btnImg.addEventListener('click', async () => {
     }
 });
 
-// --- FUNCIÓN CENTRAL DE RENDERIZADO ---
+// ==========================================
+// 8. RENDERIZADO PRINCIPAL
+// ==========================================
 function renderNPC(data) {
     const s = (val) => val || '---';
 
-    // 1. GESTIÓN DEL CONTEXTO DEL CHAT (CRÍTICO)
-    // Cada vez que se renderiza un NPC (nuevo o historial), reiniciamos el chat.
+    // REINICIAR CHAT AL CARGAR NUEVO NPC
     chatHistoryLog = [];
     if (els.chatHistory) {
         els.chatHistory.innerHTML = '<div style="text-align:center; color:#888; font-style:italic; margin-top:20px;">El NPC te está mirando...</div>';
     }
 
-    // 2. MOSTRAR BOTONES DE ACCIÓN
-    // Aseguramos que los botones aparezcan incluso si venimos del historial
+    // MOSTRAR BOTONES
     els.btnExp.style.display = 'block';
-    els.btnChat.style.display = 'block';
-
-    // El botón de imagen se resetea para permitir generar una nueva si no existe
+    els.btnChat.style.display = 'block'; // Habilitar chat
     els.btnImg.style.display = 'block';
     els.btnImg.disabled = false;
     els.btnImg.innerText = "🎨 Generar Retrato";
 
-    // Ocultar imagen anterior si cambiamos de personaje
+    // UI Reset
     els.imgContainer.style.display = 'none';
     els.generatedImg.src = '';
 
-    // 3. RENDERIZADO HTML
     els.content.innerHTML = `
         <h1 style="color:var(--accent); margin:0;">${s(data.nombre)}</h1>
         <p style="font-style:italic; margin-top:0;">${s(data.raza)} - ${s(data.rol)} (${s(data.alineamiento)})</p>
@@ -228,11 +367,12 @@ function renderNPC(data) {
         <p><strong>Gancho:</strong> ${s(data.gancho_trama)}</p>
     `;
 
-    // Actualizamos la variable global para que el chat use estos datos
     currentData = data;
 }
 
-// ... Export Logic (sin cambios) ...
+// ==========================================
+// 9. EXPORTAR A FOUNDRY
+// ==========================================
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
     const json = {
