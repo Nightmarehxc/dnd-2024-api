@@ -49,21 +49,38 @@ class BaseService:
             return {"error": str(e)}
 
     def _generate_image_content(self, user_prompt):
-        """Generación de IMAGEN (Bytes) - NUEVO MÉTODO"""
+        """Generación de IMAGEN (Bytes) - Usamos Imagen 3"""
         client = self._get_client()
         try:
-            response = client.models.generate_content(
-                model='gemini-2.0-flash',
-                contents=user_prompt,
-                config=types.GenerateContentConfig(
-                    response_modalities=["IMAGE"],  # <--- CLAVE PARA IMÁGENES
-                    temperature=0.9  # Más creatividad para arte
+            # MÉTODO ESPECÍFICO PARA IMAGEN 3
+            response = client.models.generate_images(
+                model='imagen-3.0-generate-001',
+                prompt=user_prompt,
+                config=types.GenerateImagesConfig(
+                    number_of_images=1,
+                    aspect_ratio="1:1"
                 )
             )
-            # Extraer los bytes de la primera parte de la respuesta
-            for part in response.candidates[0].content.parts:
-                if part.inline_data:
-                    return {"image_bytes": part.inline_data.data}
+
+            # La respuesta de Imagen 3 tiene una estructura distinta
+            if response.generated_images:
+                image_obj = response.generated_images[0]
+                # Accedemos a los bytes de la imagen
+                if hasattr(image_obj, 'image') and hasattr(image_obj.image, 'bytes'):
+                    return {"image_bytes": image_obj.image.bytes}
+                # Fallback para versiones antiguas del SDK
+                if hasattr(image_obj, 'bytes'):
+                    return {"image_bytes": image_obj.bytes}
+
             return {"error": "No se generó ninguna imagen"}
+
         except Exception as e:
-            return {"error": str(e)}
+            error_msg = str(e)
+            print(f"ERROR IMAGEN: {error_msg}")
+
+            if "404" in error_msg:
+                return {"error": "Tu cuenta no tiene acceso a Imagen 3 (Modelo no encontrado)."}
+            if "400" in error_msg:
+                return {"error": "Solicitud inválida a Imagen 3."}
+
+            return {"error": f"Error al generar imagen: {error_msg}"}
