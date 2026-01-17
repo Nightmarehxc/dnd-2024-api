@@ -1,16 +1,27 @@
 const API_URL = "http://localhost:5001/api/npcs/generate";
 const IMAGE_API_URL = "http://localhost:5001/api/images/generate";
+const CHAT_API_URL = "http://localhost:5001/api/npcs/chat"; // <--- Nuevo Endpoint
+
 let currentData = null;
+let chatHistoryLog = []; // Almacena el historial local de la conversación
 
 const els = {
     desc: document.getElementById('desc'),
     btnGen: document.getElementById('btnGen'),
     btnImg: document.getElementById('btnImg'),
+    btnChat: document.getElementById('btnChat'), // <--- Nuevo Botón
     btnExp: document.getElementById('btnExp'),
     content: document.getElementById('resultContent'),
     loader: document.getElementById('loader'),
     imgContainer: document.getElementById('imgContainer'),
-    generatedImg: document.getElementById('generatedImg')
+    generatedImg: document.getElementById('generatedImg'),
+
+    // Elementos del Chat
+    modal: document.getElementById('chatModal'),
+    closeModal: document.getElementById('closeModal'),
+    chatHistory: document.getElementById('chatHistory'),
+    chatInput: document.getElementById('chatInput'),
+    btnSend: document.getElementById('btnSend')
 };
 
 // --- GENERAR NPC (TEXTO) ---
@@ -22,6 +33,7 @@ els.btnGen.addEventListener('click', async () => {
     els.imgContainer.style.display = 'none';
     els.generatedImg.src = '';
     els.btnImg.style.display = 'none';
+    els.btnChat.style.display = 'none'; // Ocultar chat al regenerar
 
     els.loader.style.display = 'block';
     els.btnGen.disabled = true;
@@ -42,10 +54,16 @@ els.btnGen.addEventListener('click', async () => {
         renderNPC(data);
         els.btnExp.style.display = 'block';
 
-        // Mostrar botón de imagen
+        // Mostrar botones extra
         els.btnImg.style.display = 'block';
         els.btnImg.disabled = false;
         els.btnImg.innerText = "🎨 Generar Retrato";
+
+        els.btnChat.style.display = 'block'; // Mostrar botón chat
+
+        // Resetear historial de chat al generar nuevo NPC
+        chatHistoryLog = [];
+        els.chatHistory.innerHTML = '<p style="text-align:center; color:#888; font-style:italic;">El NPC te está mirando...</p>';
 
         if (typeof addToHistory === 'function') addToHistory(data);
 
@@ -57,7 +75,85 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-// --- GENERAR IMAGEN (CON DETECCIÓN DE ERROR REGIONAL) ---
+// --- LÓGICA DEL CHAT ---
+els.btnChat.addEventListener('click', () => {
+    els.modal.style.display = 'block';
+    els.chatInput.focus();
+});
+
+els.closeModal.addEventListener('click', () => {
+    els.modal.style.display = 'none';
+});
+
+// Cerrar modal si clic fuera
+window.onclick = function(event) {
+    if (event.target == els.modal) {
+        els.modal.style.display = 'none';
+    }
+}
+
+// Enviar mensaje
+els.btnSend.addEventListener('click', sendMessage);
+els.chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+});
+
+async function sendMessage() {
+    const text = els.chatInput.value.trim();
+    if (!text || !currentData) return;
+
+    // 1. Mostrar mensaje usuario
+    addMessageToUI("user", text);
+    els.chatInput.value = '';
+
+    // Añadir loading visual
+    const loadingId = "loading-" + Date.now();
+    els.chatHistory.innerHTML += `<div id="${loadingId}" class="message msg-npc" style="font-style:italic; color:#777;">Thinking...</div>`;
+    els.chatHistory.scrollTop = els.chatHistory.scrollHeight;
+
+    try {
+        // 2. Llamada al Backend
+        const res = await fetch(CHAT_API_URL, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                npc_data: currentData,
+                history: chatHistoryLog,
+                message: text
+            })
+        });
+
+        const data = await res.json();
+
+        // Quitar loading
+        const loader = document.getElementById(loadingId);
+        if(loader) loader.remove();
+
+        if (data.error) throw new Error(data.error);
+
+        // 3. Mostrar respuesta NPC
+        addMessageToUI("npc", data.response);
+
+    } catch (err) {
+        const loader = document.getElementById(loadingId);
+        if(loader) loader.remove();
+        addMessageToUI("npc", "Error: " + err.message); // Mostrar error como mensaje
+    }
+}
+
+function addMessageToUI(role, text) {
+    const div = document.createElement('div');
+    div.className = `message ${role === 'user' ? 'msg-user' : 'msg-npc'}`;
+    div.innerText = text;
+    els.chatHistory.appendChild(div);
+    els.chatHistory.scrollTop = els.chatHistory.scrollHeight;
+
+    // Guardar en historial para contexto
+    chatHistoryLog.push({ role: role, content: text });
+}
+
+
+// --- GENERAR IMAGEN ---
 els.btnImg.addEventListener('click', async () => {
     if (!currentData) return;
 
@@ -85,14 +181,12 @@ els.btnImg.addEventListener('click', async () => {
         els.btnImg.style.display = 'none';
 
     } catch (err) {
-        // --- MANEJO DE ERROR MEJORADO ---
         console.error(err);
-
-        if (err.message.includes("not available in your country")) {
-            alert("⚠️ BLOQUEO REGIONAL DETECTADO\n\nGoogle no permite generar imágenes con Gemini desde tu país (Europa).\n\nSOLUCIÓN: Activa una VPN (EE.UU) para usar esta función.");
+        if (err.message.includes("not available")) {
+            alert("⚠️ BLOQUEO REGIONAL: Activa VPN (USA) para generar imágenes.");
             els.btnImg.innerText = "⚠️ No disponible en tu región";
         } else {
-            alert("Error generando imagen: " + err.message);
+            alert("Error: " + err.message);
             els.btnImg.innerText = "❌ Error (Intentar de nuevo)";
             els.btnImg.disabled = false;
         }
@@ -134,7 +228,7 @@ function renderNPC(data) {
 
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
-
+    // ... (Lógica de exportación sin cambios)
     const json = {
         name: currentData.nombre,
         type: "npc",

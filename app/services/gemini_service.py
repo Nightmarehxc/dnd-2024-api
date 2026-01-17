@@ -33,6 +33,22 @@ class BaseService:
             print(f"ERROR JSON: {text}")
             return {"error": "La IA no generó un JSON válido", "raw": text}
 
+    def _generate_text(self, system_instruction, user_prompt):
+        """NUEVO: Genera texto libre para diálogos (Chat)"""
+        client = self._get_client()
+        try:
+            # Para chat usamos texto plano, no JSON
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=f"{system_instruction}\n\n{user_prompt}",
+                config=types.GenerateContentConfig(
+                    temperature=0.8  # Un poco más creativo para hablar
+                )
+            )
+            return response.text
+        except Exception as e:
+            return f"Error de conexión: {str(e)}"
+
     def _generate_content(self, system_instruction, user_prompt):
         client = self._get_client()
         try:
