@@ -21,6 +21,12 @@ const els = {
     btnSaveShop: document.getElementById('btnSaveShop')
 };
 
+// Función auxiliar para limpiar comillas y evitar errores en botones
+const escapeStr = (str) => {
+    if (!str) return '';
+    return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+};
+
 // ==========================================
 // 1. GENERAR CIUDAD
 // ==========================================
@@ -64,18 +70,20 @@ els.btnGen.addEventListener('click', async () => {
 // 2. RENDERIZADO (MODO LECTURA)
 // ==========================================
 function renderCity(data) {
+    if (!data) return;
     const s = (val) => val || '---';
 
     // Botón de Editar
     const editBtn = `<button onclick="enterEditMode()" class="btn-generate" style="background:#f39c12; width:auto; padding:5px 15px; font-size:0.9rem; margin-bottom:10px;">✏️ Editar Ciudad</button>`;
 
+    // Renderizar Distritos con seguridad
     let distritosHtml = '';
-    if (data.distritos && data.distritos.length > 0) {
+    if (data.distritos && Array.isArray(data.distritos)) {
         distritosHtml = data.distritos.map((d) => `
             <div style="margin-bottom:15px; padding:10px; background:white; border-left:4px solid var(--accent); border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h4 style="margin:0; color:var(--text-main);">${d.nombre}</h4>
-                    <button class="btn-mini-shop" onclick="openShopGen('${d.nombre}', '${data.nombre}')">🏪 Abrir Tienda Aquí</button>
+                    <button class="btn-mini-shop" onclick="openShopGen('${escapeStr(d.nombre)}', '${escapeStr(data.nombre)}')">🏪 Abrir Tienda Aquí</button>
                 </div>
                 <p style="font-size:0.95em; margin:5px 0;">${d.descripcion}</p>
                 <div style="font-size:0.85em; color:#666;">
@@ -86,12 +94,19 @@ function renderCity(data) {
         `).join('');
     }
 
+    // Renderizar Lugares de Interés con seguridad
     let poisHtml = '';
-    if (data.lugares_interes && data.lugares_interes.length > 0) {
+    if (data.lugares_interes && Array.isArray(data.lugares_interes) && data.lugares_interes.length > 0) {
         poisHtml = `<h3 style="margin-top:20px; border-bottom:2px solid #3498db; color:#3498db;">📍 Lugares de Interés</h3>
         <ul style="padding-left:20px;">
             ${data.lugares_interes.map(p => `<li style="margin-bottom:5px;"><strong>${p.nombre}</strong> (${p.tipo || 'Lugar'}): ${p.descripcion}</li>`).join('')}
         </ul>`;
+    }
+
+    // Renderizar Rumores con seguridad
+    let rumorsHtml = '';
+    if (data.rumores && Array.isArray(data.rumores)) {
+        rumorsHtml = `<p><strong>🗣️ Rumor:</strong> ${data.rumores.join(' ')}</p>`;
     }
 
     els.content.innerHTML = `
@@ -108,7 +123,7 @@ function renderCity(data) {
             <p><strong>👑 Líder:</strong> ${s(data.gobierno?.lider)}</p>
             <p><strong>⚖️ Leyes:</strong> ${s(data.gobierno?.descripcion)}</p>
             <p><strong>🛡️ Defensas:</strong> ${s(data.defensas)}</p>
-            <p><strong>🗣️ Rumor:</strong> ${s(data.rumores)}</p>
+            ${rumorsHtml}
         </div>
 
         <h3 style="border-bottom:2px solid var(--accent); padding-bottom:5px;">🏘️ Distritos y Barrios</h3>
@@ -117,7 +132,7 @@ function renderCity(data) {
         ${poisHtml}
 
         <div style="text-align:center; margin-top:30px;">
-            <button class="btn-generate" onclick="openShopGen('General', '${data.nombre}')" style="background:#8e44ad; width:auto;">🔮 Generar Tienda Aleatoria</button>
+            <button class="btn-generate" onclick="openShopGen('General', '${escapeStr(data.nombre)}')" style="background:#8e44ad; width:auto;">🔮 Generar Tienda Aleatoria</button>
         </div>
     `;
 }
@@ -129,34 +144,38 @@ window.enterEditMode = function() {
     const d = currentCityData;
     if (!d) return;
 
-    const districtsInputs = d.distritos.map((dist, idx) => `
+    // Preparamos distritos
+    const districtsInputs = (d.distritos || []).map((dist, idx) => `
         <div style="background:#eee; padding:10px; margin-bottom:10px; border-radius:5px;">
-            <input type="text" id="edit_dist_name_${idx}" value="${dist.nombre}" style="font-weight:bold; margin-bottom:5px;">
-            <textarea id="edit_dist_desc_${idx}" rows="2">${dist.descripcion}</textarea>
+            <input type="text" id="edit_dist_name_${idx}" value="${escapeStr(dist.nombre)}" style="font-weight:bold; margin-bottom:5px; width:100%;">
+            <textarea id="edit_dist_desc_${idx}" rows="2" style="width:100%;">${dist.descripcion}</textarea>
         </div>
     `).join('');
+
+    // Convertimos array de rumores a texto
+    const currentRumor = Array.isArray(d.rumores) ? d.rumores.join('\n') : (d.rumores || '');
 
     els.content.innerHTML = `
         <h2 style="color:#f39c12;">✏️ Editando ${d.nombre}</h2>
 
         <label>Nombre de la Ciudad</label>
-        <input type="text" id="edit_name" value="${d.nombre}">
+        <input type="text" id="edit_name" value="${escapeStr(d.nombre)}">
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div><label>Tipo</label><input type="text" id="edit_type" value="${d.tipo}"></div>
-            <div><label>Población</label><input type="text" id="edit_pop" value="${d.poblacion}"></div>
+            <div><label>Tipo</label><input type="text" id="edit_type" value="${escapeStr(d.tipo)}"></div>
+            <div><label>Población</label><input type="text" id="edit_pop" value="${escapeStr(d.poblacion)}"></div>
         </div>
 
         <label>Clima</label>
-        <input type="text" id="edit_clima" value="${d.clima}">
+        <input type="text" id="edit_clima" value="${escapeStr(d.clima)}">
 
         <h3 style="margin-top:20px;">Gobierno</h3>
-        <label>Tipo de Gobierno</label><input type="text" id="edit_gob_type" value="${d.gobierno?.tipo || ''}">
-        <label>Líder</label><input type="text" id="edit_gob_leader" value="${d.gobierno?.lider || ''}">
+        <label>Tipo de Gobierno</label><input type="text" id="edit_gob_type" value="${escapeStr(d.gobierno?.tipo || '')}">
+        <label>Líder</label><input type="text" id="edit_gob_leader" value="${escapeStr(d.gobierno?.lider || '')}">
         <label>Descripción / Leyes</label><textarea id="edit_gob_desc" rows="3">${d.gobierno?.descripcion || ''}</textarea>
 
-        <label>Rumores</label>
-        <textarea id="edit_rumors" rows="2">${d.rumores || ''}</textarea>
+        <label>Rumores (Uno por línea)</label>
+        <textarea id="edit_rumors" rows="3">${currentRumor}</textarea>
 
         <h3>Distritos</h3>
         ${districtsInputs}
@@ -181,14 +200,18 @@ window.saveCityChanges = function() {
     currentCityData.gobierno.lider = document.getElementById('edit_gob_leader').value;
     currentCityData.gobierno.descripcion = document.getElementById('edit_gob_desc').value;
 
-    currentCityData.rumores = [document.getElementById('edit_rumors').value];
+    // Guardar rumores como array dividiendo por salto de línea
+    const rumorsText = document.getElementById('edit_rumors').value;
+    currentCityData.rumores = rumorsText.split('\n').filter(r => r.trim() !== '');
 
-    currentCityData.distritos.forEach((dist, idx) => {
-        const nameInput = document.getElementById(`edit_dist_name_${idx}`);
-        const descInput = document.getElementById(`edit_dist_desc_${idx}`);
-        if(nameInput) dist.nombre = nameInput.value;
-        if(descInput) dist.descripcion = descInput.value;
-    });
+    if (currentCityData.distritos) {
+        currentCityData.distritos.forEach((dist, idx) => {
+            const nameInput = document.getElementById(`edit_dist_name_${idx}`);
+            const descInput = document.getElementById(`edit_dist_desc_${idx}`);
+            if(nameInput) dist.nombre = nameInput.value;
+            if(descInput) dist.descripcion = descInput.value;
+        });
+    }
 
     renderCity(currentCityData);
 };
@@ -202,8 +225,12 @@ window.openShopGen = async function(districtName, cityName) {
     els.shopLoader.style.display = 'block';
     els.btnSaveShop.style.display = 'none';
 
-    const shopTypePrompt = `Una tienda adecuada para el distrito "${districtName}" en la ciudad de "${cityName}"`;
-    const locationPrompt = `${cityName} (${districtName})`;
+    // Limpiamos comillas simples del prompt
+    const safeDistrict = districtName.replace(/'/g, "");
+    const safeCity = cityName.replace(/'/g, "");
+
+    const shopTypePrompt = `Una tienda adecuada para el distrito "${safeDistrict}" en la ciudad de "${safeCity}"`;
+    const locationPrompt = `${safeCity} (${safeDistrict})`;
 
     try {
         const res = await fetch(SHOP_API_URL, {
@@ -232,7 +259,6 @@ window.openShopGen = async function(districtName, cityName) {
 function renderShopInModal(data) {
     const s = (val) => val || '---';
 
-    // FIX: Usamos item.nombre y item.precio_gp (Claves correctas de ShopService)
     const inventario = data.inventario || [];
     const itemsHtml = inventario.map(item => `
         <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:5px 0;">
@@ -245,21 +271,17 @@ function renderShopInModal(data) {
         </div>
     `).join('');
 
-    // FIX: Usamos data.nombre_tienda y data.vendedor
     const vendedorNombre = data.vendedor ? data.vendedor.nombre : 'Desconocido';
     const vendedorRaza = data.vendedor ? data.vendedor.raza : '---';
 
     els.shopBody.innerHTML = `
         <h2 style="color:#27ae60; margin-top:0; text-align:center;">${s(data.nombre_tienda)}</h2>
-
         <p style="text-align:center; font-style:italic; color:#666;">
             Propiedad de ${s(vendedorNombre)} (${s(vendedorRaza)})
         </p>
-
         <div style="background:#f9f9f9; padding:10px; border-radius:5px; margin-bottom:15px; font-size:0.9em;">
             <p><strong>Ambiente:</strong> ${s(data.descripcion_ambiente)}</p>
         </div>
-
         <h4 style="border-bottom:2px solid #27ae60;">📦 Inventario</h4>
         <div style="max-height:200px; overflow-y:auto;">
             ${itemsHtml || '<p>Sin inventario disponible.</p>'}
@@ -267,45 +289,53 @@ function renderShopInModal(data) {
     `;
 }
 
-// FIX COMPLETO DEL GUARDADO
+// FIX: Guardar Tienda (Con manejo de errores y cierre forzado de modal)
 els.btnSaveShop.addEventListener('click', () => {
-    if (!currentCityData || !currentShopData) return;
-
-    // 1. AÑADIR A LA CIUDAD VISIBLE
-    if (!currentCityData.lugares_interes) currentCityData.lugares_interes = [];
-
-    const nuevaTienda = {
-        nombre: currentShopData.nombre_tienda,
-        tipo: "Tienda (Nueva)",
-        descripcion: `${currentShopData.descripcion_ambiente}. Regentada por ${currentShopData.vendedor?.nombre || 'un local'}.`
-    };
-
-    currentCityData.lugares_interes.push(nuevaTienda);
-    renderCity(currentCityData); // Actualizar pantalla para verla
-
-    // 2. GUARDAR EN EL HISTORIAL GLOBAL DE TIENDAS
     try {
-        const shopKey = 'history_shop'; // Clave usada por history.js para tiendas
-        let shopHistory = JSON.parse(localStorage.getItem(shopKey) || '[]');
+        if (!currentCityData || !currentShopData) return;
 
-        const historyItem = {
-            ...currentShopData,
-            nombre: currentShopData.nombre_tienda, // Normalizamos para que history.js lo lea bien
-            timestamp: new Date().toISOString()
+        // 1. Añadir a la ciudad en memoria
+        if (!currentCityData.lugares_interes) currentCityData.lugares_interes = [];
+
+        const nuevaTienda = {
+            nombre: currentShopData.nombre_tienda || "Tienda Nueva",
+            tipo: "Tienda (Nueva)",
+            descripcion: `${currentShopData.descripcion_ambiente}. Regentada por ${currentShopData.vendedor?.nombre || 'un local'}.`
         };
 
-        shopHistory.unshift(historyItem);
-        if (shopHistory.length > 20) shopHistory.pop();
+        currentCityData.lugares_interes.push(nuevaTienda);
 
-        localStorage.setItem(shopKey, JSON.stringify(shopHistory));
+        // 2. Refrescar la pantalla de la ciudad
+        renderCity(currentCityData);
 
-        alert("✅ Tienda guardada en el Historial de Tiendas y añadida a esta ciudad.");
-    } catch (e) {
-        console.error("Error guardando historial:", e);
-        alert("⚠️ Se añadió a la ciudad pero falló el historial global.");
+        // 3. Guardar en Historial Global (localStorage)
+        try {
+            const shopKey = 'history_shop';
+            let shopHistory = JSON.parse(localStorage.getItem(shopKey) || '[]');
+
+            const historyItem = {
+                ...currentShopData,
+                nombre: currentShopData.nombre_tienda,
+                timestamp: new Date().toISOString()
+            };
+
+            shopHistory.unshift(historyItem);
+            if (shopHistory.length > 20) shopHistory.pop(); // Mantener solo 20
+
+            localStorage.setItem(shopKey, JSON.stringify(shopHistory));
+            alert("✅ Tienda añadida a la ciudad y guardada en el historial.");
+        } catch (storageErr) {
+            console.error(storageErr);
+            alert("⚠️ Tienda añadida a la ciudad, pero falló el guardado en el historial global.");
+        }
+
+    } catch (err) {
+        console.error("Error al guardar tienda:", err);
+        alert("❌ Error: " + err.message);
+    } finally {
+        // 4. Cerrar el modal pase lo que pase
+        els.modal.style.display = 'none';
     }
-
-    els.modal.style.display = 'none';
 });
 
 els.closeModal.addEventListener('click', () => els.modal.style.display = 'none');
@@ -319,8 +349,11 @@ els.btnExp.addEventListener('click', () => {
     let text = `--- CIUDAD: ${currentCityData.nombre} ---\n`;
     text += `TIPO: ${currentCityData.tipo}\nPOBLACIÓN: ${currentCityData.poblacion}\n\n`;
     text += `GOBIERNO: ${currentCityData.gobierno?.tipo} (Líder: ${currentCityData.gobierno?.lider})\n`;
+
     text += "DISTRITOS:\n";
-    currentCityData.distritos.forEach(d => { text += `- ${d.nombre}: ${d.descripcion}\n`; });
+    if(currentCityData.distritos) {
+        currentCityData.distritos.forEach(d => { text += `- ${d.nombre}: ${d.descripcion}\n`; });
+    }
 
     text += "\nLUGARES DE INTERÉS:\n";
     if (currentCityData.lugares_interes) {
