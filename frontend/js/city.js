@@ -227,21 +227,43 @@ window.openShopGen = async function(districtName, cityName) {
 
 function renderShopInModal(data) {
     const s = (val) => val || '---';
-    const itemsHtml = data.inventario.map(item => `
+
+    // 1. Validamos que exista inventario para evitar errores de .map
+    const inventario = data.inventario || [];
+
+    // 2. Mapeamos usando las claves correctas del ShopService (item.nombre, item.precio_gp)
+    const itemsHtml = inventario.map(item => `
         <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:5px 0;">
-            <span>${item.item}</span>
-            <span style="font-weight:bold; color:#e67e22;">${item.precio}</span>
+            <span>
+                <strong>${item.nombre}</strong> <small>(${item.tipo || 'Obj'})</small>
+            </span>
+            <span style="font-weight:bold; color:#e67e22;">
+                ${item.precio_gp} gp
+            </span>
         </div>
     `).join('');
 
+    // 3. Extraemos datos del vendedor con seguridad
+    const vendedorNombre = data.vendedor ? data.vendedor.nombre : 'Desconocido';
+    const vendedorRaza = data.vendedor ? data.vendedor.raza : '---';
+
+    // 4. Renderizamos usando las claves correctas (nombre_tienda, descripcion_ambiente)
     els.shopBody.innerHTML = `
-        <h2 style="color:#27ae60; margin-top:0; text-align:center;">${s(data.nombre)}</h2>
-        <p style="text-align:center; font-style:italic; color:#666;">${s(data.tipo)} - Propiedad de ${s(data.dueno)}</p>
+        <h2 style="color:#27ae60; margin-top:0; text-align:center;">${s(data.nombre_tienda)}</h2>
+
+        <p style="text-align:center; font-style:italic; color:#666;">
+            Propiedad de ${s(vendedorNombre)} (${s(vendedorRaza)})
+        </p>
+
         <div style="background:#f9f9f9; padding:10px; border-radius:5px; margin-bottom:15px; font-size:0.9em;">
-            <p><strong>Apariencia:</strong> ${s(data.descripcion)}</p>
+            <p><strong>Ambiente:</strong> ${s(data.descripcion_ambiente)}</p>
+            ${data.vendedor && data.vendedor.personalidad ? `<p><strong>Personalidad:</strong> ${data.vendedor.personalidad}</p>` : ''}
         </div>
+
         <h4 style="border-bottom:2px solid #27ae60;">📦 Inventario</h4>
-        <div style="max-height:200px; overflow-y:auto;">${itemsHtml}</div>
+        <div style="max-height:200px; overflow-y:auto;">
+            ${itemsHtml || '<p>Sin inventario disponible.</p>'}
+        </div>
     `;
 }
 
@@ -249,7 +271,25 @@ els.closeModal.addEventListener('click', () => els.modal.style.display = 'none')
 window.onclick = function(event) { if (event.target == els.modal) els.modal.style.display = 'none'; }
 
 els.btnSaveShop.addEventListener('click', () => {
-    alert("Tienda guardada en memoria.");
+    if (!currentCityData || !currentShopData) return;
+
+    // 1. Inicializar array si no existe (por seguridad)
+    if (!currentCityData.lugares_interes) currentCityData.lugares_interes = [];
+
+    // 2. Crear un objeto "resumen" de la tienda para la lista de la ciudad
+    const nuevaTienda = {
+        nombre: currentShopData.nombre_tienda,   // Usamos las claves que devuelve la IA de tiendas
+        tipo: "Tienda (Nueva)",                  // Etiqueta para diferenciarla
+        descripcion: `${currentShopData.descripcion_ambiente}. Regentada por ${currentShopData.vendedor?.nombre || 'un local'}.`
+    };
+
+    // 3. Añadirlo a la lista de lugares de la ciudad
+    currentCityData.lugares_interes.push(nuevaTienda);
+
+    // 4. ¡CRÍTICO! Re-renderizar la ciudad para que aparezca el nuevo ítem en la lista
+    renderCity(currentCityData);
+
+    // 5. Cerrar el modal
     els.modal.style.display = 'none';
 });
 
