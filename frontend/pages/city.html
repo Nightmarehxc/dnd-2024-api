@@ -4,6 +4,73 @@
     <meta charset="UTF-8">
     <title>Generador de Ciudades</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Estilos del Modal para Tiendas */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 0;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            background: var(--accent);
+            color: white;
+            padding: 15px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-modal {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Botón pequeño para generar tienda */
+        .btn-mini-shop {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: transform 0.2s;
+        }
+        .btn-mini-shop:hover {
+            background-color: #2ecc71;
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -13,34 +80,55 @@
 
     <div class="generator-layout">
         <div class="panel">
-            <h2>Parámetros</h2>
-            <label>Tipo de Asentamiento</label>
+            <h2>Fundación</h2>
+
+            <label>Nombre de la Ciudad (Opcional)</label>
+            <input type="text" id="cityName" placeholder="Ej: Puerta de Baldur, Neverwinter...">
+
+            <label>Tamaño y Tipo</label>
             <select id="cityType">
-                <option value="Aldea Pequeña">Aldea Pequeña</option>
-                <option value="Pueblo Fronterizo">Pueblo Fronterizo</option>
-                <option value="Ciudad Comercial">Ciudad Comercial</option>
-                <option value="Metrópolis">Metrópolis</option>
-                <option value="Fortaleza Enana">Fortaleza Enana</option>
-                <option value="Ciudad Flotante">Ciudad Flotante</option>
+                <option value="Aldea pequeña">Aldea (Poca gente)</option>
+                <option value="Pueblo fronterizo">Pueblo Fronterizo (Comercio)</option>
+                <option value="Ciudad amurallada">Ciudad Amurallada (Militar)</option>
+                <option value="Metrópolis mágica">Metrópolis Mágica (Alta Fantasía)</option>
+                <option value="Puerto comercial">Puerto Comercial (Piratas/Comercio)</option>
             </select>
 
-            <label>Temática / Ambiente</label>
-            <input type="text" id="theme" placeholder="Ej: Gótica, Industrial, Alta Magia, Desértica...">
+            <label>Clima / Bioma</label>
+            <input type="text" id="biome" placeholder="Ej: Tundra helada, Desierto abrasador...">
 
-            <button class="btn-generate" id="btnGen">Fundar Ciudad</button>
-            <button class="btn-export" id="btnExp">Exportar Journal (Foundry)</button>
+            <button class="btn-generate" id="btnGen">Fundar Asentamiento</button>
+            <button class="btn-export" id="btnExp" style="display:none;">Exportar Mapa Textual</button>
         </div>
 
         <div class="panel result-panel">
-            <div id="loader" class="loader">🏗️ Levantando murallas...</div>
+            <div id="loader" class="loader">🧱 Colocando la primera piedra...</div>
             <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">El mapa se dibujará aquí</p>
+                <p style="text-align:center; margin-top:150px; color:#aaa;">La ciudad aparecerá aquí</p>
             </div>
         </div>
 
         <div class="history-panel">
-            <div class="history-header">📜 Mapoteca</div>
+            <div class="history-header">🗺️ Cartografía</div>
             <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <div id="shopModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0">⚖️ Nuevo Comercio Local</h3>
+                <span class="close-modal" id="closeModal">&times;</span>
+            </div>
+            <div id="shopModalBody" class="modal-body">
+                <div id="shopLoader" style="text-align:center; display:none;">
+                    <p>🔨 Construyendo el local...</p>
+                </div>
+                <div id="shopResultContent"></div>
+            </div>
+            <div style="padding:15px; background:#eee; text-align:right; border-bottom-left-radius:10px; border-bottom-right-radius:10px;">
+                <button id="btnSaveShop" class="btn-generate" style="width:auto; margin:0; font-size:0.9rem;">Guardar en Historial de Tiendas</button>
+            </div>
         </div>
     </div>
 

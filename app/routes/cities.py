@@ -5,7 +5,6 @@ from app.schemas.request import CityRequestSchema
 
 bp = Blueprint('cities', __name__, url_prefix='/api/cities')
 
-
 @bp.route('/generate', methods=['POST'])
 def generate_city():
     schema = CityRequestSchema()
@@ -14,7 +13,12 @@ def generate_city():
     except ValidationError as err:
         return jsonify({"error": "Datos inválidos", "detalles": err.messages}), 400
 
-    result = city_service.generate_city(data['city_type'], data['theme'])
+    # Llamamos al servicio con los NUEVOS nombres de campos
+    result = city_service.generate_city(
+        size_type=data['size_type'],
+        biome=data['biome'],
+        name=data['name']
+    )
 
     if "error" in result:
         return jsonify(result), 500

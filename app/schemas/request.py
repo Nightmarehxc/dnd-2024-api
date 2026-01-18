@@ -45,8 +45,9 @@ class ShopRequestSchema(Schema):
     vendor_race = fields.String(required=False, load_default=None)
 
 class CityRequestSchema(Schema):
-    city_type = fields.String(required=True) # Ej: Villa, Ciudad, Fortaleza
-    theme = fields.String(required=False, load_default="Fantasía Genérica")
+    name = fields.String(required=False, load_default="Una ciudad sin nombre")
+    size_type = fields.String(required=True, validate=validate.Length(min=3)) # Ej: "Aldea", "Metrópolis"
+    biome = fields.String(required=False, load_default="Clima templado estándar") # Ej: "Desierto", "Tundra"
 
 class RiddleRequestSchema(Schema):
     theme = fields.String(required=True)  # Ej: "Biblioteca arcana", "Tumba egipcia"
