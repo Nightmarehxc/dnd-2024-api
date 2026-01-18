@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>El Cronista</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .parchment {
+            background-color: #fcf5e5;
+            padding: 30px;
+            border: 1px solid #d4c5a3;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+        .parchment h1 {
+            font-family: 'Cinzel', serif; /* Si tuvieras la fuente, si no usará serif */
+            color: #8e44ad;
+            border-bottom: 2px solid #8e44ad;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .narrative-text {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+        .section-title {
+            font-weight: bold;
+            color: #c0392b;
+            margin-top: 20px;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+        ul.clean-list {
+            list-style: none;
+            padding: 0;
+        }
+        ul.clean-list li {
+            padding: 5px 0;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        ul.clean-list li:before {
+            content: "• ";
+            color: #c0392b;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">🖋️ El Cronista</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Notas de la Sesión</h2>
+            <p style="font-size:0.9em; color:#666; margin-bottom:10px;">Pega aquí tus apuntes rápidos, sucios y desordenados.</p>
+
+            <textarea id="notes" rows="15" placeholder="Ej: Entramos en la cueva. El bárbaro rompió la puerta. Salieron 3 esqueletos. Casi morimos pero el mago usó bola de fuego. Encontramos una espada mágica y volvimos al pueblo a cobrar la recompensa de 50 oros."></textarea>
+
+            <button class="btn-generate" id="btnGen">Escribir Crónica</button>
+            <button class="btn-export" id="btnExp" style="display:none;">Guardar en Diario</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🕯️ Mojando la pluma en tinta...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">La historia cobrará vida aquí</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📚 Tomos Anteriores</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="../js/history.js"></script>
+    <script src="../js/journal.js"></script>
+</body>
+</html>

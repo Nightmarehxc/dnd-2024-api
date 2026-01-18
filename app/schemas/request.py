@@ -64,7 +64,10 @@ class LootRequestSchema(Schema):
 
 class RuleRequestSchema(Schema):
     query = fields.String(required=True, validate=validate.Length(min=3))
-    
+
 class QuestRequestSchema(Schema):
     location = fields.String(required=True, validate=validate.Length(min=3))
     level = fields.Integer(required=False, load_default=1, validate=validate.Range(min=1, max=20))
+
+class JournalRequestSchema(Schema):
+    notes = fields.String(required=True, validate=validate.Length(min=10))

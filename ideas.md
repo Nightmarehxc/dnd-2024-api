@@ -133,3 +133,65 @@ Para dar profundidad política a tus Ciudades (CityService).
         Aliados y Rivales.
 
     Valor: Crea enemigos recurrentes o aliados poderosos para la campaña.
+
+### 11. ✨ La Forja Arcana (Spellcrafter)
+
+D&D 2024 fomenta mucho la personalización. A veces un jugador quiere un hechizo que no existe.
+
+    El Problema: Crear hechizos caseros (homebrew) suele romper el juego (demasiado daño, coste muy bajo).
+
+    Qué hace: El usuario dice: "Quiero una bola de fuego pero de electricidad que aturda".
+
+    La IA Genera: Un bloque de estadísticas completo (Nivel, Tiempo de Casteo, Componentes, Daño, Duración) balanceado matemáticamente comparándolo con hechizos oficiales.
+
+    Valor: Permite recompensas únicas para los magos del grupo.
+
+### 12. ⚡ Generador de "Desafíos de Habilidad" (Skill Challenges)
+
+No todo es combate. A veces hay que escapar de un templo que se derrumba, perseguir a un asesino por los tejados o convencer a un rey.
+
+    El Problema: Es difícil improvisar mecánicas para escenas de acción que no sean "tira ataque".
+
+    Qué hace: Pides: "Persecución de carruajes por la ciudad".
+
+    La IA Genera:
+
+        Objetivo: 5 éxitos antes de 3 fallos.
+
+        Obstáculos: "Un carro de frutas bloquea el paso (Acrobacias DC 15)".
+
+        Consecuencias: Si fallan, no mueren, pero pierden al objetivo o ganan niveles de agotamiento.
+
+    Valor: Añade cine y tensión narrativa estructurada.
+
+### 13. 👺 Arquitecto de Villanos (BBEG Planner)
+
+Tienes monstruos, pero ¿quién los manda?
+
+    Qué hace: Pides "Un villano para una campaña de terror gótico nivel 5-10".
+
+    La IA Genera:
+
+        Nombre y Arquetipo: "Lord Valdos, el Vampiro Arrepentido".
+
+        El Plan Maestro: Qué quiere conseguir y en cuántos pasos.
+
+        Los Tenientes: Sus 3 comandantes clave.
+
+        La Guarida: Dónde se esconde.
+
+    Valor: Da estructura a largo plazo a la campaña.
+
+### 14. 📝 El Cronista (Session Recap / Journal)
+
+Los DMs (y jugadores) siempre olvidan qué pasó la semana pasada.
+
+    Qué hace: Pegas tus notas desordenadas ("Mataron al goblin, encontraron llave, el bardo sedujo al dragón").
+
+    La IA Genera:
+
+        Resumen Épico: Un texto narrado como si fuera una serie de TV ("Anteriormente en D&D...").
+
+        Bullet Points: Lista limpia de objetos ganados, NPCs conocidos y misiones pendientes.
+
+    Valor: Ahorra tiempo de organización post-partida.

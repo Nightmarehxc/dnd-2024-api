@@ -15,6 +15,8 @@ function getCurrentType() {
     if (path.includes('loot.html')) return 'loot';
     if (path.includes('rules.html')) return 'rules';
     if (path.includes('quest.html')) return 'quest';
+    if (path.includes('journal.html')) return 'journal';
+
     return null;
 }
 
@@ -32,6 +34,7 @@ const ICONS = {
     'loot': '💰',
     'rules': '⚖️',
     'quest': '📜',
+    'journal': '🖋️',
 };
 
 // --- 1. CARGAR LISTA ---
@@ -111,6 +114,8 @@ function restoreItem(id) {
         if (typeof renderLoot === 'function' && PAGE_TYPE === 'loot') renderLoot(data);
         if (typeof renderRule === 'function' && PAGE_TYPE === 'rules') renderRule(data);
         if (typeof renderQuests === 'function' && PAGE_TYPE === 'quest') renderQuests(data);
+        if (typeof renderJournal === 'function' && PAGE_TYPE === 'journal') renderJournal(data);
+
 
 
         const btnExp = document.getElementById('btnExp');
