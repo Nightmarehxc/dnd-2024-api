@@ -75,3 +75,7 @@ class JournalRequestSchema(Schema):
 class SpellRequestSchema(Schema):
     description = fields.String(required=True, validate=validate.Length(min=5))
     level = fields.Integer(required=False, load_default=None, validate=validate.Range(min=0, max=9))
+
+class VillainRequestSchema(Schema):
+    theme = fields.String(required=True, validate=validate.Length(min=3))
+    level_range = fields.String(required=False, load_default="1-5") # Ej: "1-5", "10-15"

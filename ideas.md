@@ -164,7 +164,7 @@ No todo es combate. A veces hay que escapar de un templo que se derrumba, perseg
 
     Valor: Añade cine y tensión narrativa estructurada.
 
-### 13. 👺 Arquitecto de Villanos (BBEG Planner) 
+### 13. 👺 Arquitecto de Villanos (BBEG Planner) ✅
 
 Tienes monstruos, pero ¿quién los manda?
 
