@@ -16,6 +16,7 @@ function getCurrentType() {
     if (path.includes('rules.html')) return 'rules';
     if (path.includes('quest.html')) return 'quest';
     if (path.includes('journal.html')) return 'journal';
+    if (path.includes('spell.html')) return 'spell';
 
     return null;
 }
@@ -35,6 +36,7 @@ const ICONS = {
     'rules': '⚖️',
     'quest': '📜',
     'journal': '🖋️',
+    'spell': '✨',
 };
 
 // --- 1. CARGAR LISTA ---
@@ -115,7 +117,7 @@ function restoreItem(id) {
         if (typeof renderRule === 'function' && PAGE_TYPE === 'rules') renderRule(data);
         if (typeof renderQuests === 'function' && PAGE_TYPE === 'quest') renderQuests(data);
         if (typeof renderJournal === 'function' && PAGE_TYPE === 'journal') renderJournal(data);
-
+        if (typeof renderSpell === 'function' && PAGE_TYPE === 'spell') renderSpell(data);
 
 
         const btnExp = document.getElementById('btnExp');

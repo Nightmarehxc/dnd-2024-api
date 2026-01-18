@@ -71,3 +71,7 @@ class QuestRequestSchema(Schema):
 
 class JournalRequestSchema(Schema):
     notes = fields.String(required=True, validate=validate.Length(min=10))
+
+class SpellRequestSchema(Schema):
+    description = fields.String(required=True, validate=validate.Length(min=5))
+    level = fields.Integer(required=False, load_default=None, validate=validate.Range(min=0, max=9))

@@ -116,7 +116,7 @@ Tienes "Aventuras" (tramas largas), pero a veces los jugadores llegan a un puebl
 
     Valor: Contenido de relleno infinito para cuando los jugadores ignoran la trama principal.
 
-### 10. ⚔️ Creador de Facciones y Cultos
+### 10. ⚔️ Creador de Facciones y Cultos 
 
 Para dar profundidad política a tus Ciudades (CityService).
 
@@ -134,7 +134,7 @@ Para dar profundidad política a tus Ciudades (CityService).
 
     Valor: Crea enemigos recurrentes o aliados poderosos para la campaña.
 
-### 11. ✨ La Forja Arcana (Spellcrafter)
+### 11. ✨ La Forja Arcana (Spellcrafter) ✅ 
 
 D&D 2024 fomenta mucho la personalización. A veces un jugador quiere un hechizo que no existe.
 
@@ -146,7 +146,7 @@ D&D 2024 fomenta mucho la personalización. A veces un jugador quiere un hechizo
 
     Valor: Permite recompensas únicas para los magos del grupo.
 
-### 12. ⚡ Generador de "Desafíos de Habilidad" (Skill Challenges)
+### 12. ⚡ Generador de "Desafíos de Habilidad" (Skill Challenges) 
 
 No todo es combate. A veces hay que escapar de un templo que se derrumba, perseguir a un asesino por los tejados o convencer a un rey.
 
@@ -164,7 +164,7 @@ No todo es combate. A veces hay que escapar de un templo que se derrumba, perseg
 
     Valor: Añade cine y tensión narrativa estructurada.
 
-### 13. 👺 Arquitecto de Villanos (BBEG Planner)
+### 13. 👺 Arquitecto de Villanos (BBEG Planner) 
 
 Tienes monstruos, pero ¿quién los manda?
 

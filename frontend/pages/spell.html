@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>La Forja Arcana</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .spell-card {
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-family: 'Segoe UI', sans-serif;
+            position: relative;
+        }
+        .spell-card::before {
+            content: "";
+            position: absolute;
+            top: 5px; left: 5px; right: 5px; bottom: 5px;
+            border: 1px solid #c0392b;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+        .spell-header {
+            color: #c0392b;
+            font-family: serif;
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-size: 1.8em;
+        }
+        .spell-meta {
+            font-style: italic;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        .spell-stats {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 5px 15px;
+            font-size: 0.95em;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .spell-stats strong { color: #333; }
+        .spell-body { line-height: 1.5; text-align: justify; }
+        .higher-levels { margin-top: 15px; font-weight: bold; }
+        .classes-list { margin-top: 15px; font-size: 0.85em; color: #888; text-align: right; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">✨ Forja Arcana</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Investigar Hechizo</h2>
+
+            <label>Concepto / Efecto</label>
+            <textarea id="desc" rows="4" placeholder="Ej: Un muro de hielo que explota si lo tocan..."></textarea>
+
+            <label>Nivel Objetivo (Opcional)</label>
+            <input type="number" id="level" placeholder="Deja vacío para que la IA decida" min="0" max="9">
+
+            <button class="btn-generate" id="btnGen">Inscribir Pergamino</button>
+            <button class="btn-export" id="btnExp" style="display:none;">Exportar a Foundry VTT</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🔥 Canalizando energía del Weave...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">El hechizo se manifestará aquí</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📚 Grimorio Personal</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="../js/history.js"></script>
+    <script src="../js/spell.js"></script>
+</body>
+</html>
