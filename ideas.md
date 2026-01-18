@@ -182,7 +182,7 @@ Tienes monstruos, pero ¿quién los manda?
 
     Valor: Da estructura a largo plazo a la campaña.
 
-### 14. 📝 El Cronista (Session Recap / Journal)
+### 14. 📝 El Cronista (Session Recap / Journal) ✅ 
 
 Los DMs (y jugadores) siempre olvidan qué pasó la semana pasada.
 

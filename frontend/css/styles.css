@@ -193,3 +193,17 @@ button {
 .stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 5px 0; }
 .tag { display: inline-block; padding: 3px 8px; border-radius: 12px; background: #ddd; font-size: 0.8rem; margin-right: 5px; }
 .loader { text-align: center; margin-top: 100px; color: #888; display: none; }
+
+/* Títulos de Categoría en Index */
+.category-title {
+    width: 100%;
+    max-width: 1000px;
+    margin-top: 50px;
+    margin-bottom: 20px;
+    color: var(--text-main);
+    font-size: 1.5rem;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
