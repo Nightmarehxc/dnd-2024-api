@@ -4,7 +4,7 @@ from flask_cors import CORS
 from marshmallow import ValidationError
 from flasgger import Swagger
 from app.routes import characters, npcs, items, adventures, history, shops, images, cities, riddles, \
-    encounters  # <--- IMPORTAR
+    encounters, loot, rules, quests  # <--- IMPORTAR
 from config import config
 
 def create_app(config_name='default'):
@@ -51,6 +51,9 @@ def create_app(config_name='default'):
     app.register_blueprint(cities.bp)
     app.register_blueprint(riddles.bp)
     app.register_blueprint(encounters.bp)
+    app.register_blueprint(loot.bp)
+    app.register_blueprint(rules.bp)
+    app.register_blueprint(quests.bp)
     # --- SERVIR FRONTEND (NUEVO) ---
     # Calculamos la ruta absoluta a la carpeta 'frontend'
     # app.root_path apunta a /tu/proyecto/app

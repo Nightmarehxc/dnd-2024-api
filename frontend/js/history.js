@@ -12,6 +12,9 @@ function getCurrentType() {
     if (path.includes('city.html')) return 'city';
     if (path.includes('riddle.html')) return 'riddle';
     if (path.includes('encounter.html')) return 'encounter';
+    if (path.includes('loot.html')) return 'loot';
+    if (path.includes('rules.html')) return 'rules';
+    if (path.includes('quest.html')) return 'quest';
     return null;
 }
 
@@ -25,7 +28,10 @@ const ICONS = {
     'shop': '💰',
     'city': '🏰',
     'riddle': '🧩',
-    'encounter': '⚔️'
+    'encounter': '⚔️',
+    'loot': '💰',
+    'rules': '⚖️',
+    'quest': '📜',
 };
 
 // --- 1. CARGAR LISTA ---
@@ -102,6 +108,10 @@ function restoreItem(id) {
         if (typeof renderCity === 'function' && PAGE_TYPE === 'city') renderCity(data);
         if (typeof renderRiddle === 'function' && PAGE_TYPE === 'riddle') renderRiddle(data);
         if (typeof renderEncounter === 'function' && PAGE_TYPE === 'encounter') renderEncounter(data);
+        if (typeof renderLoot === 'function' && PAGE_TYPE === 'loot') renderLoot(data);
+        if (typeof renderRule === 'function' && PAGE_TYPE === 'rules') renderRule(data);
+        if (typeof renderQuests === 'function' && PAGE_TYPE === 'quest') renderQuests(data);
+
 
         const btnExp = document.getElementById('btnExp');
         if (btnExp) btnExp.style.display = 'block';

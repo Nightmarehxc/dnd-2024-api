@@ -4,7 +4,7 @@ Dado que ya tienes una arquitectura sólida (Frontend modular, Backend Flask, Hi
 
 ---
 
-### 1. ⚔️ Generador de Encuentros Tácticos (Combat Planner)
+### 1. ⚔️ Generador de Encuentros Tácticos (Combat Planner) ✅
 
 No solo decir "5 Goblins", sino diseñar el encuentro completo.
 
@@ -54,8 +54,8 @@ Para las mazmorras.
 * **Qué hace:** El usuario pide "Un acertijo para abrir una puerta mágica en una biblioteca".
 * **La IA genera:** El acertijo, la solución, y qué pasa si fallan (la trampa/consecuencia).
 * **Valor:** Los acertijos son lo más difícil de improvisar para un humano.
-
-### 6. 📄 Exportación a PDF (Ficha de impresión)
+ 
+### 6.📄 Exportación a PDF (Ficha de impresión)
 
 Ya exportas a Foundry (JSON), pero muchos DMs juegan en mesa física.
 
@@ -63,3 +63,73 @@ Ya exportas a Foundry (JSON), pero muchos DMs juegan en mesa física.
 * **Técnica:** Usar una librería de Python como `weasyprint` o `reportlab` en el backend, o simplemente CSS `@media print` bien hecho en el frontend para que salga bonito al imprimir en papel.
 
 ---
+
+### 7.💰 Generador de Botín y Tesoros (Loot Hoard) ✅ 
+
+Ya tienes un generador de objetos sueltos (ItemService), pero los DMs a menudo necesitan llenar un cofre del tesoro entero tras un combate.
+
+    Qué hace: Le das un "Nivel de Desafío (CR)" y un "Tipo de Enemigo" (ej: Dragón, Bandidos, Cultistas).
+
+    La IA genera:
+
+        Monedas: Cantidad exacta de cp, sp, gp, pp (ajustado a las tablas de la DMG).
+
+        Objetos de Arte: "Un cáliz de plata con incrustaciones de ópalo (250gp)".
+
+        Objetos Mágicos: Selecciona o inventa objetos acordes al nivel.
+
+        Curiosidades: "Una carta de amor sin enviar manchada de sangre".
+
+    Valor: Recompensa instantánea para los jugadores sin que el DM tenga que tirar en 10 tablas distintas.
+
+###  8. 🛡️ El "Árbitro de Reglas" (Rules Lawyer 2024) ✅ 
+
+Dado que D&D 2024 tiene cambios sutiles (Weapon Mastery, Exhaustion, Grappling), esto es oro puro.
+
+    Qué hace: Un buscador simple donde preguntas: "¿Cómo funciona el empujón ahora?" o "¿Se apilan los puntos de golpe temporales?".
+
+    La IA genera:
+
+        La explicación clara de la regla 2024.
+
+        Un ejemplo práctico.
+
+        (Técnicamente: Solo necesitas un buen System Prompt que le diga "Eres un experto en el PHB 2024, ignora reglas de 2014 si han cambiado").
+
+    Valor: Resuelve discusiones en la mesa en segundos.
+
+### 9. 📜 Tablón de Anuncios / Misiones Secundarias (Quest Board) ✅ 
+
+Tienes "Aventuras" (tramas largas), pero a veces los jugadores llegan a un pueblo y solo quieren hacer algo rápido para ganar dinero.
+
+    Qué hace: Genera 3-5 misiones rápidas para una ciudad o taberna específica.
+
+    La IA genera:
+
+        El Cartel: "Se busca ayuda para limpiar el sótano".
+
+        El Cliente: "Vieja Sra. Higgins".
+
+        El Giro Inesperado: "Las ratas del sótano son en realidad druidas transformados".
+
+        Recompensa: Oro o favores.
+
+    Valor: Contenido de relleno infinito para cuando los jugadores ignoran la trama principal.
+
+### 10. ⚔️ Creador de Facciones y Cultos
+
+Para dar profundidad política a tus Ciudades (CityService).
+
+    Qué hace: Creas una organización (Gremio de Ladrones, Culto Apocalíptico, Orden de Caballeros).
+
+    La IA genera:
+
+        Lema y Símbolo.
+
+        Objetivo Oculto.
+
+        Jerarquía: Quién manda y quiénes son los peones.
+
+        Aliados y Rivales.
+
+    Valor: Crea enemigos recurrentes o aliados poderosos para la campaña.

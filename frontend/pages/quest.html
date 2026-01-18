@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tablón de Anuncios</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .quest-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .quest-card {
+            background: #fff8e1;
+            border: 1px solid #d4c598;
+            padding: 15px;
+            box-shadow: 3px 3px 5px rgba(0,0,0,0.1);
+            position: relative;
+            transform: rotate(-1deg);
+            transition: transform 0.2s;
+        }
+        .quest-card:nth-child(even) { transform: rotate(1deg); }
+        .quest-card:hover { transform: scale(1.02) rotate(0); z-index: 10; }
+
+        .pin {
+            width: 12px;
+            height: 12px;
+            background: #c0392b;
+            border-radius: 50%;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .twist-box {
+            margin-top: 10px;
+            padding: 8px;
+            background: #2c3e50;
+            color: #ecf0f1;
+            font-size: 0.9em;
+            border-radius: 4px;
+            display: none; /* Oculto por defecto */
+        }
+        .show-twist:hover + .twist-box, .quest-card:hover .twist-box {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">📜 Tablón de Misiones</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Buscar Trabajo</h2>
+
+            <label>Ubicación / Taberna</label>
+            <input type="text" id="location" placeholder="Ej: Taberna del Dragón Tuerto, Plaza del Mercado...">
+
+            <label>Nivel del Grupo</label>
+            <input type="number" id="level" value="3" min="1" max="20">
+
+            <button class="btn-generate" id="btnGen">Leer Anuncios</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🍺 Preguntando al tabernero...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">Las misiones disponibles aparecerán aquí</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📂 Historial de Encargos</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="../js/history.js"></script>
+    <script src="../js/quest.js"></script>
+</body>
+</html>

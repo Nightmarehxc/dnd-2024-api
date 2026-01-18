@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Árbitro de Reglas</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .rule-card {
+            background: #fff;
+            border-left: 5px solid var(--accent);
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .change-box {
+            background-color: #ffeaa7;
+            border: 1px solid #fdcb6e;
+            color: #d35400;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">⚖️ Árbitro de Reglas (2024)</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Consultar Manual</h2>
+
+            <label>¿Cuál es tu duda?</label>
+            <textarea id="query" rows="4" placeholder="Ej: ¿Cómo funciona el forcejeo (grapple) ahora? ¿Se acumula la ventaja?"></textarea>
+
+            <button class="btn-generate" id="btnAsk">Invocar Regla</button>
+            <button class="btn-export" id="btnExp" style="display:none;">Guardar Regla</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">📖 Consultando los tomos antiguos...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">La sentencia del juez aparecerá aquí</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📚 Precedentes</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="../js/history.js"></script>
+    <script src="../js/rules.js"></script>
+</body>
+</html>

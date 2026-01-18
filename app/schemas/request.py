@@ -57,3 +57,14 @@ class EncounterRequestSchema(Schema):
     difficulty = fields.String(required=True, validate=validate.OneOf(["Fácil", "Medio", "Difícil", "Mortal"]))
     environment = fields.String(required=True, validate=validate.Length(min=3))
     players = fields.Integer(required=False, load_default=4)
+
+class LootRequestSchema(Schema):
+    cr = fields.Integer(required=True, validate=validate.Range(min=0, max=30))
+    enemy_type = fields.String(required=True, validate=validate.Length(min=3))
+
+class RuleRequestSchema(Schema):
+    query = fields.String(required=True, validate=validate.Length(min=3))
+    
+class QuestRequestSchema(Schema):
+    location = fields.String(required=True, validate=validate.Length(min=3))
+    level = fields.Integer(required=False, load_default=1, validate=validate.Range(min=1, max=20))
