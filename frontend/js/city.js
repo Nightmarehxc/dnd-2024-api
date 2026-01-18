@@ -21,7 +21,9 @@ const els = {
     btnSaveShop: document.getElementById('btnSaveShop')
 };
 
-// --- GENERACIÓN DE CIUDAD ---
+// ==========================================
+// 1. GENERAR CIUDAD
+// ==========================================
 els.btnGen.addEventListener('click', async () => {
     if (!els.type.value) return alert("Selecciona un tipo de ciudad.");
 
@@ -58,7 +60,9 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-// --- RENDERIZADO (MODO LECTURA) ---
+// ==========================================
+// 2. RENDERIZADO (MODO LECTURA)
+// ==========================================
 function renderCity(data) {
     const s = (val) => val || '---';
 
@@ -86,7 +90,7 @@ function renderCity(data) {
     if (data.lugares_interes && data.lugares_interes.length > 0) {
         poisHtml = `<h3 style="margin-top:20px; border-bottom:2px solid #3498db; color:#3498db;">📍 Lugares de Interés</h3>
         <ul style="padding-left:20px;">
-            ${data.lugares_interes.map(p => `<li style="margin-bottom:5px;"><strong>${p.nombre}:</strong> ${p.descripcion}</li>`).join('')}
+            ${data.lugares_interes.map(p => `<li style="margin-bottom:5px;"><strong>${p.nombre}</strong> (${p.tipo || 'Lugar'}): ${p.descripcion}</li>`).join('')}
         </ul>`;
     }
 
@@ -118,12 +122,13 @@ function renderCity(data) {
     `;
 }
 
-// --- MODO EDICIÓN ---
+// ==========================================
+// 3. MODO EDICIÓN
+// ==========================================
 window.enterEditMode = function() {
     const d = currentCityData;
     if (!d) return;
 
-    // Generar inputs para distritos
     const districtsInputs = d.distritos.map((dist, idx) => `
         <div style="background:#eee; padding:10px; margin-bottom:10px; border-radius:5px;">
             <input type="text" id="edit_dist_name_${idx}" value="${dist.nombre}" style="font-weight:bold; margin-bottom:5px;">
@@ -166,7 +171,6 @@ window.enterEditMode = function() {
 window.saveCityChanges = function() {
     if (!currentCityData) return;
 
-    // Actualizar objeto en memoria
     currentCityData.nombre = document.getElementById('edit_name').value;
     currentCityData.tipo = document.getElementById('edit_type').value;
     currentCityData.poblacion = document.getElementById('edit_pop').value;
@@ -177,9 +181,8 @@ window.saveCityChanges = function() {
     currentCityData.gobierno.lider = document.getElementById('edit_gob_leader').value;
     currentCityData.gobierno.descripcion = document.getElementById('edit_gob_desc').value;
 
-    currentCityData.rumores = [document.getElementById('edit_rumors').value]; // Guardar como array de 1
+    currentCityData.rumores = [document.getElementById('edit_rumors').value];
 
-    // Guardar distritos
     currentCityData.distritos.forEach((dist, idx) => {
         const nameInput = document.getElementById(`edit_dist_name_${idx}`);
         const descInput = document.getElementById(`edit_dist_desc_${idx}`);
@@ -187,11 +190,12 @@ window.saveCityChanges = function() {
         if(descInput) dist.descripcion = descInput.value;
     });
 
-    // Volver a renderizar modo lectura
     renderCity(currentCityData);
 };
 
-// --- MODAL Y TIENDAS ---
+// ==========================================
+// 4. MODAL Y TIENDAS
+// ==========================================
 window.openShopGen = async function(districtName, cityName) {
     els.modal.style.display = 'block';
     els.shopBody.innerHTML = '';
@@ -228,10 +232,8 @@ window.openShopGen = async function(districtName, cityName) {
 function renderShopInModal(data) {
     const s = (val) => val || '---';
 
-    // 1. Validamos que exista inventario para evitar errores de .map
+    // FIX: Usamos item.nombre y item.precio_gp (Claves correctas de ShopService)
     const inventario = data.inventario || [];
-
-    // 2. Mapeamos usando las claves correctas del ShopService (item.nombre, item.precio_gp)
     const itemsHtml = inventario.map(item => `
         <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:5px 0;">
             <span>
@@ -243,11 +245,10 @@ function renderShopInModal(data) {
         </div>
     `).join('');
 
-    // 3. Extraemos datos del vendedor con seguridad
+    // FIX: Usamos data.nombre_tienda y data.vendedor
     const vendedorNombre = data.vendedor ? data.vendedor.nombre : 'Desconocido';
     const vendedorRaza = data.vendedor ? data.vendedor.raza : '---';
 
-    // 4. Renderizamos usando las claves correctas (nombre_tienda, descripcion_ambiente)
     els.shopBody.innerHTML = `
         <h2 style="color:#27ae60; margin-top:0; text-align:center;">${s(data.nombre_tienda)}</h2>
 
@@ -257,7 +258,6 @@ function renderShopInModal(data) {
 
         <div style="background:#f9f9f9; padding:10px; border-radius:5px; margin-bottom:15px; font-size:0.9em;">
             <p><strong>Ambiente:</strong> ${s(data.descripcion_ambiente)}</p>
-            ${data.vendedor && data.vendedor.personalidad ? `<p><strong>Personalidad:</strong> ${data.vendedor.personalidad}</p>` : ''}
         </div>
 
         <h4 style="border-bottom:2px solid #27ae60;">📦 Inventario</h4>
@@ -267,32 +267,53 @@ function renderShopInModal(data) {
     `;
 }
 
-els.closeModal.addEventListener('click', () => els.modal.style.display = 'none');
-window.onclick = function(event) { if (event.target == els.modal) els.modal.style.display = 'none'; }
-
+// FIX COMPLETO DEL GUARDADO
 els.btnSaveShop.addEventListener('click', () => {
     if (!currentCityData || !currentShopData) return;
 
-    // 1. Inicializar array si no existe (por seguridad)
+    // 1. AÑADIR A LA CIUDAD VISIBLE
     if (!currentCityData.lugares_interes) currentCityData.lugares_interes = [];
 
-    // 2. Crear un objeto "resumen" de la tienda para la lista de la ciudad
     const nuevaTienda = {
-        nombre: currentShopData.nombre_tienda,   // Usamos las claves que devuelve la IA de tiendas
-        tipo: "Tienda (Nueva)",                  // Etiqueta para diferenciarla
+        nombre: currentShopData.nombre_tienda,
+        tipo: "Tienda (Nueva)",
         descripcion: `${currentShopData.descripcion_ambiente}. Regentada por ${currentShopData.vendedor?.nombre || 'un local'}.`
     };
 
-    // 3. Añadirlo a la lista de lugares de la ciudad
     currentCityData.lugares_interes.push(nuevaTienda);
+    renderCity(currentCityData); // Actualizar pantalla para verla
 
-    // 4. ¡CRÍTICO! Re-renderizar la ciudad para que aparezca el nuevo ítem en la lista
-    renderCity(currentCityData);
+    // 2. GUARDAR EN EL HISTORIAL GLOBAL DE TIENDAS
+    try {
+        const shopKey = 'history_shop'; // Clave usada por history.js para tiendas
+        let shopHistory = JSON.parse(localStorage.getItem(shopKey) || '[]');
 
-    // 5. Cerrar el modal
+        const historyItem = {
+            ...currentShopData,
+            nombre: currentShopData.nombre_tienda, // Normalizamos para que history.js lo lea bien
+            timestamp: new Date().toISOString()
+        };
+
+        shopHistory.unshift(historyItem);
+        if (shopHistory.length > 20) shopHistory.pop();
+
+        localStorage.setItem(shopKey, JSON.stringify(shopHistory));
+
+        alert("✅ Tienda guardada en el Historial de Tiendas y añadida a esta ciudad.");
+    } catch (e) {
+        console.error("Error guardando historial:", e);
+        alert("⚠️ Se añadió a la ciudad pero falló el historial global.");
+    }
+
     els.modal.style.display = 'none';
 });
 
+els.closeModal.addEventListener('click', () => els.modal.style.display = 'none');
+window.onclick = function(event) { if (event.target == els.modal) els.modal.style.display = 'none'; }
+
+// ==========================================
+// 5. EXPORTAR
+// ==========================================
 els.btnExp.addEventListener('click', () => {
     if(!currentCityData) return;
     let text = `--- CIUDAD: ${currentCityData.nombre} ---\n`;
@@ -300,6 +321,11 @@ els.btnExp.addEventListener('click', () => {
     text += `GOBIERNO: ${currentCityData.gobierno?.tipo} (Líder: ${currentCityData.gobierno?.lider})\n`;
     text += "DISTRITOS:\n";
     currentCityData.distritos.forEach(d => { text += `- ${d.nombre}: ${d.descripcion}\n`; });
+
+    text += "\nLUGARES DE INTERÉS:\n";
+    if (currentCityData.lugares_interes) {
+        currentCityData.lugares_interes.forEach(p => text += `- ${p.nombre} (${p.tipo}): ${p.descripcion}\n`);
+    }
 
     const blob = new Blob([text], {type : 'text/plain'});
     const a = document.createElement('a');
