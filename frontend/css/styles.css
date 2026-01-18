@@ -21,7 +21,7 @@ body {
 /* Header y Navegación */
 header {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1600px; /* Aumentado para coincidir con el layout */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -34,13 +34,27 @@ header {
 .back-btn { text-decoration: none; color: var(--bg-dark); font-weight: bold; }
 .back-btn:hover { color: var(--accent); }
 
-/* Layout Grid */
+/* --- LAYOUT PRINCIPAL (MODIFICADO) --- */
 .generator-layout {
     display: grid;
-    grid-template-columns: 350px 1fr;
-    gap: 30px;
-    width: 100%;
-    max-width: 1200px;
+    /* Columna 1 (Inputs): 320px | Columna 2 (Resultado): Flexible | Columna 3 (Historial): 300px */
+    grid-template-columns: 320px 1fr 300px;
+    gap: 20px;
+    width: 98%;
+    max-width: 1600px; /* Más ancho para que quepa todo */
+}
+
+/* Responsive: En pantallas medianas/pequeñas, pasamos a 1 sola columna */
+@media (max-width: 1100px) {
+    .generator-layout {
+        grid-template-columns: 1fr; /* Todo en una columna */
+        max-width: 800px;
+    }
+
+    .history-panel {
+        height: 500px; /* Altura fija en móvil */
+        position: static; /* Ya no es sticky en móvil */
+    }
 }
 
 /* Paneles */
@@ -49,12 +63,13 @@ header {
     padding: 25px;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    height: fit-content; /* Para que no se estire innecesariamente */
 }
 
 .result-panel {
     background-color: var(--card-bg);
     border: 1px solid #d4c5a3;
-    min-height: 500px;
+    min-height: 600px; /* Un poco más alto para ver mejor los resultados */
 }
 
 /* Elementos de Formulario */
@@ -96,16 +111,23 @@ button {
     transition: transform 0.2s;
     border: 2px solid transparent;
 }
+.menu-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+.menu-icon { font-size: 3rem; display: block; margin-bottom: 10px; }
+.menu-title { font-size: 1.5rem; font-weight: bold; }
+
+
+/* --- HISTORIAL (MODIFICADO) --- */
 .history-panel {
     background: #fff;
-    border-left: 2px solid #ddd;
-    height: 85vh;
+    border-left: 1px solid #ddd; /* Borde sutil */
+    height: 85vh; /* Ocupa casi toda la altura */
     position: sticky;
     top: 20px;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.05); /* Sombra hacia la izquierda */
 }
 
 .history-header {
@@ -166,10 +188,6 @@ button {
     transition: opacity 0.2s;
 }
 .h-delete:hover { opacity: 1; background: #ffebeb; }
-
-.menu-card:hover { transform: translateY(-5px); border-color: var(--accent); }
-.menu-icon { font-size: 3rem; display: block; margin-bottom: 10px; }
-.menu-title { font-size: 1.5rem; font-weight: bold; }
 
 /* Estilos de Ficha */
 .stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 5px 0; }
