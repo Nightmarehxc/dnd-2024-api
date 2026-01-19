@@ -23,117 +23,135 @@ class LibraryService:
                     current_data = []
 
         entity_name = entity_data.get('name', 'Unknown')
-        exists = any(x['name'] == entity_name for x in current_data)
-
-        if not exists:
+        if not any(x['name'] == entity_name for x in current_data):
             current_data.append(entity_data)
             with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(current_data, f, ensure_ascii=False, indent=2)
             return True
         return False
 
-    def process_foundry_import(self, character_json):
-        stats = {"races": 0, "classes": 0, "backgrounds": 0, "items": 0, "spells": 0}
+    def get_options(self):
+        data = {"races": [], "classes": []}
+        for type_key in ["races", "classes"]:
+            path = os.path.join(self.base_path, type_key, 'collection.json')
+            if os.path.exists(path):
+                with open(path, 'r', encoding='utf-8') as f:
+                    try:
+                        data[type_key] = sorted([i.get('name') for i in json.load(f)])
+                    except:
+                        pass
+        return data
 
-        # Variables para reconstruir el personaje
+    def process_foundry_import(self, char_json):
+        stats_count = {"races": 0, "classes": 0, "backgrounds": 0, "items": 0, "spells": 0}
+
         char_race = "Desconocida"
         char_classes = []
         char_bg = "Desconocido"
         char_items = []
+        char_features = []
 
-        # 1. Procesar Items (Guardar en Librería y Extraer datos)
-        items = character_json.get('items', [])
-
+        # 1. PROCESAR ITEMS
+        items = char_json.get('items', [])
         for item in items:
             itype = item.get('type')
             name = item.get('name')
             system = item.get('system', {})
-            description = system.get('description', {}).get('value', '')
+            desc = system.get('description', {}).get('value', '')
 
-            clean_item = {
-                "name": name,
-                "description": description,
-                "source": "Foundry Import",
-                "original_data": system
-            }
+            clean_item = {"name": name, "description": desc, "source": "Foundry Import", "original_data": system}
 
             if itype == 'race':
                 char_race = name
-                if self._save_entity('races', clean_item): stats['races'] += 1
+                if self._save_entity('races', clean_item): stats_count['races'] += 1
 
             elif itype == 'class':
-                level = system.get('levels', 1)
-                char_classes.append(f"{name} {level}")
+                lvl = system.get('levels', 1)
+                sub = system.get('subclass', '')
+                char_classes.append(f"{name} {lvl}" + (f" ({sub})" if sub else ""))
                 clean_item['hit_dice'] = system.get('hitDice', 'd8')
-                if self._save_entity('classes', clean_item): stats['classes'] += 1
+                if self._save_entity('classes', clean_item): stats_count['classes'] += 1
 
             elif itype == 'background':
                 char_bg = name
-                if self._save_entity('backgrounds', clean_item): stats['backgrounds'] += 1
+                if self._save_entity('backgrounds', clean_item): stats_count['backgrounds'] += 1
 
-            elif itype == 'spell':
-                clean_item['level'] = system.get('level', 0)
-                clean_item['school'] = system.get('school', '')
-                if self._save_entity('spells', clean_item): stats['spells'] += 1
+            elif itype == 'feat':
+                char_features.append({"nombre": name, "descripcion": desc})
 
             elif itype in ['weapon', 'equipment', 'loot', 'consumable', 'tool']:
-                char_items.append(name)
-                clean_item['type'] = itype
-                clean_item['rarity'] = system.get('rarity', '')
-                if self._save_entity('items', clean_item): stats['items'] += 1
+                detail = ""
+                if itype == 'weapon':
+                    parts = system.get('damage', {}).get('parts', [])
+                    if parts: detail = f"{parts[0][0]} {parts[0][1]}"
+                elif itype == 'equipment':
+                    ac = system.get('armor', {}).get('value')
+                    if ac: detail = f"AC {ac}"
 
-        # 2. Extraer Estadísticas (Mapeo Foundry -> App)
-        abilities = character_json.get('system', {}).get('abilities', {})
+                char_items.append({
+                    "name": name,
+                    "type": itype,
+                    "quantity": system.get('quantity', 1),
+                    "detail": detail
+                })
+
+                clean_item['type'] = itype
+                if self._save_entity('items', clean_item): stats_count['items'] += 1
+
+        # 2. EXTRAER STATS
+        abilities = char_json.get('system', {}).get('abilities', {})
         map_stats = {'str': 'Fuerza', 'dex': 'Destreza', 'con': 'Constitución', 'int': 'Inteligencia',
                      'wis': 'Sabiduría', 'cha': 'Carisma'}
-        final_stats = {}
-        for key, label in map_stats.items():
-            val = abilities.get(key, {}).get('value', 10)
-            final_stats[label] = val
+        final_stats = {label: abilities.get(key, {}).get('value', 10) for key, label in map_stats.items()}
 
-        # 3. Construir Objeto Personaje
+        # 3. EXTRAER HABILIDADES (SKILLS)
+        # Diccionario EXACTO para coincidir con el Frontend JS
+        skills_map = {
+            'acr': 'Acrobacias (Des)',
+            'ani': 'Trato Animales (Sab)',
+            'arc': 'Arcanos (Int)',
+            'ath': 'Atletismo (Fue)',
+            'dec': 'Engaño (Car)',
+            'his': 'Historia (Int)',
+            'ins': 'Perspicacia (Sab)',
+            'itm': 'Intimidación (Car)',
+            'inv': 'Investigación (Int)',
+            'med': 'Medicina (Sab)',
+            'nat': 'Naturaleza (Int)',
+            'prc': 'Percepción (Sab)',
+            'prf': 'Interpretación (Car)',
+            'per': 'Persuasión (Car)',
+            'rel': 'Religión (Int)',
+            'slt': 'Juego de Manos (Des)',
+            'ste': 'Sigilo (Des)',
+            'sur': 'Supervivencia (Sab)'
+        }
+
+        char_skills = {}
+        foundry_skills = char_json.get('system', {}).get('skills', {})
+
+        for code, label in skills_map.items():
+            skill_data = foundry_skills.get(code, {})
+            # Foundry almacena la proficiencia en 'value': 0 (nada), 1 (prof), 2 (expert)
+            val = skill_data.get('value', 0)
+            if val and val > 0:
+                char_skills[label] = val
+
+        # 4. CONSTRUIR OBJETO FINAL
         character_data = {
-            "nombre": character_json.get('name', 'Héroe Importado'),
+            "nombre": char_json.get('name', 'Héroe Importado'),
             "raza": char_race,
             "clase": " / ".join(char_classes) if char_classes else "Aventurero",
             "trasfondo": char_bg,
-            "alineamiento": character_json.get('system', {}).get('details', {}).get('alignment', 'Neutral'),
+            "alineamiento": char_json.get('system', {}).get('details', {}).get('alignment', 'Neutral'),
             "stats": final_stats,
-            "habilidades": [],  # Difícil de mapear genéricamente sin lógica compleja
-            "rasgos": ["Importado de Foundry"],
+            "habilidades": char_skills,
+            "rasgos": char_features,
             "equipo": char_items,
-            "historia": str(
-                character_json.get('system', {}).get('details', {}).get('biography', {}).get('value', 'Sin biografía.'))
+            "historia": str(char_json.get('system', {}).get('details', {}).get('biography', {}).get('value', ''))
         }
 
-        # Devolvemos ambas cosas: stats de la librería y el personaje reconstruido
-        return stats, character_data
-
-    def get_options(self):
-        """Devuelve listas simples de lo que hay en la biblioteca para el frontend/prompt"""
-        data = {"races": [], "classes": []}
-
-        # Leer Razas
-        r_path = os.path.join(self.base_path, 'races', 'collection.json')
-        if os.path.exists(r_path):
-            with open(r_path, 'r', encoding='utf-8') as f:
-                try:
-                    items = json.load(f)
-                    data["races"] = sorted([i.get('name') for i in items])
-                except:
-                    pass
-
-        # Leer Clases
-        c_path = os.path.join(self.base_path, 'classes', 'collection.json')
-        if os.path.exists(c_path):
-            with open(c_path, 'r', encoding='utf-8') as f:
-                try:
-                    items = json.load(f)
-                    data["classes"] = sorted([i.get('name') for i in items])
-                except:
-                    pass
-
-        return data
+        return stats_count, character_data
 
 
 library_service = LibraryService()

@@ -207,3 +207,130 @@ button {
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+/* --- D&D CHARACTER SHEET STYLES --- */
+.char-sheet {
+    background: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.char-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #8e44ad;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.char-name {
+    font-size: 2em;
+    font-weight: bold;
+    color: #8e44ad;
+    text-transform: uppercase;
+}
+
+.char-details {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    font-size: 0.9em;
+    background: #f4f4f4;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.char-main {
+    display: grid;
+    grid-template-columns: 100px 1fr 1fr;
+    gap: 20px;
+}
+
+/* Ability Scores Column */
+.ability-scores {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.ability-box {
+    border: 2px solid #333;
+    border-radius: 10px;
+    text-align: center;
+    padding: 5px;
+    background: #fff;
+    position: relative;
+}
+
+.ability-label {
+    font-size: 0.7em;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #666;
+}
+
+.ability-mod {
+    font-size: 1.8em;
+    font-weight: bold;
+    display: block;
+    margin: -5px 0;
+}
+
+.ability-score {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    width: 30px;
+    margin: 0 auto;
+    font-size: 0.8em;
+    position: relative;
+    top: 5px;
+}
+
+/* Stats Block (AC, Init, Speed, HP) */
+.combat-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.combat-box {
+    border: 2px solid #8e44ad;
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+}
+
+.combat-val { font-size: 1.5em; font-weight: bold; }
+.combat-lbl { font-size: 0.7em; text-transform: uppercase; }
+
+/* Skills & Saves */
+.skills-list {
+    font-size: 0.9em;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+.skill-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+    padding: 2px 0;
+}
+
+/* Sections */
+.sheet-section h3 {
+    border-bottom: 2px solid #8e44ad;
+    color: #8e44ad;
+    margin-top: 0;
+}
+
+@media (max-width: 768px) {
+    .char-main { grid-template-columns: 1fr; }
+    .ability-scores { flex-direction: row; justify-content: space-between; flex-wrap: wrap; }
+}

@@ -10,179 +10,237 @@ const els = {
     btnGen: document.getElementById('btnGen'),
     btnExp: document.getElementById('btnExp'),
     content: document.getElementById('resultContent'),
-    loader: document.getElementById('loader')
+    loader: document.getElementById('loader'),
+    btnImport: document.getElementById('btnImport'),
+    fileInput: document.getElementById('foundryFile'),
+    statusDiv: document.getElementById('importStatus')
 };
 
-// --- CARGAR OPCIONES DE BIBLIOTECA AL INICIAR ---
+// --- INIT ---
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const res = await fetch(`${LIBRARY_URL}/options`);
         const data = await res.json();
-
-        if (data.races && data.races.length > 0) {
-            data.races.forEach(r => {
-                const opt = document.createElement('option');
-                opt.value = r;
-                opt.textContent = r;
-                els.raceSelect.appendChild(opt);
-            });
-        }
-
-        if (data.classes && data.classes.length > 0) {
-            data.classes.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c;
-                opt.textContent = c;
-                els.classSelect.appendChild(opt);
-            });
-        }
-    } catch (e) {
-        console.error("No se pudo cargar la biblioteca:", e);
-    }
+        if (data.races) data.races.forEach(r => els.raceSelect.add(new Option(r, r)));
+        if (data.classes) data.classes.forEach(c => els.classSelect.add(new Option(c, c)));
+    } catch (e) { console.error(e); }
 });
 
-// ==========================================
-// 1. GENERAR PERSONAJE (IA + BIBLIOTECA)
-// ==========================================
+// --- GENERATE ---
 els.btnGen.addEventListener('click', async () => {
-    // Si no hay descripción, ponemos una por defecto para permitir aleatorios
-    const description = els.desc.value.trim() || "Un aventurero típico de fantasía";
-
     els.content.innerHTML = '';
     els.loader.style.display = 'block';
     els.btnGen.disabled = true;
-    els.btnExp.style.display = 'none';
 
     try {
         const res = await fetch(API_URL, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                description: description,
+                description: els.desc.value || "Aventurero",
                 level: parseInt(els.level.value) || 1,
-                fixed_race: els.raceSelect.value || null,  // Enviamos selección
-                fixed_class: els.classSelect.value || null // Enviamos selección
+                fixed_race: els.raceSelect.value || null,
+                fixed_class: els.classSelect.value || null
             })
         });
-
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
         currentData = data;
-        renderCharacter(data);
+        renderCharacterSheet(data);
         els.btnExp.style.display = 'block';
-
         if (typeof addToHistory === 'function') addToHistory(data);
 
     } catch (err) {
-        els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
+        els.content.innerHTML = `<p style="color:red">${err.message}</p>`;
     } finally {
         els.loader.style.display = 'none';
         els.btnGen.disabled = false;
     }
 });
 
-// ==========================================
-// 2. IMPORTAR DESDE FOUNDRY (Igual que antes)
-// ==========================================
-const btnImport = document.getElementById('btnImport');
-const fileInput = document.getElementById('foundryFile');
-const statusDiv = document.getElementById('importStatus');
-
-if (btnImport) {
-    btnImport.addEventListener('click', async () => {
-        if (!fileInput.files.length) return alert("Selecciona un archivo JSON.");
-
+// --- IMPORT ---
+if (els.btnImport) {
+    els.btnImport.addEventListener('click', async () => {
+        if (!els.fileInput.files.length) return alert("Selecciona archivo.");
         const formData = new FormData();
-        formData.append('file', fileInput.files[0]);
+        formData.append('file', els.fileInput.files[0]);
 
-        statusDiv.innerHTML = `<span style="color:#e67e22;">⏳ Procesando...</span>`;
-        btnImport.disabled = true;
+        els.statusDiv.innerHTML = `<span style="color:#e67e22;">⏳ Procesando...</span>`;
+        els.btnImport.disabled = true;
 
         try {
             const res = await fetch(`${LIBRARY_URL}/import-foundry`, { method: 'POST', body: formData });
             const data = await res.json();
             if (data.error) throw new Error(data.error);
 
-            const s = data.detalles;
-            statusDiv.innerHTML = `<span style="color:#27ae60;">✅ Datos aprendidos. Recarga la página para verlos en los selectores.</span>`;
-
+            els.statusDiv.innerHTML = `<span style="color:#27ae60;">✅ Personaje cargado con éxito.</span>`;
             if (data.character) {
                 currentData = data.character;
-                renderCharacter(currentData);
+                renderCharacterSheet(currentData);
                 els.btnExp.style.display = 'block';
                 if (typeof addToHistory === 'function') addToHistory({...currentData, nombre: currentData.nombre || "Importado"});
             }
         } catch (err) {
-            statusDiv.innerHTML = `<span style="color:#c0392b;">❌ Error: ${err.message}</span>`;
+            els.statusDiv.innerHTML = `<span style="color:#c0392b;">❌ ${err.message}</span>`;
         } finally {
-            btnImport.disabled = false;
-            fileInput.value = '';
+            els.btnImport.disabled = false;
+            els.fileInput.value = '';
         }
     });
 }
 
 // ==========================================
-// 3. RENDERIZADO UNIFICADO
+// ⚔️ RENDERIZADOR HOJA D&D ⚔️
 // ==========================================
-function renderCharacter(data) {
-    const s = (val) => val || '---';
-    const raza = data.especie || data.raza || 'Desconocida';
-    const clase = data.clase || 'Aventurero';
-    const stats = data.estadisticas || data.stats || {};
-    const historia = data.resumen_historia || data.historia || 'Sin historia.';
 
-    let equipoHtml = '<li>Sin equipo</li>';
-    const equipoRaw = data.equipo_destacado || data.equipo;
-    if (equipoRaw && Array.isArray(equipoRaw) && equipoRaw.length > 0) {
-        equipoHtml = equipoRaw.map(e => `<li>${typeof e === 'string' ? e : e.name || e}</li>`).join('');
+function getMod(score) { return Math.floor((score - 10) / 2); }
+function fmtMod(mod) { return mod >= 0 ? `+${mod}` : mod; }
+
+function renderCharacterSheet(data) {
+    const s = (val) => val || '---';
+
+    // Normalización
+    const raza = data.especie || data.raza || 'Desconocido';
+    const clase = data.clase || 'Aventurero';
+    // Intentar sacar nivel de string "Mago 5" o usar campo nivel
+    const nivel = data.nivel || (data.clase && data.clase.match(/\d+/)) ? parseInt(data.clase.match(/\d+/)[0]) : 1;
+    const prof = Math.ceil(nivel / 4) + 1;
+
+    // Stats Mapping (Flexible ES/EN)
+    const statsMap = {
+        'Fuerza': 10, 'Destreza': 10, 'Constitución': 10,
+        'Inteligencia': 10, 'Sabiduría': 10, 'Carisma': 10
+    };
+    const rawStats = data.estadisticas || data.stats || {};
+    for (let [k, v] of Object.entries(rawStats)) {
+        let key = k.toLowerCase();
+        if (key.includes('fuer') || key.includes('str')) statsMap['Fuerza'] = v;
+        else if (key.includes('dest') || key.includes('dex')) statsMap['Destreza'] = v;
+        else if (key.includes('cons') || key.includes('con')) statsMap['Constitución'] = v;
+        else if (key.includes('inte') || key.includes('int')) statsMap['Inteligencia'] = v;
+        else if (key.includes('sab') || key.includes('wis')) statsMap['Sabiduría'] = v;
+        else if (key.includes('car') || key.includes('cha')) statsMap['Carisma'] = v;
     }
 
-    const trasfondoNombre = (typeof data.trasfondo === 'object') ? data.trasfondo?.nombre : data.trasfondo;
-    const originFeat = data.trasfondo?.origin_feat;
+    const mods = {};
+    for (let [k, v] of Object.entries(statsMap)) mods[k] = getMod(v);
 
+    const hp = (8 + mods['Constitución']) + ((5 + mods['Constitución']) * (nivel - 1));
+    const ac = 10 + mods['Destreza'];
+
+    // Habilidades: Mapeo y Cálculo
+    const knownSkills = data.habilidades || {};
+
+    // NOTA: Estas etiquetas deben coincidir EXACTAMENTE con las de library_service.py
+    const skillList = [
+        ['Acrobacias (Des)', 'Destreza'], ['Trato Animales (Sab)', 'Sabiduría'], ['Arcanos (Int)', 'Inteligencia'],
+        ['Atletismo (Fue)', 'Fuerza'], ['Engaño (Car)', 'Carisma'], ['Historia (Int)', 'Inteligencia'],
+        ['Perspicacia (Sab)', 'Sabiduría'], ['Intimidación (Car)', 'Carisma'], ['Investigación (Int)', 'Inteligencia'],
+        ['Medicina (Sab)', 'Sabiduría'], ['Naturaleza (Int)', 'Inteligencia'], ['Percepción (Sab)', 'Sabiduría'],
+        ['Interpretación (Car)', 'Carisma'], ['Persuasión (Car)', 'Carisma'], ['Religión (Int)', 'Inteligencia'],
+        ['Juego de Manos (Des)', 'Destreza'], ['Sigilo (Des)', 'Destreza'], ['Supervivencia (Sab)', 'Sabiduría']
+    ];
+
+    const skillsHtml = skillList.map(([label, statKey]) => {
+        // Obtenemos nivel de proficiencia (0, 1, 2) directamente del diccionario importado
+        const profLevel = parseFloat(knownSkills[label] || 0);
+
+        let total = mods[statKey];
+        let icon = '<span style="color:#ddd;">○</span>';
+
+        if (profLevel >= 1) {
+            total += prof;
+            icon = '<span style="color:#333;">●</span>';
+        }
+        if (profLevel >= 2) {
+            total += prof; // Sumamos otra vez para expertise (Total = mod + 2*prof)
+            icon = '<span style="color:#f39c12;">🌟</span>';
+        }
+
+        return `
+            <div class="skill-row">
+                <span style="width:25px; text-align:center; font-size:1.1em;">${icon}</span>
+                <span style="flex-grow:1;">${label}</span>
+                <strong>${fmtMod(total)}</strong>
+            </div>
+        `;
+    }).join('');
+
+    // HTML PRINCIPAL
     els.content.innerHTML = `
-        <div class="sheet-header">
-            <h1 style="color:var(--accent); margin:0;">${s(data.nombre)}</h1>
-            <p style="font-style:italic;">Nivel ${data.nivel || 1} - ${s(raza)} ${s(clase)}</p>
+        <div class="char-sheet">
+            <div class="char-header">
+                <div class="char-name">${s(data.nombre)}</div>
+                <div style="text-align:right; font-size:0.9em;">
+                    Nivel ${nivel} | Bono Prof: <strong>+${prof}</strong>
+                </div>
+            </div>
+
+            <div class="char-details">
+                <div><strong>Raza:</strong> ${s(raza)}</div>
+                <div><strong>Clase:</strong> ${s(clase)}</div>
+                <div><strong>Fondo:</strong> ${s(data.trasfondo?.nombre || data.trasfondo)}</div>
+                <div><strong>Alineamiento:</strong> ${s(data.alineamiento)}</div>
+            </div>
+            <hr>
+
+            <div class="char-main">
+                <div class="ability-scores">
+                    ${Object.entries(statsMap).map(([k, v]) => `
+                        <div class="ability-box">
+                            <div class="ability-label">${k.substring(0,3)}</div>
+                            <span class="ability-mod">${fmtMod(getMod(v))}</span>
+                            <div class="ability-score">${v}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div>
+                    <div class="combat-stats">
+                        <div class="combat-box"><div class="combat-lbl">AC</div><div class="combat-val">🛡️ ${ac}</div></div>
+                        <div class="combat-box"><div class="combat-lbl">INIT</div><div class="combat-val">⚡ ${fmtMod(mods['Destreza'])}</div></div>
+                        <div class="combat-box"><div class="combat-lbl">HP</div><div class="combat-val">❤️ ${hp}</div></div>
+                    </div>
+                    <div class="sheet-section skills-list">
+                        ${skillsHtml}
+                    </div>
+                </div>
+
+                <div class="sheet-section">
+                    <h3>Rasgos y Dotes</h3>
+                    <div style="font-size:0.85em; max-height:300px; overflow-y:auto;">
+                        ${(data.rasgos || []).map(r => `
+                            <div style="margin-bottom:8px;">
+                                <strong>${r.nombre}</strong>
+                                <div style="color:#555;">${r.descripcion || ''}</div>
+                            </div>
+                        `).join('') || '<p>Sin rasgos especiales.</p>'}
+                    </div>
+
+                    <h3 style="margin-top:20px;">Inventario</h3>
+                    <ul style="padding-left:20px; font-size:0.9em;">
+                        ${(data.equipo || data.equipo_destacado || []).map(item => {
+                            const name = item.name || item;
+                            const qty = item.quantity > 1 ? `x${item.quantity}` : '';
+                            const detail = item.detail ? `<span style="color:#888; font-size:0.85em;">(${item.detail})</span>` : '';
+                            return `<li>${name} ${qty} ${detail}</li>`;
+                        }).join('') || '<li>Mochila vacía</li>'}
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin-top:20px; font-size:0.9em; border-top:1px solid #eee; padding-top:10px;">
+                <strong>Biografía:</strong> ${s(data.resumen_historia || data.historia).substring(0, 300)}...
+            </div>
         </div>
-
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(50px, 1fr)); gap:5px; margin:15px 0; text-align:center; background:#eee; padding:10px; border-radius:5px;">
-            ${Object.entries(stats).map(([k,v]) => `
-                <div><strong style="text-transform:uppercase; font-size:0.8em;">${k.substring(0,3)}</strong><br><span style="font-size:1.1em; color:var(--accent);">${v}</span></div>
-            `).join('')}
-        </div>
-
-        <div style="margin-bottom:15px;">
-            <strong>Trasfondo:</strong> ${s(trasfondoNombre)} ${originFeat ? `| <strong>Feat:</strong> ${originFeat}` : ''}
-        </div>
-
-        <h3>Historia</h3>
-        <p style="font-size:0.95em; line-height:1.5;">${s(historia)}</p>
-
-        <h3>Equipo</h3>
-        <ul style="column-count: 2;">${equipoHtml}</ul>
     `;
 }
 
-// ==========================================
-// 4. EXPORTAR JSON
-// ==========================================
+// --- EXPORT ---
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
-    const json = {
-        name: currentData.nombre,
-        type: "character",
-        img: "icons/svg/mystery-man.svg",
-        system: {
-            details: {
-                biography: { value: currentData.resumen_historia || currentData.historia },
-                race: currentData.especie || currentData.raza,
-                background: (typeof currentData.trasfondo === 'object') ? currentData.trasfondo?.nombre : currentData.trasfondo,
-                level: currentData.nivel || 1
-            }
-        }
-    };
+    const json = { name: currentData.nombre, type: "character", img: "icons/svg/mystery-man.svg", system: { details: { biography: { value: currentData.historia } } } };
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
