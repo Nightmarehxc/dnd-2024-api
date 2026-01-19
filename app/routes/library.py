@@ -14,16 +14,16 @@ def import_foundry():
         return jsonify({"error": "Nombre de archivo vacío"}), 400
 
     try:
-        # Leer el archivo JSON
         import json
         data = json.load(file)
 
-        # Procesar
-        stats = library_service.process_foundry_import(data)
+        # Desempaquetamos los dos valores que ahora devuelve el servicio
+        stats, character_data = library_service.process_foundry_import(data)
 
         return jsonify({
             "message": "Importación completada",
-            "detalles": stats
+            "detalles": stats,
+            "character": character_data  # <--- ¡Esto es lo que faltaba!
         })
 
     except Exception as e:
