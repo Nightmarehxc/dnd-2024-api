@@ -21,9 +21,18 @@ const els = {
     btnSaveShop: document.getElementById('btnSaveShop')
 };
 
-const escapeStr = (str) => {
+// --- UTILIDADES DE SEGURIDAD ---
+
+// 1. Para atributos HTML (value="..."). Solo escapa comillas dobles.
+const escapeHtml = (str) => {
     if (!str) return '';
-    return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    return str.replace(/"/g, '&quot;');
+};
+
+// 2. Para argumentos JS (onclick="func('...')"). Escapa comillas simples.
+const escapeJs = (str) => {
+    if (!str) return '';
+    return str.replace(/'/g, "\\'");
 };
 
 // --- LÓGICA DE INICIO (Cross-Linking) ---
@@ -40,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (found) {
                 currentCityData = found;
                 renderCity(found);
+                // Limpiar URL para no recargar siempre
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         } catch (e) {
@@ -103,7 +113,7 @@ function renderCity(data) {
             <div style="margin-bottom:15px; padding:10px; background:white; border-left:4px solid var(--accent); border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h4 style="margin:0; color:var(--text-main);">${d.nombre}</h4>
-                    <button class="btn-mini-shop" onclick="openShopGen('${escapeStr(d.nombre)}', '${escapeStr(data.nombre)}')">🏪 Abrir Tienda Aquí</button>
+                    <button class="btn-mini-shop" onclick="openShopGen('${escapeJs(d.nombre)}', '${escapeJs(data.nombre)}')">🏪 Abrir Tienda Aquí</button>
                 </div>
                 <p style="font-size:0.95em; margin:5px 0;">${d.descripcion}</p>
                 <div style="font-size:0.85em; color:#666;">
@@ -119,10 +129,10 @@ function renderCity(data) {
     if (data.lugares_interes && Array.isArray(data.lugares_interes) && data.lugares_interes.length > 0) {
         const listItems = data.lugares_interes.map((p, index) => {
             if (p.shopData) {
-                // Tienda vinculada
+                // Tienda vinculada -> Clickable
                 return `
                 <li style="margin-bottom:8px; padding:8px; background:#e8f5e9; border-radius:4px; cursor:pointer; border:1px solid #a5d6a7;"
-                    onclick="viewSavedShop(${index})" title="Ver Tienda">
+                    onclick="viewSavedShop(${index})" title="Ver Tienda Completa">
                     <strong>🏪 ${p.nombre}</strong> <span style="font-size:0.8em; color:#2e7d32;">(Ver Ficha)</span><br>
                     <span style="font-size:0.9em; color:#555;">${p.descripcion}</span>
                 </li>`;
@@ -136,6 +146,7 @@ function renderCity(data) {
         <ul style="padding-left:10px; list-style:none;">${listItems}</ul>`;
     }
 
+    // Rumores
     let rumorsHtml = '';
     if (data.rumores && Array.isArray(data.rumores)) {
         rumorsHtml = `<p><strong>🗣️ Rumor:</strong> ${data.rumores.join(' ')}</p>`;
@@ -166,39 +177,39 @@ function renderCity(data) {
         ${poisHtml}
 
         <div style="text-align:center; margin-top:30px;">
-            <button class="btn-generate" onclick="openShopGen('General', '${escapeStr(data.nombre)}')" style="background:#8e44ad; width:auto;">🔮 Generar Tienda Aleatoria</button>
+            <button class="btn-generate" onclick="openShopGen('General', '${escapeJs(data.nombre)}')">🔮 Generar Tienda Aleatoria</button>
         </div>
     `;
 }
 
 // ==========================================
-// 3. MODO EDICIÓN (MEJORADO CON IMPORTADOR)
+// 3. MODO EDICIÓN
 // ==========================================
 window.enterEditMode = function() {
     const d = currentCityData;
     if (!d) return;
 
-    // Inputs Distritos
+    // Distritos
     const distritosList = Array.isArray(d.distritos) ? d.distritos : [];
     const districtsInputs = distritosList.map((dist, idx) => `
         <div style="background:#eee; padding:10px; margin-bottom:10px; border-radius:5px;">
-            <input type="text" id="edit_dist_name_${idx}" value="${escapeStr(dist.nombre)}" style="font-weight:bold; margin-bottom:5px; width:100%;">
+            <input type="text" id="edit_dist_name_${idx}" value="${escapeHtml(dist.nombre)}" style="font-weight:bold; margin-bottom:5px; width:100%;">
             <textarea id="edit_dist_desc_${idx}" rows="2" style="width:100%;">${dist.descripcion}</textarea>
         </div>
     `).join('');
 
-    // Lista de Lugares Actuales con botón borrar
+    // Lugares
     let placesHtml = '<p style="color:#777; font-style:italic;">No hay lugares registrados.</p>';
     if (d.lugares_interes && d.lugares_interes.length > 0) {
         placesHtml = d.lugares_interes.map((p, idx) => `
             <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:5px; border:1px solid #ddd; margin-bottom:5px;">
                 <span>${p.shopData ? '🏪' : '📍'} <strong>${p.nombre}</strong></span>
-                <button onclick="deletePlace(${idx})" style="background:#e74c3c; padding:2px 8px; font-size:0.8rem; width:auto; margin:0;">🗑️</button>
+                <button onclick="deletePlace(${idx})" style="background:#e74c3c; padding:2px 8px; font-size:0.8rem; width:auto; margin:0; cursor:pointer;">🗑️</button>
             </div>
         `).join('');
     }
 
-    // SELECTOR DE TIENDAS DEL HISTORIAL GLOBAL
+    // Dropdown Tiendas
     let shopOptions = '<option value="">-- Seleccionar Tienda --</option>';
     try {
         const shopHistory = JSON.parse(localStorage.getItem('history_shop') || '[]');
@@ -209,22 +220,23 @@ window.enterEditMode = function() {
 
     const currentRumor = Array.isArray(d.rumores) ? d.rumores.join('\n') : (d.rumores || '');
 
+    // Usamos escapeHtml para los values (no pone backslashes feos)
     els.content.innerHTML = `
         <h2 style="color:#f39c12;">✏️ Editando ${d.nombre}</h2>
 
-        <label>Nombre</label><input type="text" id="edit_name" value="${escapeStr(d.nombre)}">
+        <label>Nombre</label><input type="text" id="edit_name" value="${escapeHtml(d.nombre)}">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div><label>Tipo</label><input type="text" id="edit_type" value="${escapeStr(d.tipo)}"></div>
-            <div><label>Población</label><input type="text" id="edit_pop" value="${escapeStr(d.poblacion)}"></div>
+            <div><label>Tipo</label><input type="text" id="edit_type" value="${escapeHtml(d.tipo)}"></div>
+            <div><label>Población</label><input type="text" id="edit_pop" value="${escapeHtml(d.poblacion)}"></div>
         </div>
-        <label>Clima</label><input type="text" id="edit_clima" value="${escapeStr(d.clima)}">
+        <label>Clima</label><input type="text" id="edit_clima" value="${escapeHtml(d.clima)}">
 
         <h3 style="margin-top:20px;">Gobierno</h3>
-        <label>Tipo</label><input type="text" id="edit_gob_type" value="${escapeStr(d.gobierno?.tipo || '')}">
-        <label>Líder</label><input type="text" id="edit_gob_leader" value="${escapeStr(d.gobierno?.lider || '')}">
+        <label>Tipo</label><input type="text" id="edit_gob_type" value="${escapeHtml(d.gobierno?.tipo || '')}">
+        <label>Líder</label><input type="text" id="edit_gob_leader" value="${escapeHtml(d.gobierno?.lider || '')}">
         <label>Leyes</label><textarea id="edit_gob_desc" rows="2">${d.gobierno?.descripcion || ''}</textarea>
 
-        <label>Rumores</label><textarea id="edit_rumors" rows="2">${currentRumor}</textarea>
+        <label>Rumores (Uno por línea)</label><textarea id="edit_rumors" rows="2">${currentRumor}</textarea>
 
         <div style="background:#e8f5e9; padding:15px; border:1px solid #a5d6a7; border-radius:5px; margin-top:20px;">
             <h4 style="margin-top:0; color:#2e7d32;">📥 Importar Tienda del Historial</h4>
@@ -250,58 +262,10 @@ window.enterEditMode = function() {
     `;
 };
 
-// Función para importar tienda desde el dropdown
-window.importShopFromHistory = function() {
-    const select = document.getElementById('historyShopSelect');
-    const index = select.value;
+// --- FUNCIONES DE ACCIÓN EN MODO EDICIÓN ---
 
-    if (index === "") return alert("Selecciona una tienda primero.");
-
-    try {
-        const shopHistory = JSON.parse(localStorage.getItem('history_shop') || '[]');
-        const shop = shopHistory[index];
-
-        if (shop) {
-            // Añadir como POI a la ciudad actual
-            if (!currentCityData.lugares_interes) currentCityData.lugares_interes = [];
-
-            currentCityData.lugares_interes.push({
-                nombre: shop.nombre_tienda || shop.nombre,
-                tipo: "Tienda (Importada)",
-                descripcion: `Sucursal de ${shop.nombre_tienda}. ${shop.descripcion_ambiente || ''}`,
-                shopData: shop
-            });
-
-            // Refrescar modo edición para ver el cambio en la lista
-            saveTempEditState(); // Guardar lo que hayamos escrito en inputs
-            enterEditMode(); // Recargar UI
-            alert("Tienda importada correctamente.");
-        }
-    } catch (e) {
-        console.error(e);
-        alert("Error al importar tienda.");
-    }
-};
-
-// Función auxiliar para borrar POI
-window.deletePlace = function(index) {
-    if (confirm("¿Borrar este lugar de interés?")) {
-        currentCityData.lugares_interes.splice(index, 1);
-        saveTempEditState();
-        enterEditMode();
-    }
-};
-
-// Función auxiliar para no perder datos de inputs al recargar el edit mode (por importar/borrar)
+// ¡CRUCIAL! Guarda TODO el estado de los inputs antes de redibujar la pantalla.
 function saveTempEditState() {
-    currentCityData.nombre = document.getElementById('edit_name').value;
-    // ... (Capturamos lo básico para no perderlo al refrescar el div)
-    // Nota: Para una implementación perfecta deberíamos capturar todo,
-    // pero para este flujo rápido basta con que el objeto currentCityData tenga los cambios.
-    // Como enterEditMode lee de currentCityData, si modificamos el objeto antes de llamarlo, funciona.
-}
-
-window.saveCityChanges = function() {
     if (!currentCityData) return;
 
     currentCityData.nombre = document.getElementById('edit_name').value;
@@ -309,7 +273,7 @@ window.saveCityChanges = function() {
     currentCityData.poblacion = document.getElementById('edit_pop').value;
     currentCityData.clima = document.getElementById('edit_clima').value;
 
-    if(!currentCityData.gobierno) currentCityData.gobierno = {};
+    if (!currentCityData.gobierno) currentCityData.gobierno = {};
     currentCityData.gobierno.tipo = document.getElementById('edit_gob_type').value;
     currentCityData.gobierno.lider = document.getElementById('edit_gob_leader').value;
     currentCityData.gobierno.descripcion = document.getElementById('edit_gob_desc').value;
@@ -321,12 +285,61 @@ window.saveCityChanges = function() {
         currentCityData.distritos.forEach((dist, idx) => {
             const nameInput = document.getElementById(`edit_dist_name_${idx}`);
             const descInput = document.getElementById(`edit_dist_desc_${idx}`);
-            if(nameInput) dist.nombre = nameInput.value;
-            if(descInput) dist.descripcion = descInput.value;
+            if (nameInput) dist.nombre = nameInput.value;
+            if (descInput) dist.descripcion = descInput.value;
         });
     }
+}
 
+window.importShopFromHistory = function() {
+    const select = document.getElementById('historyShopSelect');
+    const index = select.value;
+
+    if (index === "") return alert("Selecciona una tienda primero.");
+
+    try {
+        const shopHistory = JSON.parse(localStorage.getItem('history_shop') || '[]');
+        const shop = shopHistory[index];
+
+        if (shop) {
+            if (!currentCityData.lugares_interes) currentCityData.lugares_interes = [];
+
+            // Guardamos lo que el usuario haya escrito en los inputs antes de refrescar
+            saveTempEditState();
+
+            currentCityData.lugares_interes.push({
+                nombre: shop.nombre_tienda || shop.nombre,
+                tipo: "Tienda (Importada)",
+                descripcion: `Sucursal de ${shop.nombre_tienda}. ${shop.descripcion_ambiente || ''}`,
+                shopData: shop
+            });
+
+            enterEditMode(); // Refrescamos para ver la nueva lista
+            alert("Tienda importada correctamente.");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Error al importar tienda.");
+    }
+};
+
+window.deletePlace = function(index) {
+    if (confirm("¿Borrar este lugar de interés?")) {
+        // Guardamos antes de borrar para no perder ediciones
+        saveTempEditState();
+        currentCityData.lugares_interes.splice(index, 1);
+        enterEditMode();
+    }
+};
+
+window.saveCityChanges = function() {
+    // Reutilizamos la lógica de guardado completo
+    saveTempEditState();
+
+    // Renderizamos la vista normal
     renderCity(currentCityData);
+
+    // Persistimos en historial global
     if (typeof addToHistory === 'function') addToHistory(currentCityData);
 };
 
@@ -339,10 +352,9 @@ window.openShopGen = async function(districtName, cityName) {
     els.shopLoader.style.display = 'block';
     els.btnSaveShop.style.display = 'none';
 
-    const safeDistrict = districtName.replace(/'/g, "");
-    const safeCity = cityName.replace(/'/g, "");
-    const shopTypePrompt = `Una tienda adecuada para el distrito "${safeDistrict}" en la ciudad de "${safeCity}"`;
-    const locationPrompt = `${safeCity} (${safeDistrict})`;
+    // Para la IA usamos texto limpio
+    const shopTypePrompt = `Una tienda adecuada para el distrito "${districtName}" en la ciudad de "${cityName}"`;
+    const locationPrompt = `${cityName} (${districtName})`;
 
     try {
         const res = await fetch(SHOP_API_URL, {
@@ -360,7 +372,7 @@ window.openShopGen = async function(districtName, cityName) {
         currentShopData = {
             ...data,
             location: locationPrompt,
-            city_reference: safeCity
+            city_reference: cityName
         };
 
         renderShopInModal(currentShopData);
@@ -373,6 +385,7 @@ window.openShopGen = async function(districtName, cityName) {
     }
 };
 
+// Abrir tienda existente (desde link de ciudad)
 window.viewSavedShop = function(index) {
     if (!currentCityData || !currentCityData.lugares_interes) return;
     const item = currentCityData.lugares_interes[index];
@@ -380,7 +393,7 @@ window.viewSavedShop = function(index) {
     if (item && item.shopData) {
         currentShopData = item.shopData;
         renderShopInModal(currentShopData);
-        els.btnSaveShop.style.display = 'none';
+        els.btnSaveShop.style.display = 'none'; // Ya existe, no mostramos guardar
         els.modal.style.display = 'block';
     }
 };
@@ -409,13 +422,14 @@ function renderShopInModal(data) {
     `;
 }
 
-// GUARDAR TIENDA (Y persistir en Historial Global)
+// Guardar nueva tienda en la ciudad Y en el historial global
 els.btnSaveShop.addEventListener('click', () => {
     try {
         if (!currentCityData || !currentShopData) return;
 
         if (!currentCityData.lugares_interes) currentCityData.lugares_interes = [];
 
+        // 1. Añadir a la ciudad
         const nuevaTiendaEnCiudad = {
             nombre: currentShopData.nombre_tienda || "Tienda Nueva",
             tipo: "Tienda (Vinculada)",
@@ -424,17 +438,17 @@ els.btnSaveShop.addEventListener('click', () => {
         };
 
         currentCityData.lugares_interes.push(nuevaTiendaEnCiudad);
+
+        // 2. Refrescar ciudad
         renderCity(currentCityData);
         if (typeof addToHistory === 'function') addToHistory(currentCityData);
 
-        // AQUI ESTA LA CLAVE: Guardar también en history_shop
+        // 3. Guardar en Historial Global Shops (Sin duplicados)
         try {
             const shopKey = 'history_shop';
             let shopHistory = JSON.parse(localStorage.getItem(shopKey) || '[]');
 
-            // Verificamos si ya existe para no duplicar infinitamente
             const yaExiste = shopHistory.some(s => s.nombre_tienda === currentShopData.nombre_tienda);
-
             if (!yaExiste) {
                 const historyItem = {
                     ...currentShopData,
