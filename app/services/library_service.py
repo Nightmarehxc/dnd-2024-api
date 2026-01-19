@@ -23,6 +23,7 @@ class LibraryService:
                     current_data = []
 
         entity_name = entity_data.get('name', 'Unknown')
+        # Evitar duplicados exactos
         if not any(x['name'] == entity_name for x in current_data):
             current_data.append(entity_data)
             with open(filename, 'w', encoding='utf-8') as f:
@@ -51,39 +52,52 @@ class LibraryService:
         char_items = []
         char_features = []
 
-        # 1. PROCESAR ITEMS
+        # 1. PROCESAR ITEMS (Equipo, Clases, Feats)
         items = char_json.get('items', [])
         for item in items:
             itype = item.get('type')
             name = item.get('name')
             system = item.get('system', {})
-            desc = system.get('description', {}).get('value', '')
+            desc = system.get('description', {}).get('value', '') or ""
 
-            clean_item = {"name": name, "description": desc, "source": "Foundry Import", "original_data": system}
+            # Limpiar HTML de descripciones para la base de conocimientos
+            import re
+            clean_desc = re.sub('<[^<]+?>', '', desc)[:200]
+
+            clean_item = {"name": name, "description": clean_desc, "source": "Foundry Import", "original_data": system}
 
             if itype == 'race':
                 char_race = name
-                if self._save_entity('races', clean_item): stats_count['races'] += 1
+                self._save_entity('races', clean_item)
+                stats_count['races'] += 1
 
             elif itype == 'class':
                 lvl = system.get('levels', 1)
                 sub = system.get('subclass', '')
-                char_classes.append(f"{name} {lvl}" + (f" ({sub})" if sub else ""))
+                class_str = f"{name} {lvl}"
+                if sub: class_str += f" ({sub})"
+                char_classes.append(class_str)
                 clean_item['hit_dice'] = system.get('hitDice', 'd8')
-                if self._save_entity('classes', clean_item): stats_count['classes'] += 1
+                self._save_entity('classes', clean_item)
+                stats_count['classes'] += 1
 
             elif itype == 'background':
                 char_bg = name
-                if self._save_entity('backgrounds', clean_item): stats_count['backgrounds'] += 1
+                self._save_entity('backgrounds', clean_item)
+                stats_count['backgrounds'] += 1
 
             elif itype == 'feat':
-                char_features.append({"nombre": name, "descripcion": desc})
+                char_features.append({"nombre": name, "descripcion": clean_desc})
 
-            elif itype in ['weapon', 'equipment', 'loot', 'consumable', 'tool']:
+            elif itype in ['weapon', 'equipment', 'loot', 'consumable', 'tool', 'backpack']:
                 detail = ""
                 if itype == 'weapon':
-                    parts = system.get('damage', {}).get('parts', [])
-                    if parts: detail = f"{parts[0][0]} {parts[0][1]}"
+                    # Intento robusto de sacar daño
+                    damage_parts = system.get('damage', {}).get('parts', [])
+                    if damage_parts and len(damage_parts) > 0:
+                        dmg = damage_parts[0][0]  # Ej: 1d8 + @mod
+                        dtype = damage_parts[0][1] if len(damage_parts[0]) > 1 else ""
+                        detail = f"{dmg} {dtype}".strip()
                 elif itype == 'equipment':
                     ac = system.get('armor', {}).get('value')
                     if ac: detail = f"AC {ac}"
@@ -96,23 +110,29 @@ class LibraryService:
                 })
 
                 clean_item['type'] = itype
-                if self._save_entity('items', clean_item): stats_count['items'] += 1
+                self._save_entity('items', clean_item)
+                stats_count['items'] += 1
 
-        # 2. EXTRAER STATS
+        # 2. EXTRAER STATS (Blindaje contra nulos)
         abilities = char_json.get('system', {}).get('abilities', {})
         map_stats = {'str': 'Fuerza', 'dex': 'Destreza', 'con': 'Constitución', 'int': 'Inteligencia',
                      'wis': 'Sabiduría', 'cha': 'Carisma'}
-        final_stats = {label: abilities.get(key, {}).get('value', 10) for key, label in map_stats.items()}
+        final_stats = {}
+        for key, label in map_stats.items():
+            # A veces viene como 'value', a veces directo
+            ab_data = abilities.get(key, {})
+            val = ab_data.get('value') if isinstance(ab_data, dict) else 10
+            final_stats[label] = val or 10
 
-        # 3. EXTRAER HABILIDADES (SKILLS)
-        # ESTA PARTE ES CRÍTICA: Mapea los códigos de Foundry a nombres legibles
+        # 3. EXTRAER HABILIDADES (SKILLS) - Mapeo Simplificado
+        # Usamos nombres CLAVE simples para evitar problemas de " (Des)"
         skills_map = {
-            'acr': 'Acrobacias (Des)', 'ani': 'Trato Animales (Sab)', 'arc': 'Arcanos (Int)',
-            'ath': 'Atletismo (Fue)', 'dec': 'Engaño (Car)', 'his': 'Historia (Int)',
-            'ins': 'Perspicacia (Sab)', 'itm': 'Intimidación (Car)', 'inv': 'Investigación (Int)',
-            'med': 'Medicina (Sab)', 'nat': 'Naturaleza (Int)', 'prc': 'Percepción (Sab)',
-            'prf': 'Interpretación (Car)', 'per': 'Persuasión (Car)', 'rel': 'Religión (Int)',
-            'slt': 'Juego de Manos (Des)', 'ste': 'Sigilo (Des)', 'sur': 'Supervivencia (Sab)'
+            'acr': 'Acrobacias', 'ani': 'Trato Animales', 'arc': 'Arcanos',
+            'ath': 'Atletismo', 'dec': 'Engaño', 'his': 'Historia',
+            'ins': 'Perspicacia', 'itm': 'Intimidación', 'inv': 'Investigación',
+            'med': 'Medicina', 'nat': 'Naturaleza', 'prc': 'Percepción',
+            'prf': 'Interpretación', 'per': 'Persuasión', 'rel': 'Religión',
+            'slt': 'Juego de Manos', 'ste': 'Sigilo', 'sur': 'Supervivencia'
         }
 
         char_skills = {}
@@ -120,12 +140,17 @@ class LibraryService:
 
         for code, label in skills_map.items():
             skill_data = foundry_skills.get(code, {})
-            # Foundry: 0 = nada, 1 = competente, 2 = experto
-            val = skill_data.get('value', 0)
-            if val and val > 0:
-                char_skills[label] = val
+            # Soporte para varias versiones de Foundry
+            val = skill_data.get('value') or skill_data.get('proficient') or 0
 
-        # 4. CONSTRUIR OBJETO FINAL
+            try:
+                val = float(val)  # Asegurar que es número
+                if val >= 0.5:  # Si es 1 (prof) o 2 (expert), o 0.5 (jack of all trades)
+                    char_skills[label] = val
+            except:
+                pass
+
+        # 4. CONSTRUIR OBJETO
         character_data = {
             "nombre": char_json.get('name', 'Héroe Importado'),
             "raza": char_race,
@@ -133,7 +158,7 @@ class LibraryService:
             "trasfondo": char_bg,
             "alineamiento": char_json.get('system', {}).get('details', {}).get('alignment', 'Neutral'),
             "stats": final_stats,
-            "habilidades": char_skills,  # Enviamos el mapa de habilidades
+            "habilidades": char_skills,  # { "Sigilo": 2, "Atletismo": 1 }
             "rasgos": char_features,
             "equipo": char_items,
             "historia": str(char_json.get('system', {}).get('details', {}).get('biography', {}).get('value', ''))

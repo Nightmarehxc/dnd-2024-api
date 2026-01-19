@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (e) { console.error(e); }
 });
 
-// --- GENERATE ---
+// --- GENERATE (IA) ---
 els.btnGen.addEventListener('click', async () => {
     els.content.innerHTML = '';
     els.loader.style.display = 'block';
@@ -59,7 +59,7 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-// --- IMPORT ---
+// --- IMPORT (Foundry) ---
 if (els.btnImport) {
     els.btnImport.addEventListener('click', async () => {
         if (!els.fileInput.files.length) return alert("Selecciona archivo.");
@@ -74,7 +74,7 @@ if (els.btnImport) {
             const data = await res.json();
             if (data.error) throw new Error(data.error);
 
-            els.statusDiv.innerHTML = `<span style="color:#27ae60;">✅ Personaje cargado con éxito.</span>`;
+            els.statusDiv.innerHTML = `<span style="color:#27ae60;">✅ Personaje cargado.</span>`;
             if (data.character) {
                 currentData = data.character;
                 renderCharacterSheet(currentData);
@@ -91,7 +91,7 @@ if (els.btnImport) {
 }
 
 // ==========================================
-// ⚔️ RENDERIZADOR HOJA D&D ⚔️
+// ⚔️ RENDERIZADOR ROBUSTO ⚔️
 // ==========================================
 
 function getMod(score) { return Math.floor((score - 10) / 2); }
@@ -100,18 +100,24 @@ function fmtMod(mod) { return mod >= 0 ? `+${mod}` : mod; }
 function renderCharacterSheet(data) {
     const s = (val) => val || '---';
 
-    // Normalización
+    // 1. Normalización de Datos Básicos
     const raza = data.especie || data.raza || 'Desconocido';
     const clase = data.clase || 'Aventurero';
-    const nivel = data.nivel || (data.clase && data.clase.match(/\d+/)) ? parseInt(data.clase.match(/\d+/)[0]) : 1;
+    // Extraer número de nivel robustamente
+    let nivel = data.nivel || 1;
+    if (typeof data.clase === 'string') {
+        const match = data.clase.match(/(\d+)/);
+        if (match) nivel = parseInt(match[0]);
+    }
     const prof = Math.ceil(nivel / 4) + 1;
 
-    // Stats Mapping
+    // 2. Normalización de Stats (Mapeo Flexible)
     const statsMap = {
         'Fuerza': 10, 'Destreza': 10, 'Constitución': 10,
         'Inteligencia': 10, 'Sabiduría': 10, 'Carisma': 10
     };
     const rawStats = data.estadisticas || data.stats || {};
+
     for (let [k, v] of Object.entries(rawStats)) {
         let key = k.toLowerCase();
         if (key.includes('fuer') || key.includes('str')) statsMap['Fuerza'] = v;
@@ -125,24 +131,45 @@ function renderCharacterSheet(data) {
     const mods = {};
     for (let [k, v] of Object.entries(statsMap)) mods[k] = getMod(v);
 
+    // Cálculos Derivados
     const hp = (8 + mods['Constitución']) + ((5 + mods['Constitución']) * (nivel - 1));
-    const ac = 10 + mods['Destreza'];
+    const ac = 10 + mods['Destreza']; // Básico, sin armadura
 
-    // Habilidades
+    // 3. Renderizado de Habilidades (Lógica Fuzzy Match)
     const knownSkills = data.habilidades || {};
     const skillList = [
-        ['Acrobacias (Des)', 'Destreza'], ['Trato Animales (Sab)', 'Sabiduría'], ['Arcanos (Int)', 'Inteligencia'],
-        ['Atletismo (Fue)', 'Fuerza'], ['Engaño (Car)', 'Carisma'], ['Historia (Int)', 'Inteligencia'],
-        ['Perspicacia (Sab)', 'Sabiduría'], ['Intimidación (Car)', 'Carisma'], ['Investigación (Int)', 'Inteligencia'],
-        ['Medicina (Sab)', 'Sabiduría'], ['Naturaleza (Int)', 'Inteligencia'], ['Percepción (Sab)', 'Sabiduría'],
-        ['Interpretación (Car)', 'Carisma'], ['Persuasión (Car)', 'Carisma'], ['Religión (Int)', 'Inteligencia'],
-        ['Juego de Manos (Des)', 'Destreza'], ['Sigilo (Des)', 'Destreza'], ['Supervivencia (Sab)', 'Sabiduría']
+        ['Acrobacias', 'Destreza'], ['Trato Animales', 'Sabiduría'], ['Arcanos', 'Inteligencia'],
+        ['Atletismo', 'Fuerza'], ['Engaño', 'Carisma'], ['Historia', 'Inteligencia'],
+        ['Perspicacia', 'Sabiduría'], ['Intimidación', 'Carisma'], ['Investigación', 'Inteligencia'],
+        ['Medicina', 'Sabiduría'], ['Naturaleza', 'Inteligencia'], ['Percepción', 'Sabiduría'],
+        ['Interpretación', 'Carisma'], ['Persuasión', 'Carisma'], ['Religión', 'Inteligencia'],
+        ['Juego de Manos', 'Destreza'], ['Sigilo', 'Destreza'], ['Supervivencia', 'Sabiduría']
     ];
 
     const skillsHtml = skillList.map(([label, statKey]) => {
-        // AQUÍ ESTÁ EL CÁLCULO
-        const profLevel = parseFloat(knownSkills[label] || 0);
+        let profLevel = 0;
 
+        // ESTRATEGIA DE BÚSQUEDA HÍBRIDA (Para soportar IA y Foundry a la vez)
+
+        // A) Caso Diccionario (Foundry): { "Sigilo": 2 }
+        if (typeof knownSkills === 'object' && !Array.isArray(knownSkills)) {
+            // Buscamos coincidencia parcial (Ej: "Sigilo" coincide con "Sigilo (Des)")
+            for (let [k, v] of Object.entries(knownSkills)) {
+                if (label.includes(k) || k.includes(label)) {
+                    profLevel = v;
+                    break;
+                }
+            }
+        }
+
+        // B) Caso Array (IA Generativa): ["Sigilo", "Atletismo"]
+        else if (Array.isArray(knownSkills)) {
+            if (knownSkills.some(s => s.toLowerCase().includes(label.toLowerCase()))) {
+                profLevel = 1;
+            }
+        }
+
+        // CÁLCULO FINAL
         let total = mods[statKey];
         let icon = '<span style="color:#ddd;">○</span>';
 
@@ -151,14 +178,14 @@ function renderCharacterSheet(data) {
             icon = '<span style="color:#333;">●</span>';
         }
         if (profLevel >= 2) {
-            total += prof; // Sumamos otra vez para Expertise
+            total += prof; // Expertise suma proficiencia de nuevo
             icon = '<span style="color:#f39c12;">🌟</span>';
         }
 
         return `
             <div class="skill-row">
                 <span style="width:25px; text-align:center; font-size:1.1em;">${icon}</span>
-                <span style="flex-grow:1;">${label}</span>
+                <span style="flex-grow:1;">${label} <small style="color:#999;">(${statKey.substring(0,3)})</small></span>
                 <strong>${fmtMod(total)}</strong>
             </div>
         `;
@@ -199,18 +226,16 @@ function renderCharacterSheet(data) {
                         <div class="combat-box"><div class="combat-lbl">INIT</div><div class="combat-val">⚡ ${fmtMod(mods['Destreza'])}</div></div>
                         <div class="combat-box"><div class="combat-lbl">HP</div><div class="combat-val">❤️ ${hp}</div></div>
                     </div>
-                    <div class="sheet-section skills-list">
-                        ${skillsHtml}
-                    </div>
+                    <div class="sheet-section skills-list">${skillsHtml}</div>
                 </div>
 
                 <div class="sheet-section">
                     <h3>Rasgos y Dotes</h3>
                     <div style="font-size:0.85em; max-height:300px; overflow-y:auto;">
                         ${(data.rasgos || []).map(r => `
-                            <div style="margin-bottom:8px;">
+                            <div style="margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:5px;">
                                 <strong>${r.nombre}</strong>
-                                <div style="color:#555;">${r.descripcion || ''}</div>
+                                <div style="color:#555; font-size:0.9em;">${r.descripcion || 'Sin descripción'}</div>
                             </div>
                         `).join('') || '<p>Sin rasgos especiales.</p>'}
                     </div>
@@ -228,7 +253,7 @@ function renderCharacterSheet(data) {
             </div>
 
             <div style="margin-top:20px; font-size:0.9em; border-top:1px solid #eee; padding-top:10px;">
-                <strong>Biografía:</strong> ${s(data.resumen_historia || data.historia).substring(0, 300)}...
+                <strong>Historia:</strong> ${s(data.resumen_historia || data.historia).substring(0, 400)}...
             </div>
         </div>
     `;
