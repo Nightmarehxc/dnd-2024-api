@@ -105,26 +105,14 @@ class LibraryService:
         final_stats = {label: abilities.get(key, {}).get('value', 10) for key, label in map_stats.items()}
 
         # 3. EXTRAER HABILIDADES (SKILLS)
-        # Diccionario EXACTO para coincidir con el Frontend JS
+        # ESTA PARTE ES CRÍTICA: Mapea los códigos de Foundry a nombres legibles
         skills_map = {
-            'acr': 'Acrobacias (Des)',
-            'ani': 'Trato Animales (Sab)',
-            'arc': 'Arcanos (Int)',
-            'ath': 'Atletismo (Fue)',
-            'dec': 'Engaño (Car)',
-            'his': 'Historia (Int)',
-            'ins': 'Perspicacia (Sab)',
-            'itm': 'Intimidación (Car)',
-            'inv': 'Investigación (Int)',
-            'med': 'Medicina (Sab)',
-            'nat': 'Naturaleza (Int)',
-            'prc': 'Percepción (Sab)',
-            'prf': 'Interpretación (Car)',
-            'per': 'Persuasión (Car)',
-            'rel': 'Religión (Int)',
-            'slt': 'Juego de Manos (Des)',
-            'ste': 'Sigilo (Des)',
-            'sur': 'Supervivencia (Sab)'
+            'acr': 'Acrobacias (Des)', 'ani': 'Trato Animales (Sab)', 'arc': 'Arcanos (Int)',
+            'ath': 'Atletismo (Fue)', 'dec': 'Engaño (Car)', 'his': 'Historia (Int)',
+            'ins': 'Perspicacia (Sab)', 'itm': 'Intimidación (Car)', 'inv': 'Investigación (Int)',
+            'med': 'Medicina (Sab)', 'nat': 'Naturaleza (Int)', 'prc': 'Percepción (Sab)',
+            'prf': 'Interpretación (Car)', 'per': 'Persuasión (Car)', 'rel': 'Religión (Int)',
+            'slt': 'Juego de Manos (Des)', 'ste': 'Sigilo (Des)', 'sur': 'Supervivencia (Sab)'
         }
 
         char_skills = {}
@@ -132,7 +120,7 @@ class LibraryService:
 
         for code, label in skills_map.items():
             skill_data = foundry_skills.get(code, {})
-            # Foundry almacena la proficiencia en 'value': 0 (nada), 1 (prof), 2 (expert)
+            # Foundry: 0 = nada, 1 = competente, 2 = experto
             val = skill_data.get('value', 0)
             if val and val > 0:
                 char_skills[label] = val
@@ -145,7 +133,7 @@ class LibraryService:
             "trasfondo": char_bg,
             "alineamiento": char_json.get('system', {}).get('details', {}).get('alignment', 'Neutral'),
             "stats": final_stats,
-            "habilidades": char_skills,
+            "habilidades": char_skills,  # Enviamos el mapa de habilidades
             "rasgos": char_features,
             "equipo": char_items,
             "historia": str(char_json.get('system', {}).get('details', {}).get('biography', {}).get('value', ''))

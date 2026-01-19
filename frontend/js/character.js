@@ -103,11 +103,10 @@ function renderCharacterSheet(data) {
     // Normalización
     const raza = data.especie || data.raza || 'Desconocido';
     const clase = data.clase || 'Aventurero';
-    // Intentar sacar nivel de string "Mago 5" o usar campo nivel
     const nivel = data.nivel || (data.clase && data.clase.match(/\d+/)) ? parseInt(data.clase.match(/\d+/)[0]) : 1;
     const prof = Math.ceil(nivel / 4) + 1;
 
-    // Stats Mapping (Flexible ES/EN)
+    // Stats Mapping
     const statsMap = {
         'Fuerza': 10, 'Destreza': 10, 'Constitución': 10,
         'Inteligencia': 10, 'Sabiduría': 10, 'Carisma': 10
@@ -129,10 +128,8 @@ function renderCharacterSheet(data) {
     const hp = (8 + mods['Constitución']) + ((5 + mods['Constitución']) * (nivel - 1));
     const ac = 10 + mods['Destreza'];
 
-    // Habilidades: Mapeo y Cálculo
+    // Habilidades
     const knownSkills = data.habilidades || {};
-
-    // NOTA: Estas etiquetas deben coincidir EXACTAMENTE con las de library_service.py
     const skillList = [
         ['Acrobacias (Des)', 'Destreza'], ['Trato Animales (Sab)', 'Sabiduría'], ['Arcanos (Int)', 'Inteligencia'],
         ['Atletismo (Fue)', 'Fuerza'], ['Engaño (Car)', 'Carisma'], ['Historia (Int)', 'Inteligencia'],
@@ -143,7 +140,7 @@ function renderCharacterSheet(data) {
     ];
 
     const skillsHtml = skillList.map(([label, statKey]) => {
-        // Obtenemos nivel de proficiencia (0, 1, 2) directamente del diccionario importado
+        // AQUÍ ESTÁ EL CÁLCULO
         const profLevel = parseFloat(knownSkills[label] || 0);
 
         let total = mods[statKey];
@@ -154,7 +151,7 @@ function renderCharacterSheet(data) {
             icon = '<span style="color:#333;">●</span>';
         }
         if (profLevel >= 2) {
-            total += prof; // Sumamos otra vez para expertise (Total = mod + 2*prof)
+            total += prof; // Sumamos otra vez para Expertise
             icon = '<span style="color:#f39c12;">🌟</span>';
         }
 
