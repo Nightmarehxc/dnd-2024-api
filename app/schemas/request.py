@@ -13,6 +13,13 @@ class GenerationRequestSchema(Schema):
         validate=validate.Range(min=1, max=20, error="El nivel debe ser entre 1 y 20.")
     )
 
+class CharacterRequestSchema(Schema):
+    description = fields.String(required=False, load_default="")
+    level = fields.Integer(required=False, load_default=1)
+    # NUEVOS CAMPOS:
+    fixed_race = fields.String(required=False, allow_none=True)
+    fixed_class = fields.String(required=False, allow_none=True)
+
 # Esquema específico para Objetos (Items)
 class ItemRequestSchema(Schema):
     description = fields.String(required=True, validate=validate.Length(min=3))

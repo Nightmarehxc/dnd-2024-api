@@ -1,194 +1,144 @@
-const API_URL = "http://localhost:5001/api/characters/generate";
-let currentData = null;
+const HISTORY_API_BASE = "http://localhost:5001/api/history";
+const historyContainer = document.getElementById('historyList');
 
-const els = {
-    desc: document.getElementById('desc'),
-    level: document.getElementById('level'),
-    btnGen: document.getElementById('btnGen'),
-    btnExp: document.getElementById('btnExp'),
-    content: document.getElementById('resultContent'),
-    loader: document.getElementById('loader')
+// Detectar automáticamente el tipo de generador según la URL
+function getCurrentType() {
+    const path = window.location.pathname;
+    if (path.includes('npc.html')) return 'npc';
+    if (path.includes('item.html')) return 'item';
+    if (path.includes('character.html')) return 'character';
+    if (path.includes('adventure.html')) return 'adventure';
+    if (path.includes('shop.html')) return 'shop';
+    if (path.includes('city.html')) return 'city';
+    if (path.includes('riddle.html')) return 'riddle';
+    if (path.includes('encounter.html')) return 'encounter';
+    if (path.includes('loot.html')) return 'loot';
+    if (path.includes('rules.html')) return 'rules';
+    if (path.includes('quest.html')) return 'quest';
+    if (path.includes('journal.html')) return 'journal';
+    if (path.includes('spell.html')) return 'spell';
+    if (path.includes('villain.html')) return 'villain';
+    if (path.includes('faction.html')) return 'faction';
+    if (path.includes('alchemy.html')) return 'alchemy';
+
+    return null;
+}
+
+const PAGE_TYPE = getCurrentType();
+
+const ICONS = {
+    'character': '👤',
+    'npc': '🎭',
+    'item': '⚔️',
+    'adventure': '🗺️',
+    'shop': '💰',
+    'city': '🏰',
+    'riddle': '🧩',
+    'encounter': '⚔️',
+    'loot': '💰',
+    'rules': '⚖️',
+    'quest': '📜',
+    'journal': '🖋️',
+    'spell': '✨',
+    'villain': '👺',
+    'faction': '🛡️',
+    'alchemy': '🧪',
 };
 
-// ==========================================
-// 1. GENERAR PERSONAJE (IA)
-// ==========================================
-els.btnGen.addEventListener('click', async () => {
-    if (!els.desc.value) return alert("Describe tu personaje.");
-
-    // UI Reset
-    els.content.innerHTML = '';
-    els.loader.style.display = 'block';
-    els.btnGen.disabled = true;
-    els.btnExp.style.display = 'none';
-
+// --- 1. CARGAR LISTA ---
+async function loadHistory() {
+    if (!historyContainer || !PAGE_TYPE) return;
     try {
-        const res = await fetch(API_URL, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                description: els.desc.value,
-                level: parseInt(els.level.value) || 1
-            })
-        });
-
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-
-        currentData = data;
-        renderCharacter(data);
-        els.btnExp.style.display = 'block';
-
-        // --- GUARDAR EN HISTORIAL ---
-        if (typeof addToHistory === 'function') addToHistory(data);
-
-    } catch (err) {
-        els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
-    } finally {
-        els.loader.style.display = 'none';
-        els.btnGen.disabled = false;
+        const res = await fetch(`${HISTORY_API_BASE}/${PAGE_TYPE}`);
+        const history = await res.json();
+        renderHistoryList(history);
+    } catch (e) {
+        console.error("Error historial:", e);
+        historyContainer.innerHTML = '<p style="color:red; text-align:center;">Error de conexión</p>';
     }
-});
+}
 
-// ==========================================
-// 2. IMPORTAR DESDE FOUNDRY
-// ==========================================
-const btnImport = document.getElementById('btnImport');
-const fileInput = document.getElementById('foundryFile');
-const statusDiv = document.getElementById('importStatus');
+function renderHistoryList(history) {
+    historyContainer.innerHTML = '';
+    if (history.length === 0) {
+        historyContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">Sin registros</p>';
+        return;
+    }
 
-if (btnImport) {
-    btnImport.addEventListener('click', async () => {
-        if (!fileInput.files.length) {
-            alert("Por favor, selecciona un archivo JSON primero.");
-            return;
-        }
-
-        const file = fileInput.files[0];
-        const formData = new FormData();
-        formData.append('file', file);
-
-        // Feedback visual inmediato
-        statusDiv.innerHTML = `<span style="color:#e67e22;">⏳ Analizando pergaminos arcanos...</span>`;
-        btnImport.disabled = true;
-        els.content.innerHTML = ''; // Limpiar panel central
-
-        try {
-            const res = await fetch('http://localhost:5001/api/library/import-foundry', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await res.json();
-
-            if (data.error) throw new Error(data.error);
-
-            // 1. Mostrar resumen de lo aprendido en la librería
-            const s = data.detalles;
-            statusDiv.innerHTML = `
-                <span style="color:#27ae60;">✅ Éxito! Datos aprendidos:</span><br>
-                <ul style="margin:5px 0; padding-left:20px; color:#333; font-size:0.8em;">
-                    <li>Razas: ${s.races} | Clases: ${s.classes}</li>
-                    <li>Items: ${s.items} | Hechizos: ${s.spells}</li>
-                </ul>
-            `;
-
-            // 2. MOSTRAR PERSONAJE IMPORTADO Y AÑADIR A HISTORIAL
-            if (data.character) {
-                currentData = data.character;
-
-                // Renderizar en el panel principal
-                renderCharacter(currentData);
-
-                // Guardar explícitamente en el historial (Salón de Héroes)
-                if (typeof addToHistory === 'function') {
-                    // Aseguramos que tenga un nombre para el historial
-                    addToHistory({ ...currentData, nombre: currentData.nombre || 'Sin Nombre' });
-                }
-
-                // Habilitar botón de exportar (por si se quiere volver a bajar)
-                els.btnExp.style.display = 'block';
-            }
-
-        } catch (err) {
-            console.error(err);
-            statusDiv.innerHTML = `<span style="color:#c0392b;">❌ Error: ${err.message}</span>`;
-            els.content.innerHTML = `<p style="color:red; text-align:center;">Error al importar: ${err.message}</p>`;
-        } finally {
-            btnImport.disabled = false;
-            fileInput.value = ''; // Limpiar input
-        }
+    history.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `
+            <div class="history-info" onclick="restoreItem('${item.id}')">
+                <span class="h-icon">${ICONS[item.type] || '📄'}</span>
+                <div class="h-details">
+                    <div class="h-name">${item.name}</div>
+                    <div class="h-date">${item.timestamp}</div>
+                </div>
+            </div>
+            <button class="h-delete" onclick="deleteItem('${item.id}')">🗑️</button>
+        `;
+        // Guardamos los datos en el elemento para recuperarlos sin fetch extra
+        div.dataset.json = JSON.stringify(item.data);
+        div.dataset.id = item.id;
+        historyContainer.appendChild(div);
     });
 }
 
-// ==========================================
-// 3. RENDERIZADO (Unificado Generador/Importador)
-// ==========================================
-function renderCharacter(data) {
-    const s = (val) => val || '---';
-
-    // Normalización de campos para compatibilidad entre IA e Importador
-    const raza = data.especie || data.raza; // IA usa 'especie', Importador 'raza'
-    const stats = data.estadisticas || data.stats; // IA usa 'estadisticas', Importador 'stats'
-    const historia = data.resumen_historia || data.historia;
-    const equipo = data.equipo_destacado || data.equipo;
-
-    // El trasfondo puede ser un objeto (IA) o un string (Importador)
-    const trasfondoNombre = (typeof data.trasfondo === 'object') ? data.trasfondo?.nombre : data.trasfondo;
-    const originFeat = data.trasfondo?.origin_feat || 'N/A'; // Solo IA suele tener esto
-
-    els.content.innerHTML = `
-        <div class="sheet-header">
-            <h1 style="color:var(--accent); margin:0;">${s(data.nombre)}</h1>
-            <p style="font-style:italic;">Nivel ${data.nivel || 1} - ${s(raza)} ${s(data.clase)}</p>
-        </div>
-
-        <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:5px; margin:15px 0; text-align:center; background:#eee; padding:10px; border-radius:5px;">
-            ${stats ? Object.entries(stats).map(([k,v]) =>
-                `<div><strong>${k}</strong><br>${v}</div>`).join('') : '<p>Sin atributos</p>'}
-        </div>
-
-        <h3>Trasfondo: ${s(trasfondoNombre)}</h3>
-        ${originFeat !== 'N/A' ? `<p><strong>Origin Feat:</strong> ${s(originFeat)}</p>` : ''}
-
-        <h3>Historia</h3>
-        <p>${s(historia)}</p>
-
-        <h3>Equipo</h3>
-        <ul>
-            ${equipo ? equipo.map(e => `<li>${e}</li>`).join('') : '<li>Equipo estándar</li>'}
-        </ul>
-    `;
+// --- 2. GUARDAR (Usado por item.js, character.js...) ---
+async function addToHistory(data) {
+    if (!PAGE_TYPE) return;
+    try {
+        await fetch(`${HISTORY_API_BASE}/${PAGE_TYPE}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: data })
+        });
+        loadHistory(); // Recargar la lista para ver el nuevo ítem
+    } catch (e) {
+        console.error("Error guardando:", e);
+    }
 }
 
-// ==========================================
-// 4. EXPORTAR A JSON (Foundry)
-// ==========================================
-els.btnExp.addEventListener('click', () => {
-    if(!currentData) return;
+// --- 3. RESTAURAR Y BORRAR ---
+function restoreItem(id) {
+    const itemDiv = Array.from(document.querySelectorAll('.history-item'))
+        .find(div => div.dataset.id === id);
 
-    // Normalizamos de nuevo para exportar
-    const historia = currentData.resumen_historia || currentData.historia;
-    const raza = currentData.especie || currentData.raza;
-    const trasfondo = (typeof currentData.trasfondo === 'object') ? currentData.trasfondo?.nombre : currentData.trasfondo;
+    if (itemDiv) {
+        const data = JSON.parse(itemDiv.dataset.json);
 
-    const json = {
-        name: currentData.nombre,
-        type: "character",
-        img: "icons/svg/mystery-man.svg",
-        system: {
-            details: {
-                biography: { value: historia },
-                race: raza,
-                background: trasfondo,
-                level: currentData.nivel || 1
-            }
-        }
-    };
+        // Actualizar variable global y renderizar según la función disponible
+        if (typeof currentData !== 'undefined') currentData = data;
 
-    const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `${currentData.nombre.replace(/\s+/g, '_')}_Foundry.json`;
-    a.click();
-});
+        if (typeof renderItem === 'function') renderItem(data);
+        if (typeof renderCharacter === 'function') renderCharacter(data);
+        if (typeof renderNPC === 'function') renderNPC(data);
+        if (typeof renderAdventure === 'function') renderAdventure(data);
+        if (PAGE_TYPE === 'shop' && typeof renderShop === 'function') renderShop(data);
+        if (typeof renderCity === 'function' && PAGE_TYPE === 'city') renderCity(data);
+        if (typeof renderRiddle === 'function' && PAGE_TYPE === 'riddle') renderRiddle(data);
+        if (typeof renderEncounter === 'function' && PAGE_TYPE === 'encounter') renderEncounter(data);
+        if (typeof renderLoot === 'function' && PAGE_TYPE === 'loot') renderLoot(data);
+        if (typeof renderRule === 'function' && PAGE_TYPE === 'rules') renderRule(data);
+        if (typeof renderQuests === 'function' && PAGE_TYPE === 'quest') renderQuests(data);
+        if (typeof renderJournal === 'function' && PAGE_TYPE === 'journal') renderJournal(data);
+        if (typeof renderSpell === 'function' && PAGE_TYPE === 'spell') renderSpell(data);
+        if (typeof renderVillain === 'function' && PAGE_TYPE === 'villain') renderVillain(data);
+        if (typeof renderFaction === 'function' && PAGE_TYPE === 'faction') renderFaction(data);
+        if (typeof renderAlchemy === 'function' && PAGE_TYPE === 'alchemy') renderAlchemy(data);
+
+
+        const btnExp = document.getElementById('btnExp');
+        if (btnExp) btnExp.style.display = 'block';
+    }
+}
+
+async function deleteItem(id) {
+    if (!confirm("¿Borrar esta entrada?")) return;
+    await fetch(`${HISTORY_API_BASE}/${PAGE_TYPE}/${id}`, { method: 'DELETE' });
+    loadHistory();
+}
+
+// Inicializar al cargar la página
+document.addEventListener('DOMContentLoaded', loadHistory);

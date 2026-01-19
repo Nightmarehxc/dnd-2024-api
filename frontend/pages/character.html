@@ -4,58 +4,114 @@
     <meta charset="UTF-8">
     <title>Generador de Personajes</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Estilos específicos para la hoja de personaje */
+        .sheet-header {
+            text-align: center;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .import-zone {
+            background: #e3f2fd;
+            padding: 15px;
+            border: 2px dashed #2980b9;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+        .import-zone:hover {
+            background: #d4ebfb;
+            border-color: #1a5276;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 5px;
+            margin: 15px 0;
+            text-align: center;
+            background: #eee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        /* Ajuste responsive para stats */
+        @media (max-width: 600px) {
+            .stat-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        }
+    </style>
 </head>
 <body>
-<header>
-    <div class="brand">👤 Creador de Personajes</div>
-    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-</header>
+    <header>
+        <div class="brand">⚔️ Forja de Héroes</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
 
-<div class="generator-layout">
-    <div class="panel">
-        <h2>Datos del PJ</h2>
-        <label>Concepto / Idea</label>
-        <textarea id="desc" rows="5" placeholder="Ej: Un pícaro elfo que huye de su pasado noble..."></textarea>
+    <div class="generator-layout">
+        <div class="panel">
 
-        <label>Nivel</label>
-        <input type="number" id="level" value="1" min="1" max="20">
+            <div class="import-zone">
+                <h3 style="margin-top:0; color:#2980b9; font-size:1rem;">📥 Importar desde Foundry VTT</h3>
+                <p style="font-size:0.85rem; color:#555; margin-bottom:10px;">
+                    Sube tu ficha <code>.json</code> para guardarla en el historial y enseñar nuevas razas/clases a la IA.
+                </p>
 
-        <button class="btn-generate" id="btnGen">Crear Personaje</button>
-        <button class="btn-export" id="btnExp">Exportar a Foundry VTT</button>
-
-        <div style="background: #e3f2fd; padding: 15px; border: 1px dashed #2980b9; border-radius: 8px; margin-bottom: 25px;">
-            <h3 style="margin-top:0; color:#2980b9; font-size:1rem;">📥 Importar desde Foundry VTT</h3>
-            <p style="font-size:0.8rem; color:#666; margin-bottom:10px;">
-                Sube el <code>.json</code> de tu personaje exportado de Foundry.
-                El sistema extraerá automáticamente: Raza, Clase, Trasfondo y Equipo para usarlos en futuras
-                generaciones.
-            </p>
-
-            <div style="display:flex; gap:10px; align-items:center;">
-                <input type="file" id="foundryFile" accept=".json" style="background:white; padding:5px;">
-                <button id="btnImport" class="btn-generate"
-                        style="background:#2980b9; width:auto; margin:0; padding:8px 15px; font-size:0.9rem;">
-                    Procesar JSON
-                </button>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <input type="file" id="foundryFile" accept=".json" style="background:white; padding:5px; border-radius:4px; border:1px solid #bdc3c7;">
+                    <button id="btnImport" class="btn-generate" style="background:#2980b9; width:100%; margin:0; padding:8px;">
+                        Procesar Ficha
+                    </button>
+                </div>
+                <div id="importStatus" style="margin-top:10px; font-size:0.85rem; font-weight:bold; min-height:20px;"></div>
             </div>
-            <div id="importStatus" style="margin-top:10px; font-size:0.85rem; font-weight:bold;"></div>
+
+            <hr style="border:0; border-top:1px solid #ddd; margin: 20px 0;">
+
+            <h2>Crear Nuevo Personaje</h2>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:15px;">
+                <div>
+                    <label>Nivel</label>
+                    <input type="number" id="level" value="1" min="1" max="20">
+                </div>
+                <div>
+                    <label>Raza (Biblio)</label>
+                    <select id="raceSelect" style="width:100%;">
+                        <option value="">Cualquiera</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Clase (Biblio)</label>
+                    <select id="classSelect" style="width:100%;">
+                        <option value="">Cualquiera</option>
+                    </select>
+                </div>
+            </div>
+
+            <label>Concepto / Descripción</label>
+            <textarea id="desc" rows="4" placeholder="Ej: Un paladín caído que busca redención en los barrios bajos..."></textarea>
+
+            <button class="btn-generate" id="btnGen">Invocar Personaje</button>
+            <button class="btn-export" id="btnExp" style="display:none; background:#27ae60;">Exportar JSON (Foundry)</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🎲 Tirando características...</div>
+            <div id="resultContent">
+                <div style="text-align:center; margin-top:100px; color:#aaa;">
+                    <p style="font-size:3rem; margin:0;">🛡️</p>
+                    <p>Configura o importa un personaje para empezar.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">🏛️ Salón de Héroes</div>
+            <div class="history-list" id="historyList">
+                </div>
         </div>
     </div>
 
-    <div class="panel result-panel">
-        <div id="loader" class="loader">✨ Tejiendo el destino...</div>
-        <div id="resultContent">
-            <p style="text-align:center; margin-top:150px; color:#aaa;">La hoja de personaje aparecerá aquí</p>
-        </div>
-    </div>
-
-    <div class="history-panel">
-        <div class="history-header">📜 Salón de Héroes</div>
-        <div class="history-list" id="historyList"></div>
-    </div>
-</div>
-
-<script src="../js/history.js"></script>
-<script src="../js/character.js"></script>
+    <script src="../js/history.js"></script>
+    <script src="../js/character.js"></script>
 </body>
 </html>

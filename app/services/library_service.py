@@ -109,5 +109,31 @@ class LibraryService:
         # Devolvemos ambas cosas: stats de la librería y el personaje reconstruido
         return stats, character_data
 
+    def get_options(self):
+        """Devuelve listas simples de lo que hay en la biblioteca para el frontend/prompt"""
+        data = {"races": [], "classes": []}
+
+        # Leer Razas
+        r_path = os.path.join(self.base_path, 'races', 'collection.json')
+        if os.path.exists(r_path):
+            with open(r_path, 'r', encoding='utf-8') as f:
+                try:
+                    items = json.load(f)
+                    data["races"] = sorted([i.get('name') for i in items])
+                except:
+                    pass
+
+        # Leer Clases
+        c_path = os.path.join(self.base_path, 'classes', 'collection.json')
+        if os.path.exists(c_path):
+            with open(c_path, 'r', encoding='utf-8') as f:
+                try:
+                    items = json.load(f)
+                    data["classes"] = sorted([i.get('name') for i in items])
+                except:
+                    pass
+
+        return data
+
 
 library_service = LibraryService()

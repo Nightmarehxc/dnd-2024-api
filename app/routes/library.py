@@ -3,7 +3,6 @@ from app.services.library_service import library_service
 
 bp = Blueprint('library', __name__, url_prefix='/api/library')
 
-
 @bp.route('/import-foundry', methods=['POST'])
 def import_foundry():
     if 'file' not in request.files:
@@ -28,3 +27,8 @@ def import_foundry():
 
     except Exception as e:
         return jsonify({"error": f"Error procesando el archivo: {str(e)}"}), 500
+
+@bp.route('/options', methods=['GET'])
+def get_library_options():
+    """Devuelve las razas y clases disponibles en la biblioteca local"""
+    return jsonify(library_service.get_options())
