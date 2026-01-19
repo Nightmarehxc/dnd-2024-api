@@ -18,6 +18,8 @@ function getCurrentType() {
     if (path.includes('journal.html')) return 'journal';
     if (path.includes('spell.html')) return 'spell';
     if (path.includes('villain.html')) return 'villain';
+    if (path.includes('faction.html')) return 'faction';
+    if (path.includes('alchemy.html')) return 'alchemy';
 
     return null;
 }
@@ -39,6 +41,8 @@ const ICONS = {
     'journal': '🖋️',
     'spell': '✨',
     'villain': '👺',
+    'faction': '🛡️',
+    'alchemy': '🧪',
 };
 
 // --- 1. CARGAR LISTA ---
@@ -121,6 +125,8 @@ function restoreItem(id) {
         if (typeof renderJournal === 'function' && PAGE_TYPE === 'journal') renderJournal(data);
         if (typeof renderSpell === 'function' && PAGE_TYPE === 'spell') renderSpell(data);
         if (typeof renderVillain === 'function' && PAGE_TYPE === 'villain') renderVillain(data);
+        if (typeof renderFaction === 'function' && PAGE_TYPE === 'faction') renderFaction(data);
+        if (typeof renderAlchemy === 'function' && PAGE_TYPE === 'alchemy') renderAlchemy(data);
 
 
         const btnExp = document.getElementById('btnExp');

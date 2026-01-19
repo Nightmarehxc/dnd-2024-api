@@ -80,3 +80,15 @@ class SpellRequestSchema(Schema):
 class VillainRequestSchema(Schema):
     theme = fields.String(required=True, validate=validate.Length(min=3))
     level_range = fields.String(required=False, load_default="1-5") # Ej: "1-5", "10-15"
+
+class TravelRequestSchema(Schema):
+    environment = fields.String(required=True, validate=validate.Length(min=3)) # Ej: Bosque de los Elfos, Desierto de ceniza
+    days = fields.Integer(required=False, load_default=3, validate=validate.Range(min=1, max=10)) # Cuántos eventos generar
+
+class FactionRequestSchema(Schema):
+    theme = fields.String(required=True, validate=validate.Length(min=3)) # Ej: "Bajos fondos", "Corte Real"
+    faction_type = fields.String(required=False, load_default="Organización Secreta")
+
+class AlchemyRequestSchema(Schema):
+    item_type = fields.String(required=True, validate=validate.OneOf(["Poción", "Veneno", "Aceite", "Elixir", "Ungüento"]))
+    rarity = fields.String(required=False, load_default="Común")

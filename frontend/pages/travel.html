@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Eventos de Viaje</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .travel-header {
+            background: #d35400; /* Color tierra/viaje */
+            color: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            text-align: center;
+        }
+        .travel-body {
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+        .event-node {
+            display: flex;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .event-node:last-child { margin-bottom: 0; }
+
+        /* Línea de tiempo */
+        .event-node::before {
+            content: "";
+            position: absolute;
+            left: 20px;
+            top: 40px;
+            bottom: -20px;
+            width: 4px;
+            background: #ecf0f1;
+            z-index: 0;
+        }
+        .event-node:last-child::before { display: none; }
+
+        .event-icon {
+            width: 45px;
+            height: 45px;
+            background: #e67e22;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            z-index: 1;
+            flex-shrink: 0;
+            margin-right: 15px;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .event-content {
+            background: #fdfefe;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 6px;
+            flex-grow: 1;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .event-type-tag {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+        .interaction-box {
+            background: #e8f6f3;
+            border-left: 4px solid #1abc9c;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #16a085;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">⛺ Diario de Viaje</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Planificar Ruta</h2>
+
+            <label>Entorno / Bioma</label>
+            <textarea id="env" rows="3" placeholder="Ej: El Bosque de los Susurros, lleno de niebla y ruinas élficas..."></textarea>
+
+            <label>Duración (Eventos)</label>
+            <input type="number" id="days" value="4" min="1" max="10">
+
+            <button class="btn-generate" id="btnGen" style="background:#d35400;">Comenzar Viaje</button>
+            <button class="btn-export" id="btnExp" style="display:none;">Guardar Bitácora</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🐎 Ensillando los caballos...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">El camino se revelará aquí</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">🗺️ Rutas Pasadas</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="../js/history.js"></script>
+    <script src="../js/travel.js"></script>
+</body>
+</html>

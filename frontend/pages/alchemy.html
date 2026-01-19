@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mesa de Alquimia</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="brand">🧪 Mesa de Alquimia</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Mezclar Ingredientes</h2>
+            <label>Tipo de Brebaje</label>
+            <select id="alcType">
+                <option value="Poción">Poción (Bebible)</option>
+                <option value="Veneno">Veneno (Dañino)</option>
+                <option value="Aceite">Aceite (Aplicable a armas)</option>
+                <option value="Elixir">Elixir (Efecto largo)</option>
+                <option value="Ungüento">Ungüento (Tópico)</option>
+            </select>
+
+            <label>Rareza / Potencia</label>
+            <select id="alcRarity">
+                <option value="Común">Común (Niveles 1-4)</option>
+                <option value="Poco Común">Poco Común (Niveles 5-10)</option>
+                <option value="Rara">Rara (Niveles 11-16)</option>
+                <option value="Muy Rara">Muy Rara (Niveles 17+)</option>
+                <option value="Legendaria">Legendaria (Única)</option>
+            </select>
+
+            <button class="btn-generate" id="btnGen" style="background:#8e44ad;">Destilar</button>
+            <button class="btn-export" id="btnExp" style="display:none;">Crear Item (Foundry)</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">⚗️ Burbujeando...</div>
+            <div id="resultContent"><p style="text-align:center; margin-top:150px; color:#aaa;">El resultado aparecerá aquí</p></div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📚 Recetario</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="../js/history.js"></script>
+    <script src="../js/alchemy.js"></script>
+</body>
+</html>

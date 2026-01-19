@@ -116,23 +116,15 @@ Tienes "Aventuras" (tramas largas), pero a veces los jugadores llegan a un puebl
 
     Valor: Contenido de relleno infinito para cuando los jugadores ignoran la trama principal.
 
-### 10. ⚔️ Creador de Facciones y Cultos 
+### 10. 🛡️ Gestor de Facciones (Faction & Guilds) ✅ 
 
-Para dar profundidad política a tus Ciudades (CityService).
+Para dar profundidad política a tus ciudades.
 
-    Qué hace: Creas una organización (Gremio de Ladrones, Culto Apocalíptico, Orden de Caballeros).
+    Qué hace: Crea organizaciones secretas, gremios de ladrones, cultos o órdenes de caballeros.
 
-    La IA genera:
+    La IA Genera: Nombre, Símbolo, Lema, Líder, Objetivos, Recursos y Relación con los jugadores (¿Aliados o Rivales?).
 
-        Lema y Símbolo.
-
-        Objetivo Oculto.
-
-        Jerarquía: Quién manda y quiénes son los peones.
-
-        Aliados y Rivales.
-
-    Valor: Crea enemigos recurrentes o aliados poderosos para la campaña.
+    Valor: Ideal para campañas urbanas o de intriga.
 
 ### 11. ✨ La Forja Arcana (Spellcrafter) ✅ 
 
@@ -195,3 +187,58 @@ Los DMs (y jugadores) siempre olvidan qué pasó la semana pasada.
         Bullet Points: Lista limpia de objetos ganados, NPCs conocidos y misiones pendientes.
 
     Valor: Ahorra tiempo de organización post-partida.
+
+### 15. 🏰 El Arquitecto de Mazmorras (Dungeon Architect)
+
+Ya tienes "Encuentros" (combate) y "Aventuras" (trama), pero falta la estructura física donde ocurren.
+
+    Qué hace: Genera una estructura de mazmorra rápida (ej: "La Técnica de las 5 Habitaciones").
+
+    La IA Genera:
+
+        Entrada/Guardián: El obstáculo inicial.
+
+        Puzzle/Roleplay: Un desafío no combativo.
+
+        La Trampa/Revés: Algo que sale mal.
+
+        Clímax: La batalla final.
+
+        Recompensa: El tesoro y la salida.
+
+    Valor: Crea una sesión de "dungeon crawl" completa en segundos.
+
+
+### 17🧪 La Mesa de Alquimia (Potion & Poison Maker) ✅ 
+
+Los jugadores siempre quieren craftear cosas o encuentran líquidos raros.
+
+    Qué hace: Genera consumibles únicos que no están en el manual.
+
+    La IA Genera:
+
+        Apariencia: "Líquido viscoso y burbujeante color violeta".
+
+        Sabor/Olor: "Huele a ozono y sabe a ceniza".
+
+        Efecto Mecánico: "Cura 2d4 pero te vuelve azul durante 1 hora".
+
+        Ingredientes: Qué necesitan para fabricarla.
+
+    Valor: Da sabor (literalmente) al botín y al crafteo.
+
+### 18 ⛺ Eventos de Viaje (Travel Events) ✅ 
+
+El famoso "voy de Punto A a Punto B". A veces no quieres combate, sino "sabor".
+
+    Qué hace: Genera encuentros no combativos para el camino.
+
+    La IA Genera:
+
+        "Un mercader con una rueda rota".
+
+        "Ruinas antiguas con un mural profético".
+
+        "Un cambio de clima repentino mágico".
+
+    Valor: Hace que el mundo se sienta vivo y grande entre aventuras.
