@@ -6,37 +6,56 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="brand">👤 Creador de Personajes</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">👤 Creador de Personajes</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Datos del PJ</h2>
-            <label>Concepto / Idea</label>
-            <textarea id="desc" rows="5" placeholder="Ej: Un pícaro elfo que huye de su pasado noble..."></textarea>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Datos del PJ</h2>
+        <label>Concepto / Idea</label>
+        <textarea id="desc" rows="5" placeholder="Ej: Un pícaro elfo que huye de su pasado noble..."></textarea>
 
-            <label>Nivel</label>
-            <input type="number" id="level" value="1" min="1" max="20">
+        <label>Nivel</label>
+        <input type="number" id="level" value="1" min="1" max="20">
 
-            <button class="btn-generate" id="btnGen">Crear Personaje</button>
-            <button class="btn-export" id="btnExp">Exportar a Foundry VTT</button>
-        </div>
+        <button class="btn-generate" id="btnGen">Crear Personaje</button>
+        <button class="btn-export" id="btnExp">Exportar a Foundry VTT</button>
 
-        <div class="panel result-panel">
-            <div id="loader" class="loader">✨ Tejiendo el destino...</div>
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">La hoja de personaje aparecerá aquí</p>
+        <div style="background: #e3f2fd; padding: 15px; border: 1px dashed #2980b9; border-radius: 8px; margin-bottom: 25px;">
+            <h3 style="margin-top:0; color:#2980b9; font-size:1rem;">📥 Importar desde Foundry VTT</h3>
+            <p style="font-size:0.8rem; color:#666; margin-bottom:10px;">
+                Sube el <code>.json</code> de tu personaje exportado de Foundry.
+                El sistema extraerá automáticamente: Raza, Clase, Trasfondo y Equipo para usarlos en futuras
+                generaciones.
+            </p>
+
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="file" id="foundryFile" accept=".json" style="background:white; padding:5px;">
+                <button id="btnImport" class="btn-generate"
+                        style="background:#2980b9; width:auto; margin:0; padding:8px 15px; font-size:0.9rem;">
+                    Procesar JSON
+                </button>
             </div>
-        </div>
-
-        <div class="history-panel">
-            <div class="history-header">📜 Salón de Héroes</div>
-            <div class="history-list" id="historyList"></div>
+            <div id="importStatus" style="margin-top:10px; font-size:0.85rem; font-weight:bold;"></div>
         </div>
     </div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/character.js"></script> </body>
+    <div class="panel result-panel">
+        <div id="loader" class="loader">✨ Tejiendo el destino...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">La hoja de personaje aparecerá aquí</p>
+        </div>
+    </div>
+
+    <div class="history-panel">
+        <div class="history-header">📜 Salón de Héroes</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history.js"></script>
+<script src="../js/character.js"></script>
+</body>
 </html>

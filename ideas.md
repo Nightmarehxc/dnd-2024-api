@@ -25,13 +25,17 @@ Esta es mi favorita y técnicamente muy viable con tu código actual.
     * **Funcionalidad:** Añadir un botón "Hablar" en la ficha del NPC. Esto abre un pequeño chat donde el usuario (DM) le hace preguntas y la IA responde **roleando como ese NPC** (usando su personalidad, secretos y trasfondo generados previamente).
     * **Valor:** Permite al DM improvisar diálogos en tiempo real si los jugadores hacen preguntas inesperadas.
 
-### 3. ✨ Creador de Hechizos (Spellcrafter)
+### 3. ✨ La Forja Arcana (Spellcrafter) ✅ 
 
-D&D 2024 permite mucha personalización.
+D&D 2024 fomenta mucho la personalización. A veces un jugador quiere un hechizo que no existe.
 
-    * **Qué hace:** El usuario describe una idea: "Una bola de fuego pero de hielo que ralentiza".
-    * **La IA genera:** Un bloque de estadísticas de hechizo completo (Tiempo de lanzamiento, Componentes V/S/M, Duración) equilibrado para el nivel deseado.
-    * **Valor:** Creación de contenido *homebrew* balanceado automáticamente.
+    El Problema: Crear hechizos caseros (homebrew) suele romper el juego (demasiado daño, coste muy bajo).
+
+    Qué hace: El usuario dice: "Quiero una bola de fuego pero de electricidad que aturda".
+
+    La IA Genera: Un bloque de estadísticas completo (Nivel, Tiempo de Casteo, Componentes, Daño, Duración) balanceado matemáticamente comparándolo con hechizos oficiales.
+
+    Valor: Permite recompensas únicas para los magos del grupo.
 
 ### 4. 🏰 Generador de Asentamientos / Ciudades ✅ 
 
@@ -50,10 +54,10 @@ Ya tienes aventuras y tiendas, falta el lugar donde ocurren.
 ### 5. 📜 Generador de Acertijos y Trampas ✅ 
 
 Para las mazmorras.
-
-* **Qué hace:** El usuario pide "Un acertijo para abrir una puerta mágica en una biblioteca".
-* **La IA genera:** El acertijo, la solución, y qué pasa si fallan (la trampa/consecuencia).
-* **Valor:** Los acertijos son lo más difícil de improvisar para un humano.
+    
+    * **Qué hace:** El usuario pide "Un acertijo para abrir una puerta mágica en una biblioteca".
+      * **La IA genera:** El acertijo, la solución, y qué pasa si fallan (la trampa/consecuencia).
+      * **Valor:** Los acertijos son lo más difícil de improvisar para un humano.
  
 ### 6.📄 Exportación a PDF (Ficha de impresión)
 
@@ -126,19 +130,8 @@ Para dar profundidad política a tus ciudades.
 
     Valor: Ideal para campañas urbanas o de intriga.
 
-### 11. ✨ La Forja Arcana (Spellcrafter) ✅ 
 
-D&D 2024 fomenta mucho la personalización. A veces un jugador quiere un hechizo que no existe.
-
-    El Problema: Crear hechizos caseros (homebrew) suele romper el juego (demasiado daño, coste muy bajo).
-
-    Qué hace: El usuario dice: "Quiero una bola de fuego pero de electricidad que aturda".
-
-    La IA Genera: Un bloque de estadísticas completo (Nivel, Tiempo de Casteo, Componentes, Daño, Duración) balanceado matemáticamente comparándolo con hechizos oficiales.
-
-    Valor: Permite recompensas únicas para los magos del grupo.
-
-### 12. ⚡ Generador de "Desafíos de Habilidad" (Skill Challenges) 
+### 11. ⚡ Generador de "Desafíos de Habilidad" (Skill Challenges) 
 
 No todo es combate. A veces hay que escapar de un templo que se derrumba, perseguir a un asesino por los tejados o convencer a un rey.
 
@@ -156,7 +149,7 @@ No todo es combate. A veces hay que escapar de un templo que se derrumba, perseg
 
     Valor: Añade cine y tensión narrativa estructurada.
 
-### 13. 👺 Arquitecto de Villanos (BBEG Planner) ✅
+### 12. 👺 Arquitecto de Villanos (BBEG Planner) ✅
 
 Tienes monstruos, pero ¿quién los manda?
 
@@ -174,7 +167,7 @@ Tienes monstruos, pero ¿quién los manda?
 
     Valor: Da estructura a largo plazo a la campaña.
 
-### 14. 📝 El Cronista (Session Recap / Journal) ✅ 
+### 13. 📝 El Cronista (Session Recap / Journal) ✅ 
 
 Los DMs (y jugadores) siempre olvidan qué pasó la semana pasada.
 
@@ -188,7 +181,7 @@ Los DMs (y jugadores) siempre olvidan qué pasó la semana pasada.
 
     Valor: Ahorra tiempo de organización post-partida.
 
-### 15. 🏰 El Arquitecto de Mazmorras (Dungeon Architect)
+### 14. 🏰 El Arquitecto de Mazmorras (Dungeon Architect)
 
 Ya tienes "Encuentros" (combate) y "Aventuras" (trama), pero falta la estructura física donde ocurren.
 
@@ -209,7 +202,7 @@ Ya tienes "Encuentros" (combate) y "Aventuras" (trama), pero falta la estructura
     Valor: Crea una sesión de "dungeon crawl" completa en segundos.
 
 
-### 17🧪 La Mesa de Alquimia (Potion & Poison Maker) ✅ 
+### 15🧪 La Mesa de Alquimia (Potion & Poison Maker) ✅ 
 
 Los jugadores siempre quieren craftear cosas o encuentran líquidos raros.
 
@@ -227,7 +220,7 @@ Los jugadores siempre quieren craftear cosas o encuentran líquidos raros.
 
     Valor: Da sabor (literalmente) al botín y al crafteo.
 
-### 18 ⛺ Eventos de Viaje (Travel Events) ✅ 
+### 16 ⛺ Eventos de Viaje (Travel Events) ✅ 
 
 El famoso "voy de Punto A a Punto B". A veces no quieres combate, sino "sabor".
 

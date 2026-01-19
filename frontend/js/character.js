@@ -95,3 +95,54 @@ els.btnExp.addEventListener('click', () => {
     a.download = `${currentData.nombre}_Foundry.json`;
     a.click();
 });
+
+const btnImport = document.getElementById('btnImport');
+const fileInput = document.getElementById('foundryFile');
+const statusDiv = document.getElementById('importStatus');
+
+if(btnImport) {
+    btnImport.addEventListener('click', async () => {
+        if (!fileInput.files.length) {
+            alert("Por favor, selecciona un archivo JSON primero.");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        statusDiv.innerHTML = `<span style="color:#e67e22;">⏳ Analizando pergaminos arcanos...</span>`;
+        btnImport.disabled = true;
+
+        try {
+            const res = await fetch('http://localhost:5001/api/library/import-foundry', {
+                method: 'POST',
+                body: formData // No ponemos Content-Type, fetch lo pone automático con el boundary
+            });
+
+            const data = await res.json();
+
+            if (data.error) throw new Error(data.error);
+
+            // Mostrar resumen bonito
+            const s = data.detalles;
+            statusDiv.innerHTML = `
+                <span style="color:#27ae60;">✅ Éxito! Se han aprendido nuevos conocimientos:</span><br>
+                <ul style="margin:5px 0; padding-left:20px; color:#333;">
+                    <li>Razas: ${s.races}</li>
+                    <li>Clases: ${s.classes}</li>
+                    <li>Trasfondos: ${s.backgrounds}</li>
+                    <li>Objetos: ${s.items}</li>
+                    <li>Hechizos: ${s.spells}</li>
+                </ul>
+            `;
+
+        } catch (err) {
+            console.error(err);
+            statusDiv.innerHTML = `<span style="color:#c0392b;">❌ Error: ${err.message}</span>`;
+        } finally {
+            btnImport.disabled = false;
+            fileInput.value = ''; // Limpiar input
+        }
+    });
+}
