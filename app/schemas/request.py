@@ -99,3 +99,9 @@ class FactionRequestSchema(Schema):
 class AlchemyRequestSchema(Schema):
     item_type = fields.String(required=True, validate=validate.OneOf(["Poción", "Veneno", "Aceite", "Elixir", "Ungüento"]))
     rarity = fields.String(required=False, load_default="Común")
+
+# ... imports existentes ...
+
+class DungeonRequestSchema(Schema):
+    theme = fields.String(required=True, validate=validate.Length(min=3))
+    level = fields.Integer(required=False, load_default=1, validate=validate.Range(min=1, max=20))

@@ -20,6 +20,7 @@ function getCurrentType() {
     if (path.includes('villain.html')) return 'villain';
     if (path.includes('faction.html')) return 'faction';
     if (path.includes('alchemy.html')) return 'alchemy';
+    if (path.includes('dungeon.html')) return 'dungeon';
 
     return null;
 }
@@ -43,6 +44,7 @@ const ICONS = {
     'villain': '👺',
     'faction': '🛡️',
     'alchemy': '🧪',
+    'dungeon': '🏰',
 };
 
 // --- 1. CARGAR LISTA ---
@@ -127,6 +129,7 @@ function restoreItem(id) {
         if (typeof renderVillain === 'function' && PAGE_TYPE === 'villain') renderVillain(data);
         if (typeof renderFaction === 'function' && PAGE_TYPE === 'faction') renderFaction(data);
         if (typeof renderAlchemy === 'function' && PAGE_TYPE === 'alchemy') renderAlchemy(data);
+        if (typeof renderDungeon === 'function' && PAGE_TYPE === 'dungeon') renderDungeon(data);
 
 
         const btnExp = document.getElementById('btnExp');

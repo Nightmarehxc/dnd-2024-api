@@ -181,7 +181,7 @@ Los DMs (y jugadores) siempre olvidan qué pasó la semana pasada.
 
     Valor: Ahorra tiempo de organización post-partida.
 
-### 14. 🏰 El Arquitecto de Mazmorras (Dungeon Architect)
+### 14. 🏰 El Arquitecto de Mazmorras (Dungeon Architect) ✅ 
 
 Ya tienes "Encuentros" (combate) y "Aventuras" (trama), pero falta la estructura física donde ocurren.
 
