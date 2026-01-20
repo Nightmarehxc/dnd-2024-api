@@ -235,3 +235,171 @@ El famoso "voy de Punto A a Punto B". A veces no quieres combate, sino "sabor".
         "Un cambio de clima repentino mágico".
 
     Valor: Hace que el mundo se sienta vivo y grande entre aventuras.
+
+### 17. 👹 Laboratorio de Monstruos (Monster Modder)
+
+A veces el manual de monstruos se queda corto o los jugadores ya se saben las estadísticas de memoria.
+
+    Qué hace: Tomas un monstruo base (ej: "Ogro") y le aplicas una "Plantilla" o tema (ej: "Infernal", "Cibernético", "Fúngico").
+
+    La IA genera:
+
+        Nuevos Rasgos: "Piel de Esporas: Al recibir daño, libera una nube tóxica".
+
+        Ataques Modificados: El garrote ahora hace daño de veneno.
+
+        Descripción Visual: "Un ogro con setas púrpuras brotando de sus hombros y ojos lechosos".
+
+    Valor: Sorprende a los jugadores veteranos reciclando monstruos clásicos con un giro fresco.
+
+### 18📚 El Bibliotecario (Lore & Book Generator) ✅ 
+
+Los jugadores adoran saquear estanterías. Decir "encuentras 3 libros" es aburrido.
+
+    Qué hace: Genera el contenido de un libro, pergamino o carta encontrada en una mazmorra.
+
+    La IA genera:
+
+        Título y Autor: "Tratado sobre la cría de Wyverns, por Lord Fizzbang".
+
+        Extracto de Texto: Un párrafo legible del contenido (lore, pistas o humor).
+
+        Estado y Valor: "¿Está quemado? ¿Escrito en sangre? ¿Vale 50gp?".
+
+    Valor: Aporta profundidad al mundo (Lore) instantáneo sin que tengas que escribir historias enteras.
+
+### 19. 🕵️‍♂️ Generador de Misterios (Investigation Planner) ✅ 
+
+Diseñar un buen misterio es difícil; la IA es experta en conectar puntos.
+
+    Qué hace: Pides "Un asesinato en una mansión cerrada".
+
+    La IA genera:
+
+        La Víctima y el Lugar: Quién murió y dónde.
+
+        Los Sospechosos: 3 NPCs con motivos creíbles.
+
+        Las Pistas: 3 pistas físicas (una carta, una huella, un olor) que llevan al culpable.
+
+        La Verdad: Quién lo hizo realmente y por qué.
+
+    Valor: Crea una sesión completa de investigación estilo Sherlock Holmes en segundos.
+
+### 20. ⚖️ El Abogado del Diablo (Contract Generator) ✅ 
+
+Ideal para Brujos (Warlocks), tratos con Diablos o gremios mercantiles estrictos.
+
+    Qué hace: Genera un contrato legal o mágico con "letra pequeña".
+
+    La IA genera:
+
+        Términos del Servicio: Qué se ofrece y qué se pide a cambio.
+
+        La Letra Pequeña (Trampa): "El alma se entregará tras la muerte o tras el primer incumplimiento menor".
+
+        Forma de Romperlo: Una cláusula de escape oculta o difícil.
+
+    Valor: Utilería de juego (Props) de alta calidad para rolear pactos y acuerdos.
+
+### 21. 🎪 Organizador de Festivales (Festival Maker) 
+
+Las ciudades están vivas. Cuando los jugadores llegan, a veces hay fiesta.
+
+    Qué hace: Diseña una festividad local única.
+
+    La IA genera:
+
+        Nombre y Motivo: "La Fiesta de la Luna Roja (Conmemora una victoria antigua)".
+
+        Eventos/Minijuegos: "Concurso de comer pasteles", "Tiro al trasgo", "Carrera de cerdos engrasados" (con mecánicas de dados simples).
+
+        Comida Callejera: Platos típicos del festival.
+
+    Valor: Momentos de relax y roleo divertido entre aventuras peligrosas.
+
+### 22. 🕍 Panteones y Cultos (Deity & Cult Creator) 
+
+Diferente a las facciones políticas, esto se centra en la fe y la magia divina.
+
+    Qué hace: Crea una religión, secta o dios menor.
+
+    La IA genera:
+
+        Nombre y Dominios: "Zalthos, dios de las sombras y los secretos perdidos".
+
+        Símbolo Sagrado: Descripción visual.
+
+        Dogma/Mandamientos: "Nunca enciendas una luz sin pedir perdón a la oscuridad".
+
+        Rituales: Qué hacen sus seguidores (sacrificios, cánticos, ayunos).
+
+    Valor: Fundamental para Clérigos, Paladines y tramas de cultistas.
+
+### 23. 🍲 Gastronomía Fantástica (Fantasy Chef) 
+
+Para esas tabernas de lujo o cenas con el rey.
+
+    Qué hace: Genera un menú exótico con efectos menores.
+
+    La IA genera:
+
+        Plato: "Estofado de Hidra con salsa de pimienta fantasma".
+
+        Descripción Sensorial: "La carne se regenera ligeramente mientras la masticas, picante y ácida".
+
+        Efecto Menor (Opcional): "Te sientes valiente (+1d4 a la próxima salvación de miedo) pero tienes ardores".
+
+    Valor: Sabor (literalmente) y roleo para los momentos de descanso.
+
+### 24.🛡️ Objetos de Legado (Evolving Items) 
+
+Objetos que crecen con el jugador, muy populares en campañas largas.
+
+    Qué hace: Crea un arma u objeto con niveles de poder.
+
+    La IA genera:
+
+        Historia: A quién perteneció.
+
+        Nivel 1 (Dormido): Es una espada +1 normal.
+
+        Nivel 5 (Despierto): Gana daño de fuego y brilla.
+
+        Nivel 10 (Exaltado): Permite lanzar "Bola de Fuego" una vez al día.
+
+        Condición de Desbloqueo: "Debes bañar la hoja en sangre de dragón para despertarla".
+
+    Valor: Da a los jugadores un objetivo personal a largo plazo.
+
+### 25. 🔮 Tejedor de Sueños (Dream Generator) ✅ 
+
+Los DMs suelen usar los sueños para dar pistas o avanzar la trama.
+
+    Qué hace: Genera una secuencia onírica simbólica o profética.
+
+    La IA genera:
+
+        Imágenes: "Ves una torre cayendo en silencio, rodeada de cuervos de cristal".
+
+        Sensaciones: Frío intenso, sensación de caída.
+
+        Significado Oculto: "Representa la caída inminente del rey local".
+
+    Valor: Narrativa potente para cuando los personajes hacen un Descanso Largo.
+
+### 26.️ 🏚️ Historiador de Ruinas (Ruins Lore)
+
+Para darle sentido a tu "Dungeon Architect" o "Cities".
+
+    Qué hace: Explica por qué ese lugar es una ruina.
+
+    La IA genera:
+
+        Uso Original: "Era una academia de magia para nobles".
+
+        El Cataclismo: "Un experimento de invocación salió mal y fusionó a los estudiantes con las paredes".
+
+        Estado Actual: "Los fantasmas de los estudiantes aún intentan asistir a clase".
+
+    Valor: Convierte una "mazmorra genérica" en un lugar con historia y alma.

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>El Bibliotecario</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="brand">📚 El Bibliotecario</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Escribir Documento</h2>
+
+            <label>Tema o Título</label>
+            <textarea id="topic" rows="3" placeholder="Ej: La cría de dragones, Historia de la ciudad perdida..."></textarea>
+
+            <label>Formato</label>
+            <select id="type">
+                <option value="Libro Antiguo">Libro Antiguo</option>
+                <option value="Pergamino">Pergamino Enrollado</option>
+                <option value="Carta Personal">Carta Personal</option>
+                <option value="Diario de Viaje">Diario de Viaje</option>
+                <option value="Tablilla de Piedra">Tablilla de Piedra</option>
+                <option value="Nota Arrugada">Nota Arrugada</option>
+            </select>
+
+            <button class="btn-generate" id="btnGen" style="background:#8d6e63;">Investigar</button>
+            <button class="btn-export" id="btnExp" style="display:none;">Crear Journal (Foundry)</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">📖 Buscando en los archivos...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">El conocimiento espera...</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📂 Biblioteca</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="../js/history.js"></script>
+    <script src="../js/librarian.js"></script>
+</body>
+</html>

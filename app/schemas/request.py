@@ -105,3 +105,19 @@ class AlchemyRequestSchema(Schema):
 class DungeonRequestSchema(Schema):
     theme = fields.String(required=True, validate=validate.Length(min=3))
     level = fields.Integer(required=False, load_default=1, validate=validate.Range(min=1, max=20))
+
+class LibrarianRequestSchema(Schema):
+    topic = fields.String(required=True, validate=validate.Length(min=3))  # Tema del libro
+    type = fields.String(required=False, load_default="Libro Antiguo")     # Libro, Pergamino, Carta...
+
+class DreamRequestSchema(Schema):
+    context = fields.String(required=True)  # Contexto del personaje o situación
+    tone = fields.String(required=False, load_default="Profético") # Pesadilla, Simbólico...
+
+class MysteryRequestSchema(Schema):
+    setting = fields.String(required=True)  # Mansión, Barco, Pueblo
+    difficulty = fields.String(required=False, load_default="Medio")
+
+class ContractRequestSchema(Schema):
+    patron = fields.String(required=True)   # Diablo, Hada, Gremio
+    desire = fields.String(required=True)   # Qué quiere el jugador (Poder, Oro)

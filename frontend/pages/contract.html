@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Abogado del Diablo</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="brand">⚖️ Abogado del Diablo</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Redactar Acuerdo</h2>
+
+            <label>El Patrón (Quien ofrece)</label>
+            <input type="text" id="patron" placeholder="Ej: Asmodeus, Un archimago, El Gremio de Ladrones...">
+
+            <label>El Deseo (Qué quiere el PJ)</label>
+            <textarea id="desire" rows="4" placeholder="Ej: Poder para salvar a su hermana, Una espada mágica, Borrar una deuda..."></textarea>
+
+            <button class="btn-generate" id="btnGen" style="background:#c0392b;">Firmar Pacto</button>
+            <button class="btn-export" id="btnExp" style="display:none;">Exportar Contrato</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🔥 Calentando el lacre...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">Esperando firma...</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📜 Registro Civil</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="../js/history.js"></script>
+    <script src="../js/contract.js"></script>
+</body>
+</html>

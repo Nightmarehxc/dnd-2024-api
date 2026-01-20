@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tejedor de Sueños</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="brand">🔮 Tejedor de Sueños</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Inducir Visión</h2>
+
+            <label>Contexto del Personaje</label>
+            <textarea id="context" rows="4" placeholder="Ej: Un paladín que ha perdido su fe y duerme en una cripta maldita..."></textarea>
+
+            <label>Tono del Sueño</label>
+            <select id="tone">
+                <option value="Profético">Profético / Revelador</option>
+                <option value="Pesadilla">Pesadilla Terrorífica</option>
+                <option value="Melancólico">Melancólico / Triste</option>
+                <option value="Abstracto">Abstracto / Surrealista</option>
+                <option value="Inspirador">Inspirador / Divino</option>
+            </select>
+
+            <button class="btn-generate" id="btnGen" style="background:#673ab7;">Tejer Sueño</button>
+            <button class="btn-export" id="btnExp" style="display:none;">Guardar Visión</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">💤 Entrando en el trance...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">Cierra los ojos...</p>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">🌙 Diario de Sueños</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="../js/history.js"></script>
+    <script src="../js/dream.js"></script>
+</body>
+</html>

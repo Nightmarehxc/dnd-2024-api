@@ -21,7 +21,10 @@ function getCurrentType() {
     if (path.includes('faction.html')) return 'faction';
     if (path.includes('alchemy.html')) return 'alchemy';
     if (path.includes('dungeon.html')) return 'dungeon';
-
+    if (path.includes('librarian.html')) return 'librarian';
+    if (path.includes('dream.html')) return 'dream';
+    if (path.includes('mystery.html')) return 'mystery';
+    if (path.includes('contract.html')) return 'contract';
     return null;
 }
 
@@ -45,6 +48,10 @@ const ICONS = {
     'faction': '🛡️',
     'alchemy': '🧪',
     'dungeon': '🏰',
+    'librarian': '📚',
+    'dream': '🔮',
+    'mystery': '🕵️',
+    'contract': '⚖️',
 };
 
 // --- 1. CARGAR LISTA ---
@@ -130,6 +137,10 @@ function restoreItem(id) {
         if (typeof renderFaction === 'function' && PAGE_TYPE === 'faction') renderFaction(data);
         if (typeof renderAlchemy === 'function' && PAGE_TYPE === 'alchemy') renderAlchemy(data);
         if (typeof renderDungeon === 'function' && PAGE_TYPE === 'dungeon') renderDungeon(data);
+        if (pageType === 'librarian' && typeof renderBook === 'function') renderBook(data);
+        if (pageType === 'dream' && typeof renderDream === 'function') renderDream(data);
+        if (pageType === 'mystery' && typeof renderMystery === 'function') renderMystery(data);
+        if (pageType === 'contract' && typeof renderContract === 'function') renderContract(data);
 
 
         const btnExp = document.getElementById('btnExp');
