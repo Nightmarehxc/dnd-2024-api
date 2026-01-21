@@ -90,16 +90,22 @@ els.btnEdit.addEventListener('click', () => {
 els.btnSave.addEventListener('click', () => {
     try {
         const newData = JSON.parse(els.textarea.value);
+        // Preservar ID si existía
+        if (currentData._db_id) newData._db_id = currentData._db_id;
+
         currentData = newData;
-        renderInn(currentData);
+        renderShop(currentData);
         els.editorContainer.style.display = 'none';
 
-        // Actualizamos visualmente, pero no el historial (opcionalmente podrías actualizarlo)
-        alert("✅ Cambios aplicados a la vista.");
+        // --- LÓGICA INTELIGENTE ---
+        if (currentData._db_id && typeof updateHistoryItem === 'function') {
+            updateHistoryItem(currentData._db_id, currentData);
+        } else if (typeof addToHistory === 'function') {
+            addToHistory(currentData, 'inn');
+        }
 
-    } catch (e) {
-        alert("❌ Error en el JSON: " + e.message);
-    }
+        alert("✅ Inventario actualizado.");
+    } catch (e) { alert("❌ Error JSON: " + e.message); }
 });
 
 // --- RENDERIZAR ---

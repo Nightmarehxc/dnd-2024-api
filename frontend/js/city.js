@@ -114,29 +114,42 @@ els.btnCancel.addEventListener('click', () => {
 
 // 3. Guardar Cambios
 els.btnSave.addEventListener('click', () => {
-    // Actualizar objeto de datos
-    currentData.nombre = els.editName.value;
-    currentData.titulo = els.editTitle.value;
-    currentData.poblacion = els.editPop.value;
-    currentData.gobierno = els.editGov.value;
-    currentData.clima_atmosfera = els.editAtmos.value;
-    currentData.conflicto_actual = els.editConflict.value;
+    try {
+        // Recogemos datos del formulario
+        const newData = {
+            ...currentData, // Mantenemos datos viejos (como _db_id)
+            nombre: els.editName.value,
+            titulo: els.editTitle.value,
+            poblacion: els.editPop.value,
+            gobierno: els.editGov.value,
+            clima_atmosfera: els.editAtmos.value,
+            conflicto_actual: els.editConflict.value
+        };
 
-    // Renderizar de nuevo
-    renderCity(currentData);
+        if (!newData.nombre) throw new Error("La ciudad debe tener nombre.");
 
-    // Volver a vista de lectura
-    els.editorContainer.style.display = 'none';
-    els.content.style.display = 'block';
+        currentData = newData;
+        renderCity(currentData);
 
-    // Actualizar Historial
-    if (typeof addToHistory === 'function') {
-        addToHistory({ ...currentData, nombre: currentData.nombre, tipo_item: "Ciudad" });
+        // Ocultar editor
+        els.editorContainer.style.display = 'none';
+        els.content.style.display = 'block';
+
+        // --- LÓGICA DE ACTUALIZACIÓN INTELIGENTE ---
+        if (currentData._db_id && typeof updateHistoryItem === 'function') {
+            // Si tiene ID, actualizamos el registro existente
+            updateHistoryItem(currentData._db_id, currentData);
+        } else if (typeof addToHistory === 'function') {
+            // Si es nuevo (recién generado y editado antes de guardar), creamos
+            addToHistory(currentData, 'city');
+        }
+
+        alert("✅ Ciudad actualizada.");
+        els.content.scrollIntoView({behavior: "smooth"});
+
+    } catch (e) {
+        alert("❌ Error: " + e.message);
     }
-
-    // Feedback visual simple
-    // (Opcional: podrías usar un toast notification)
-    console.log("✅ Ciudad actualizada");
 });
 
 // --- RENDERIZADO ---

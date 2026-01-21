@@ -1,34 +1,38 @@
-from flask import Flask
+from flask import Flask, send_from_directory  # <--- Añadir send_from_directory
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy  # <--- 1. Importar
+from flask_sqlalchemy import SQLAlchemy
 import os
 
-# 2. Inicializar DB fuera de la función
 db = SQLAlchemy()
 
 
 def create_app(config_name='default'):
-    app = Flask(__name__)
+    # 1. CONFIGURACIÓN DE CARPETAS
+    # Le decimos a Flask que los archivos estáticos (HTML, CSS, JS) están en "../frontend"
+    app = Flask(__name__,
+                static_folder='../frontend',
+                static_url_path='')
 
-    # Configuración básica
     app.config.from_object('config.Config')
 
-    # 3. Configuración SQLite
-    # Esto creará un archivo "dnd_database.sqlite" en la carpeta raíz
+    # Configuración de SQLite
     basedir = os.path.abspath(os.path.dirname(__file__))
     db_path = os.path.join(basedir, '../dnd_database.sqlite')
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     CORS(app)
-
-    # 4. Iniciar DB con la app
     db.init_app(app)
 
-    # Registro de Blueprints (Mantén los que ya tienes)
+    # 2. RUTA PRINCIPAL (Para que al entrar a localhost:5001 cargue la web)
+    @app.route('/')
+    def serve_index():
+        return send_from_directory(app.static_folder, 'index.html')
+
+    # Registro de Blueprints
     from app.routes import (
         adventures, characters, items, spells, npcs, loot,
-        encounters, cities, shops, images, history,  # Asegúrate de que history está aquí
+        encounters, cities, shops, images, history,
         factions, villains, quests, riddles, rules, travel, alchemy,
         dungeons, librarian, dreams, mysteries, contracts, ruins, monsters,
         inns
@@ -61,8 +65,9 @@ def create_app(config_name='default'):
     app.register_blueprint(monsters.bp)
     app.register_blueprint(inns.bp)
 
-    # 5. Crear tablas automáticamente si no existen
+    # Crear tablas
     with app.app_context():
+        from app.models import GeneratedItem
         db.create_all()
 
     return app
