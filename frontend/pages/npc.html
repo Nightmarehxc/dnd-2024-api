@@ -5,176 +5,73 @@
     <title>Generador de NPCs</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-        /* Estilos específicos para el Chat Modal */
-        .modal {
+        #formEditorContainer {
             display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 10% auto;
-            padding: 0;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 600px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-            height: 60vh;
-        }
-
-        .modal-header {
+            background: #2c3e50;
             padding: 15px;
-            background: var(--accent);
-            color: white;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .close-modal {
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .chat-history {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .message {
-            max-width: 80%;
-            padding: 10px 15px;
-            border-radius: 15px;
-            font-size: 0.95rem;
-            line-height: 1.4;
-        }
-
-        .msg-user {
-            align-self: flex-end;
-            background-color: #3498db;
-            color: white;
-            border-bottom-right-radius: 2px;
-        }
-
-        .msg-npc {
-            align-self: flex-start;
-            background-color: #e0e0e0;
-            color: #333;
-            border-bottom-left-radius: 2px;
-            border: 1px solid #ccc;
-        }
-
-        .chat-input-area {
-            padding: 15px;
-            background: white;
-            border-bottom-left-radius: 10px;
-            border-bottom-right-radius: 10px;
-            display: flex;
-            gap: 10px;
-            border-top: 1px solid #ddd;
-        }
-
-        .chat-input-area input {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
             border-radius: 5px;
-        }
-
-        .chat-input-area button {
-            width: auto;
-            margin: 0;
-            padding: 10px 20px;
-            background: var(--accent);
+            margin-top: 20px;
             color: white;
         }
+        label { display: block; margin-top: 8px; font-weight: bold; font-size: 0.9em; color:#bdc3c7;}
+        input, textarea { width: 100%; padding: 8px; margin-top: 2px; border-radius: 4px; border:none; }
+        .editor-actions { margin-top: 15px; display: flex; gap: 10px; }
     </style>
 </head>
 <body>
-<header>
-    <div class="brand">🎭 Generador de NPCs</div>
-    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-</header>
+    <header>
+        <div class="brand">🎭 Personajes (NPCs)</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
 
-<div class="generator-layout">
-    <div class="panel">
-        <h2>Configuración</h2>
-        <label>Descripción / Concepto</label>
-        <textarea id="desc" rows="6"
-                  placeholder="Ej: Un capitán de la guardia corrupto que acepta sobornos pero protege a los suyos..."></textarea>
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Crear NPC</h2>
+            <label>Raza / Clase (Opcional)</label>
+            <input type="text" id="race" placeholder="Ej: Orco Guerrero, Elfo Mago...">
+            <label>Ocupación (Opcional)</label>
+            <input type="text" id="job" placeholder="Ej: Herrero, Guardia, Noble...">
 
-        <button class="btn-generate" id="btnGen">Invocar NPC</button>
-
-        <button class="btn-generate" id="btnChat" style="background-color: #2980b9; display: none; margin-top: 10px;">💬
-            Hablar con NPC
-        </button>
-        <button class="btn-generate" id="btnImg" style="background-color: #8e44ad; display: none; margin-top: 10px;">🎨
-            Generar Retrato
-        </button>
-
-        <button class="btn-export" id="btnExp">Exportar a Foundry VTT</button>
-    </div>
-
-    <div class="panel result-panel">
-        <div id="imgContainer" style="text-align: center; margin-bottom: 20px; display: none;">
-            <img id="generatedImg" src=""
-                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid var(--accent);">
+            <button class="btn-generate" id="btnGen" style="background:#8e44ad;">Crear Personaje</button>
+            <hr>
+            <button class="btn-edit" id="btnEdit" style="display:none; background:#f39c12; width:100%;">✏️ Editar Detalles</button>
+            <button class="btn-export" id="btnExp" style="display:none; background:#2980b9; width:100%; margin-top:5px;">Exportar</button>
         </div>
 
-        <div id="loader" class="loader">🔮 Creando vida...</div>
-        <div id="resultContent">
-            <p style="text-align:center; margin-top:150px; color:#aaa;">El NPC aparecerá aquí</p>
-        </div>
-    </div>
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🎭 Ensayando papel...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">Nadie a la vista.</p>
+            </div>
 
-    <div class="history-panel">
-        <div class="history-header">📚 Historial de NPCs</div>
-        <div class="history-list" id="historyList"></div>
-    </div>
-</div>
+            <div id="formEditorContainer">
+                <h3 style="margin-top:0;">Editar Ficha</h3>
 
-<div id="chatModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 style="margin:0">💬 Interrogatorio</h3>
-            <span class="close-modal" id="closeModal">&times;</span>
-        </div>
-        <div id="chatHistory" class="chat-history">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div><label>Nombre</label><input type="text" id="editName"></div>
+                    <div><label>Raza / Clase</label><input type="text" id="editRace"></div>
+                </div>
+                <label>Ocupación</label><input type="text" id="editJob">
+
+                <label>Apariencia</label><textarea id="editApp" rows="2"></textarea>
+                <label>Personalidad</label><textarea id="editPers" rows="2"></textarea>
+                <label>Secreto / Gancho</label><textarea id="editSecret" rows="2"></textarea>
+
+                <div class="editor-actions">
+                    <button id="btnSaveChanges" style="background:#27ae60; color:white; border:none; padding:10px; flex:1; cursor:pointer;">💾 Guardar</button>
+                    <button id="btnCancelEdit" style="background:#c0392b; color:white; border:none; padding:10px; cursor:pointer;">Cancelar</button>
+                </div>
+            </div>
         </div>
 
-        <div class="chat-input-area">
-            <button id="btnMic" style="background:#e74c3c; width:50px; border-radius:50%;">🎤</button>
-            <input type="text" id="chatInput" placeholder="Escribe o pulsa el micro para hablar..." autocomplete="off">
-            <button id="btnSend">Enviar</button>
-        </div>
-        <div id="recordingStatus"
-             style="display:none; text-align:center; color:red; font-weight:bold; padding:5px; background:#fff;">🔴
-            Grabando... (Suelta para enviar)
+        <div class="history-panel">
+            <div class="history-header">👥 Habitantes</div>
+            <div class="history-list" id="historyList"></div>
         </div>
     </div>
-</div>
-<script src="../js/history/config.js"></script>
-<script src="../js/history/manager.js"></script>
-<script src="../js/npc.js"></script>
+
+    <script src="../js/history/config.js"></script>
+    <script src="../js/history/manager.js"></script>
+    <script src="../js/npc.js"></script>
 </body>
 </html>

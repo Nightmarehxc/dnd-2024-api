@@ -119,7 +119,7 @@ function restoreItem(id) {
 
             const btnEdit = document.getElementById('btnEdit');
             // Permitimos editar en estas herramientas
-            if (btnEdit && ['monster', 'inn', 'shop', 'city'].includes(type)) {
+            if (btnEdit && ['monster', 'inn', 'shop', 'city','item'].includes(type)) {
                 btnEdit.style.display = 'block';
             }
 

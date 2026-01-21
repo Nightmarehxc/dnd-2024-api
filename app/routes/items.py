@@ -1,18 +1,24 @@
 from flask import Blueprint, request, jsonify
-from marshmallow import ValidationError
-from app.services.item_service import item_service # <--- NUEVO IMPORT
+from app.services.item_service import item_service
 from app.schemas.request import ItemRequestSchema
 
 bp = Blueprint('items', __name__, url_prefix='/api/items')
 
-@bp.route('/generate', methods=['POST'])
-def generate_item():
-    schema = ItemRequestSchema()
-    try:
-        data = schema.load(request.json)
-    except ValidationError as err:
-        return jsonify({"error": "Datos inválidos", "detalles": err.messages}), 400
 
-    # Llamada limpia al servicio específico
-    result = item_service.generate(data['description'], data['type'])
-    return jsonify(result)
+@bp.route('/generate', methods=['POST'])
+def generate():
+    try:
+        # Validar datos con Marshmallow
+        data = ItemRequestSchema().load(request.json)
+
+        # Llamar al servicio con los nombres de parámetros correctos
+        result = item_service.generate_item(
+            name=data['name'],
+            item_type=data['item_type'],
+            rarity=data['rarity'],
+            attunement=data['attunement']
+        )
+        return jsonify(result)
+    except Exception as e:
+        # Esto te ayudará a ver qué campo falla exactamente en la consola del navegador
+        return jsonify({"error": f"Validation Error: {str(e)}"}), 400

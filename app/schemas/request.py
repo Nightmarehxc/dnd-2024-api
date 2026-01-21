@@ -22,12 +22,12 @@ class CharacterRequestSchema(Schema):
 
 # Esquema específico para Objetos (Items)
 class ItemRequestSchema(Schema):
-    description = fields.String(required=True, validate=validate.Length(min=3))
-    type = fields.String(
-        required=False,
-        load_default="Cualquiera",
-        validate=validate.OneOf(["Arma", "Armadura", "Poción", "Objeto Maravilloso", "Cualquiera"])
-    )
+    name = fields.String(required=False, load_default="")
+    # El frontend envía 'item_type', asegúrate de que coincida aquí
+    item_type = fields.String(required=True)
+    rarity = fields.String(required=True)
+    # El frontend envía un booleano (true/false) en 'attunement'
+    attunement = fields.Boolean(required=False, load_default=False)
 
 # Esquema para Aventuras (CORREGIDO)
 class AdventureRequestSchema(Schema):

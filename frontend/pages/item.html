@@ -4,48 +4,87 @@
     <meta charset="UTF-8">
     <title>Generador de Objetos</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        #formEditorContainer {
+            display: none;
+            background: #2c3e50;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            color: white;
+        }
+        label { display: block; margin-top: 8px; font-weight: bold; font-size: 0.9em; color:#bdc3c7;}
+        input, textarea { width: 100%; padding: 8px; margin-top: 2px; border-radius: 4px; border:none; }
+        .editor-actions { margin-top: 15px; display: flex; gap: 10px; }
+    </style>
 </head>
 <body>
-<header>
-    <div class="brand">⚔️ Forja de Objetos</div>
-    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-</header>
+    <header>
+        <div class="brand">⚔️ Forja Arcana</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
 
-<div class="generator-layout">
-    <div class="panel">
-        <h2>Detalles del Objeto</h2>
-        <label>Tipo de Objeto</label>
-        <select id="itemType">
-            <option value="Arma">Arma</option>
-            <option value="Armadura">Armadura</option>
-            <option value="Poción">Poción</option>
-            <option value="Anillo">Anillo</option>
-            <option value="Objeto Maravilloso">Objeto Maravilloso</option>
-        </select>
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Forjar Objeto</h2>
+            <label>Nombre</label>
+            <input type="text" id="itemName" placeholder="Ej: Espada Vorpal...">
+            <label>Tipo</label>
+            <input type="text" id="itemType" placeholder="Ej: Arma, Anillo, Varita...">
+            <label>Rareza</label>
+            <select id="itemRarity">
+                <option value="Común">Común</option>
+                <option value="Poco Común" selected>Poco Común</option>
+                <option value="Raro">Raro</option>
+                <option value="Muy Raro">Muy Raro</option>
+                <option value="Legendario">Legendario</option>
+            </select>
+            <div style="margin-top:10px;">
+                <label><input type="checkbox" id="itemAttunement" style="width:auto;"> Requiere Sintonización</label>
+            </div>
 
-        <label>Descripción Visual / Efecto</label>
-        <textarea id="desc" rows="6"
-                  placeholder="Ej: Una espada larga hecha de cristal que vibra cuando hay mentiras cerca..."></textarea>
+            <button class="btn-generate" id="btnGen" style="background:#8e44ad; margin-top:15px;">Encantar</button>
+            <hr>
+            <button class="btn-edit" id="btnEdit" style="display:none; background:#f39c12; width:100%;">✏️ Editar</button>
+            <button class="btn-export" id="btnExp" style="display:none; background:#2980b9; width:100%; margin-top:5px;">Exportar</button>
+        </div>
 
-        <button class="btn-generate" id="btnGen">Forjar Objeto</button>
-        <button class="btn-export" id="btnExp">Exportar a Foundry VTT</button>
-    </div>
+        <div class="panel result-panel">
+            <div id="loader" class="loader">✨ Infundiendo magia...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">El yunque está frío.</p>
+            </div>
 
-    <div class="panel result-panel">
-        <div id="loader" class="loader">🔥 Forjando en el yunque...</div>
-        <div id="resultContent">
-            <p style="text-align:center; margin-top:150px; color:#aaa;">El objeto aparecerá aquí</p>
+            <div id="formEditorContainer">
+                <h3 style="margin-top:0;">Retocar Encantamiento</h3>
+
+                <label>Nombre</label><input type="text" id="editName">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div><label>Tipo</label><input type="text" id="editType"></div>
+                    <div><label>Rareza</label><input type="text" id="editRarity"></div>
+                </div>
+
+                <label>Descripción Visual/Lore</label>
+                <textarea id="editDesc" rows="3"></textarea>
+
+                <label>Mecánicas / Efectos</label>
+                <textarea id="editMech" rows="3" style="background:#f4ecf7; color:#333;"></textarea>
+
+                <div class="editor-actions">
+                    <button id="btnSaveChanges" style="background:#27ae60; color:white; border:none; padding:10px; flex:1; cursor:pointer;">💾 Guardar</button>
+                    <button id="btnCancelEdit" style="background:#c0392b; color:white; border:none; padding:10px; cursor:pointer;">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📜 Armería</div>
+            <div class="history-list" id="historyList"></div>
         </div>
     </div>
 
-    <div class="history-panel">
-        <div class="history-header">💎 Armería (Historial)</div>
-        <div class="history-list" id="historyList"></div>
-    </div>
-</div>
-
-<script src="../js/history/config.js"></script>
-<script src="../js/history/manager.js"></script>
-<script src="../js/item.js"></script>
+    <script src="../js/history/config.js"></script>
+    <script src="../js/history/manager.js"></script>
+    <script src="../js/item.js"></script>
 </body>
 </html>
