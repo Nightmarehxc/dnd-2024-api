@@ -95,34 +95,23 @@ els.btnCancel.addEventListener('click', () => {
 // 3. Guardar Cambios
 els.btnSave.addEventListener('click', () => {
     try {
-        // Intentamos parsear el texto editado
         const newData = JSON.parse(els.textarea.value);
+        // Preservar ID si existía
+        if (currentData._db_id) newData._db_id = currentData._db_id;
 
-        // Validar mínimos
-        if (!newData.shop_name) throw new Error("Falta el nombre de la tienda.");
-
-        // Actualizamos los datos actuales
         currentData = newData;
-
-        // Renderizamos de nuevo la vista bonita
         renderShop(currentData);
         els.editorContainer.style.display = 'none';
 
-        // --- ACTUALIZACIÓN PERSISTENTE ---
-        // Guardamos la versión editada en el historial para no perderla
-        if (typeof addToHistory === 'function') {
-            // Nota: addToHistory normalmente añade al principio.
-            // Si quisieras actualizar el existente, requeriría lógica extra en history.js,
-            // pero añadirlo de nuevo asegura que la versión más reciente esté arriba.
-            addToHistory({ ...currentData, nombre: currentData.shop_name, tipo_item: "Tienda" }, 'shop');
+        // --- LÓGICA INTELIGENTE ---
+        if (currentData._db_id && typeof updateHistoryItem === 'function') {
+            updateHistoryItem(currentData._db_id, currentData);
+        } else if (typeof addToHistory === 'function') {
+            addToHistory(currentData, 'shop');
         }
 
-        alert("✅ Tienda actualizada y guardada.");
-        els.content.scrollIntoView({behavior: "smooth"});
-
-    } catch (e) {
-        alert("❌ Error en el formato JSON:\n" + e.message + "\n\nRevisa que todas las comillas y comas estén bien.");
-    }
+        alert("✅ Inventario actualizado.");
+    } catch (e) { alert("❌ Error JSON: " + e.message); }
 });
 
 // --- RENDERIZADO ---

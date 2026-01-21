@@ -2,25 +2,48 @@ const API_URL = "http://localhost:5001/api/monsters/generate";
 let currentData = null;
 
 const els = {
+    // Generación
     base: document.getElementById('baseMonster'),
     theme: document.getElementById('theme'),
     cr: document.getElementById('targetCR'),
     btnGen: document.getElementById('btnGen'),
+
+    // UI General
     btnEdit: document.getElementById('btnEdit'),
     btnExp: document.getElementById('btnExp'),
     content: document.getElementById('resultContent'),
     loader: document.getElementById('loader'),
-    editorContainer: document.getElementById('jsonEditorContainer'),
-    textarea: document.getElementById('jsonTextarea'),
-    btnSave: document.getElementById('btnSaveChanges')
+
+    // Editor Formulario
+    editorContainer: document.getElementById('formEditorContainer'),
+    btnSave: document.getElementById('btnSaveChanges'),
+    btnCancel: document.getElementById('btnCancelEdit'),
+
+    // Inputs del Editor
+    eName: document.getElementById('editName'),
+    eType: document.getElementById('editType'),
+    eAC: document.getElementById('editAC'),
+    eHP: document.getElementById('editHP'),
+    eSpeed: document.getElementById('editSpeed'),
+    eCR: document.getElementById('editCR'),
+    eVisual: document.getElementById('editVisual'),
+    // Stats
+    eStr: document.getElementById('editStr'),
+    eDex: document.getElementById('editDex'),
+    eCon: document.getElementById('editCon'),
+    eInt: document.getElementById('editInt'),
+    eWis: document.getElementById('editWis'),
+    eCha: document.getElementById('editCha')
 };
 
-// --- 1. GENERAR ---
+// --- GENERAR ---
 els.btnGen.addEventListener('click', async () => {
     if (!els.base.value || !els.theme.value) return alert("Faltan datos.");
 
     els.content.innerHTML = '';
     els.editorContainer.style.display = 'none';
+    els.content.style.display = 'block';
+
     els.loader.style.display = 'block';
     els.btnGen.disabled = true;
     els.btnEdit.style.display = 'none';
@@ -41,14 +64,10 @@ els.btnGen.addEventListener('click', async () => {
         if (data.error) throw new Error(data.error);
 
         currentData = data;
-        renderMonster(data);
+        window.renderMonster(data);
 
-        els.btnEdit.style.display = 'block';
-        els.btnExp.style.display = 'block';
-
-        if (typeof addToHistory === 'function') {
-            addToHistory({ ...data, nombre: data.name, tipo_item: "Monstruo" });
-        }
+        // Guardar Nuevo
+        if (typeof addToHistory === 'function') addToHistory(currentData, 'monster');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -58,169 +77,112 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-// --- 2. EDITAR JSON ---
+// --- EDICIÓN ---
 els.btnEdit.addEventListener('click', () => {
     if(!currentData) return;
-    els.textarea.value = JSON.stringify(currentData, null, 4);
+
+    // Rellenar datos
+    els.eName.value = currentData.name || "";
+    els.eType.value = (currentData.type || "") + (currentData.alignment ? `, ${currentData.alignment}` : "");
+    els.eAC.value = parseInt(currentData.ac) || 10;
+    els.eHP.value = currentData.hp || "";
+    els.eSpeed.value = currentData.speed || "";
+    els.eCR.value = currentData.cr || "";
+    els.eVisual.value = currentData.visual || "";
+
+    const s = currentData.stats || {};
+    els.eStr.value = s.STR || 10; els.eDex.value = s.DEX || 10; els.eCon.value = s.CON || 10;
+    els.eInt.value = s.INT || 10; els.eWis.value = s.WIS || 10; els.eCha.value = s.CHA || 10;
+
+    els.content.style.display = 'none';
     els.editorContainer.style.display = 'block';
-    els.editorContainer.scrollIntoView({behavior: "smooth"});
+});
+
+els.btnCancel.addEventListener('click', () => {
+    els.editorContainer.style.display = 'none';
+    els.content.style.display = 'block';
 });
 
 els.btnSave.addEventListener('click', () => {
-    try {
-        const newData = JSON.parse(els.textarea.value);
-        currentData = newData;
-        renderMonster(currentData);
-        els.editorContainer.style.display = 'none';
-        alert("✅ Actualizado.");
-    } catch (e) {
-        alert("❌ Error JSON: " + e.message);
+    // Procesar Tipo y Alineamiento
+    const typeParts = els.eType.value.split(',');
+
+    const newData = {
+        ...currentData,
+        name: els.eName.value,
+        type: typeParts[0]?.trim() || "Monstruo",
+        alignment: typeParts[1]?.trim() || "Neutral",
+        ac: els.eAC.value,
+        hp: els.eHP.value,
+        speed: els.eSpeed.value,
+        cr: els.eCR.value,
+        visual: els.eVisual.value,
+        stats: {
+            STR: parseInt(els.eStr.value) || 10, DEX: parseInt(els.eDex.value) || 10,
+            CON: parseInt(els.eCon.value) || 10, INT: parseInt(els.eInt.value) || 10,
+            WIS: parseInt(els.eWis.value) || 10, CHA: parseInt(els.eCha.value) || 10
+        }
+    };
+
+    currentData = newData;
+    window.renderMonster(currentData);
+    els.editorContainer.style.display = 'none';
+    els.content.style.display = 'block';
+
+    // Guardar en DB
+    if (currentData._db_id && typeof updateHistoryItem === 'function') {
+        updateHistoryItem(currentData._db_id, currentData);
+    } else if (typeof addToHistory === 'function') {
+        addToHistory(currentData, 'monster');
     }
 });
 
-// --- 3. RENDERIZAR ---
-function renderMonster(data) {
+// --- RENDERIZADO GLOBAL ---
+window.renderMonster = function(data) {
     const s = (val) => val || '---';
     const stats = data.stats || {};
-
-    const getMod = (score) => {
-        const mod = Math.floor((score - 10) / 2);
-        return mod >= 0 ? `+${mod}` : mod;
-    };
+    const getMod = (sc) => { const m = Math.floor((sc-10)/2); return m>=0?`+${m}`:m; };
 
     let statsHtml = '';
-    ['STR','DEX','CON','INT','WIS','CHA'].forEach(stat => {
-        const val = parseInt(stats[stat]) || 10;
-        statsHtml += `
-            <div class="ability-score">
-                <strong>${stat}</strong><br>
-                ${val} (${getMod(val)})
-            </div>
-        `;
+    ['STR','DEX','CON','INT','WIS','CHA'].forEach(k => {
+        const v = parseInt(stats[k])||10;
+        statsHtml += `<div class="ability-score"><strong>${k}</strong><br>${v} (${getMod(v)})</div>`;
     });
 
-    const traitsHtml = (data.traits || []).map(t => `<p><strong>${t.name}.</strong> ${t.desc}</p>`).join('');
-    const actionsHtml = (data.actions || []).map(a => `<p class="stat-line"><span class="action-name">${a.name}.</span> ${a.desc}</p>`).join('');
+    const traitsHtml = (data.traits||[]).map(t => `<p><strong>${t.name}.</strong> ${t.desc}</p>`).join('');
+    const actionsHtml = (data.actions||[]).map(a => `<p class="stat-line"><span class="action-name">${a.name}.</span> ${a.desc}</p>`).join('');
 
     els.content.innerHTML = `
         <div class="stat-block">
             <h2>${s(data.name)}</h2>
             <div style="font-style:italic;">${s(data.type)}, ${s(data.alignment)}</div>
             <div class="red-line"></div>
-
             <p class="stat-line"><strong>AC</strong> ${s(data.ac)}</p>
             <p class="stat-line"><strong>HP</strong> ${s(data.hp)}</p>
-            <p class="stat-line"><strong>Speed</strong> ${s(data.speed)}</p>
-
+            <p class="stat-line"><strong>Velocidad</strong> ${s(data.speed)}</p>
             <div class="red-line"></div>
             <div style="display:flex; justify-content:space-between;">${statsHtml}</div>
             <div class="red-line"></div>
-
-            <p class="stat-line"><strong>Saves:</strong> ${s(data.saves)}</p>
-            <p class="stat-line"><strong>Skills:</strong> ${s(data.skills)}</p>
-            <p class="stat-line"><strong>Senses:</strong> ${s(data.senses)}</p>
-            <p class="stat-line"><strong>CR:</strong> ${s(data.cr)}</p>
-
+            <p class="stat-line"><strong>Desafío</strong> ${s(data.cr)}</p>
             <div class="red-line"></div>
             ${traitsHtml}
-
             <h3 style="color:#822000; border-bottom:1px solid #822000;">Acciones</h3>
             ${actionsHtml}
-
-            <div style="margin-top:15px; padding-top:10px; border-top:1px solid #aaa; font-style:italic; font-size:0.9em;">
-                ${s(data.visual)}
-            </div>
+            <div style="margin-top:15px; border-top:1px solid #aaa; padding-top:10px; font-style:italic;">${s(data.visual)}</div>
         </div>
     `;
-}
 
-// --- 4. EXPORTAR A FOUNDRY (Lógica Compleja) ---
+    if(els.btnEdit) els.btnEdit.style.display = 'block';
+    if(els.btnExp) els.btnExp.style.display = 'block';
+};
+
+// --- EXPORTAR ---
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
-
-    // 1. Procesar Stats (STR -> str)
-    const abilities = {};
-    const keys = { 'STR': 'str', 'DEX': 'dex', 'CON': 'con', 'INT': 'int', 'WIS': 'wis', 'CHA': 'cha' };
-
-    // Default 10 si no existe
-    Object.keys(keys).forEach(k => {
-        abilities[keys[k]] = {
-            value: parseInt(currentData.stats[k]) || 10,
-            mod: Math.floor(((parseInt(currentData.stats[k]) || 10) - 10) / 2)
-        };
-    });
-
-    // 2. Procesar HP (Separar "50 (6d10)" -> 50 y fórmula)
-    let hpVal = 10;
-    let hpFormula = "";
-    if (currentData.hp) {
-        // Intentar sacar el primer número
-        const matchVal = currentData.hp.toString().match(/^(\d+)/);
-        if (matchVal) hpVal = parseInt(matchVal[1]);
-
-        // Intentar sacar fórmula entre paréntesis
-        const matchForm = currentData.hp.toString().match(/\((.*?)\)/);
-        if (matchForm) hpFormula = matchForm[1];
-    }
-
-    // 3. Crear Items (Rasgos y Acciones)
-    const items = [];
-
-    // Rasgos -> Feats
-    (currentData.traits || []).forEach(t => {
-        items.push({
-            name: t.name,
-            type: "feat",
-            system: {
-                description: { value: t.desc },
-                activation: { type: "", cost: 0 },
-                duration: { value: "", units: "" }
-            }
-        });
-    });
-
-    // Acciones -> Weapons (Para que se puedan tirar dados)
-    (currentData.actions || []).forEach(a => {
-        items.push({
-            name: a.name,
-            type: "weapon", // "weapon" permite tiradas de ataque/daño en Foundry
-            system: {
-                description: { value: a.desc },
-                activation: { type: "action", cost: 1 },
-                actionType: "mwak", // Melee Weapon Attack por defecto
-                equipped: true
-            }
-        });
-    });
-
-    // 4. Construir JSON Final
-    const json = {
-        name: currentData.name,
-        type: "npc",
-        img: "icons/svg/mystery-man.svg",
-        system: {
-            attributes: {
-                ac: { value: parseInt(currentData.ac) || 10 },
-                hp: { value: hpVal, max: hpVal, formula: hpFormula },
-                speed: { value: currentData.speed || "30 ft" }
-            },
-            abilities: abilities,
-            details: {
-                alignment: currentData.alignment || "Neutral",
-                cr: parseFloat(currentData.cr) || 1,
-                biography: { value: currentData.visual || "" },
-                type: { value: currentData.type || "custom" }
-            },
-            traits: {
-                languages: { value: [currentData.languages || "Common"] }
-            }
-        },
-        items: items // <--- Aquí van las armas y poderes
-    };
-
+    const json = { name: currentData.name, type: "npc", system: { details: { biography: { value: currentData.visual } }, attributes: { hp: { value: 10, max: 10, formula: currentData.hp } } } }; // Simplificado
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `${currentData.name.replace(/\s+/g, '_')}_Foundry.json`;
+    a.download = `${currentData.name.replace(/\s+/g, '_')}.json`;
     a.click();
 });

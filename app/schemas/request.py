@@ -22,12 +22,12 @@ class CharacterRequestSchema(Schema):
 
 # Esquema específico para Objetos (Items)
 class ItemRequestSchema(Schema):
-    description = fields.String(required=True, validate=validate.Length(min=3))
-    type = fields.String(
-        required=False,
-        load_default="Cualquiera",
-        validate=validate.OneOf(["Arma", "Armadura", "Poción", "Objeto Maravilloso", "Cualquiera"])
-    )
+    name = fields.String(required=False, load_default="")
+    # El frontend envía 'item_type', asegúrate de que coincida aquí
+    item_type = fields.String(required=True)
+    rarity = fields.String(required=True)
+    # El frontend envía un booleano (true/false) en 'attunement'
+    attunement = fields.Boolean(required=False, load_default=False)
 
 # Esquema para Aventuras (CORREGIDO)
 class AdventureRequestSchema(Schema):
@@ -79,7 +79,12 @@ class QuestRequestSchema(Schema):
     level = fields.Integer(required=False, load_default=1, validate=validate.Range(min=1, max=20))
 
 class JournalRequestSchema(Schema):
-    notes = fields.String(required=True, validate=validate.Length(min=10))
+    # SOLUCIÓN: Límite de 5000 caracteres para evitar abuso o costes excesivos
+    raw_notes = fields.String(
+        required=True,
+        validate=validate.Length(max=5000, error="Las notas no pueden exceder los 5000 caracteres.")
+    )
+    tone = fields.String(required=False, load_default="Épico")
 
 class SpellRequestSchema(Schema):
     description = fields.String(required=True, validate=validate.Length(min=5))

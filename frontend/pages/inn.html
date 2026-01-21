@@ -5,97 +5,87 @@
     <title>Generador de Posadas</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-        .menu-grid-items {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 10px;
-            font-size: 0.9em;
-            border-bottom: 1px dashed #ccc;
-            padding: 5px 0;
-        }
-        .price-tag { color: #c0392b; font-weight: bold; }
-
-        /* Estilos Editor JSON */
-        #jsonEditorContainer {
+        #formEditorContainer {
             display: none;
             background: #2c3e50;
             padding: 15px;
             border-radius: 5px;
             margin-top: 20px;
+            color: white;
         }
-        #jsonTextarea {
-            width: 100%;
-            height: 300px;
-            background: #ecf0f1;
-            font-family: monospace;
-            padding: 10px;
-            border: none;
-            border-radius: 3px;
-        }
-        .btn-edit { background: #e67e22; margin-top: 10px; }
-        .btn-save-changes { background: #27ae60; margin-top: 10px; width: 100%; }
+        label { display: block; margin-top: 8px; font-weight: bold; font-size: 0.9em; color:#bdc3c7;}
+        input, textarea { width: 100%; padding: 8px; margin-top: 2px; border-radius: 4px; border:none; }
+        .editor-actions { margin-top: 15px; display: flex; gap: 10px; }
     </style>
 </head>
 <body>
-<header>
-    <div class="brand">🍺 La Taberna Infinita</div>
-    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-</header>
+    <header>
+        <div class="brand">🍺 Posadas y Tabernas</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
 
-<div class="generator-layout">
-    <div class="panel">
-        <h2>Abrir Establecimiento</h2>
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Abrir Establecimiento</h2>
+            <label>Nombre (Opcional)</label>
+            <input type="text" id="name" placeholder="Ej: El Poni Pisador...">
 
-        <label>Nombre (Opcional)</label>
-        <input type="text" id="name" placeholder="Ej: El Poni Pisador...">
+            <label>Ubicación (Ciudad)</label>
+            <input type="text" id="city" list="cityList" placeholder="Selecciona ciudad...">
+            <datalist id="cityList"></datalist>
 
-        <label>Ubicación (Ciudad)</label>
-        <input type="text" id="city" list="cityList" placeholder="Escribe o selecciona una ciudad generada...">
-        <datalist id="cityList">
-        </datalist>
+            <label>Nivel de Vida</label>
+            <select id="comfort">
+                <option value="Miserable">Miserable</option>
+                <option value="Modesto">Modesto</option>
+                <option value="Confortable" selected>Confortable</option>
+                <option value="Lujoso">Lujoso</option>
+            </select>
 
-        <label>Nivel de Vida</label>
-        <select id="comfort">
-            <option value="Miserable">Miserable (Sórdida)</option>
-            <option value="Pobre">Pobre (Barata)</option>
-            <option value="Modesta" selected>Modesta (Estándar)</option>
-            <option value="Confortable">Confortable (Buena)</option>
-            <option value="Rica">Rica (Lujosa)</option>
-            <option value="Aristocrática">Aristocrática (Exclusiva)</option>
-        </select>
+            <label>Ambiente</label>
+            <input type="text" id="theme" placeholder="Ej: Ruidosa, Misteriosa, Familiar...">
 
-        <label>Ambiente / Temática</label>
-        <input type="text" id="theme" placeholder="Ej: Frecuentada por piratas, embrujada...">
-
-        <button class="btn-generate" id="btnGen" style="background:#d35400;">Servir Cerveza</button>
-
-        <hr>
-        <button class="btn-edit" id="btnEdit" style="display:none;">📝 Editar Manualmente (JSON)</button>
-        <button class="btn-export" id="btnExp" style="display:none;">Crear Journal (Foundry)</button>
-    </div>
-
-    <div class="panel result-panel">
-        <div id="loader" class="loader">🍻 Limpiando las mesas...</div>
-
-        <div id="resultContent">
-            <p style="text-align:center; margin-top:150px; color:#aaa;">El fuego de la chimenea está apagado.</p>
+            <button class="btn-generate" id="btnGen" style="background:#d35400;">Abrir Puertas</button>
+            <hr>
+            <button class="btn-edit" id="btnEdit" style="display:none; background:#f39c12; width:100%;">✏️ Editar Datos</button>
+            <button class="btn-export" id="btnExp" style="display:none; background:#2980b9; width:100%; margin-top:5px;">Exportar</button>
         </div>
 
-        <div id="jsonEditorContainer">
-            <h4 style="color:white; margin-top:0;">Libro de Cuentas (JSON)</h4>
-            <textarea id="jsonTextarea"></textarea>
-            <button class="btn-save-changes" id="btnSaveChanges">💾 Guardar Cambios</button>
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🍻 Sirviendo cerveza...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">Cerrado por reformas.</p>
+            </div>
+
+            <div id="formEditorContainer">
+                <h3 style="margin-top:0;">Libro de Registro</h3>
+
+                <label>Nombre Posada</label>
+                <input type="text" id="editName">
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div><label>Posadero</label><input type="text" id="editKeeper"></div>
+                    <div><label>Raza</label><input type="text" id="editKeeperRace"></div>
+                </div>
+
+                <label>Rumor Local</label>
+                <textarea id="editRumor" rows="3"></textarea>
+
+                <div class="editor-actions">
+                    <button id="btnSaveChanges" style="background:#27ae60; color:white; border:none; padding:10px; flex:1; cursor:pointer;">💾 Guardar</button>
+                    <button id="btnCancelEdit" style="background:#c0392b; color:white; border:none; padding:10px; cursor:pointer;">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">🛌 Alojamientos</div>
+            <div class="history-list" id="historyList"></div>
         </div>
     </div>
 
-    <div class="history-panel">
-        <div class="history-header">🏘️ Guía de Posadas</div>
-        <div class="history-list" id="historyList"></div>
-    </div>
-</div>
-
-<script src="../js/history/config.js"></script>
-<script src="../js/history/manager.js"></script>
-<script src="../js/inn.js"></script>
+    <script src="../js/history/config.js"></script>
+    <script src="../js/history/manager.js"></script>
+    <script src="../js/inn.js"></script>
 </body>
 </html>

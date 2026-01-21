@@ -76,11 +76,56 @@
             <p style="text-align:center; margin-top:150px; color:#aaa;">La mesa de operaciones está vacía.</p>
         </div>
 
-        <div id="jsonEditorContainer">
-            <h4 style="color:white; margin-top:0;">Editor de Código Genético</h4>
-            <textarea id="jsonTextarea"></textarea>
-            <button class="btn-save-changes" id="btnSaveChanges">💾 Aplicar Cambios</button>
-            <small style="color:#bdc3c7;">Cuidado: Si rompes el formato JSON, el monstruo morirá.</small>
+        <div id="formEditorContainer"
+             style="display:none; background:#2c3e50; padding:15px; border-radius:5px; margin-top:20px; color:white;">
+            <h3 style="margin-top:0; border-bottom:1px solid #7f8c8d; padding-bottom:10px;">Mutar Especímen</h3>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="editName" class="form-control" style="width:100%;">
+                </div>
+                <div class="form-group">
+                    <label>Tipo / Alineamiento</label>
+                    <input type="text" id="editType" placeholder="Ej: Humanoide, Caótico Malvado" style="width:100%;">
+                </div>
+
+                <div class="form-group"><label>Armor Class (AC)</label><input type="number" id="editAC"
+                                                                              style="width:100%;"></div>
+                <div class="form-group"><label>Hit Points (HP)</label><input type="text" id="editHP"
+                                                                             style="width:100%;"></div>
+                <div class="form-group"><label>Velocidad</label><input type="text" id="editSpeed" style="width:100%;">
+                </div>
+                <div class="form-group"><label>Desafío (CR)</label><input type="text" id="editCR" style="width:100%;">
+                </div>
+            </div>
+
+            <hr style="border-color:#7f8c8d;">
+
+            <label>Atributos Base (STR / DEX / CON / INT / WIS / CHA)</label>
+            <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:5px;">
+                <input type="number" id="editStr" placeholder="STR">
+                <input type="number" id="editDex" placeholder="DEX">
+                <input type="number" id="editCon" placeholder="CON">
+                <input type="number" id="editInt" placeholder="INT">
+                <input type="number" id="editWis" placeholder="WIS">
+                <input type="number" id="editCha" placeholder="CHA">
+            </div>
+
+            <div class="form-group" style="margin-top:10px;">
+                <label>Descripción Visual</label>
+                <textarea id="editVisual" rows="3" style="width:100%; font-family:inherit;"></textarea>
+            </div>
+
+            <div class="editor-actions" style="margin-top:15px; display:flex; gap:10px;">
+                <button id="btnSaveChanges"
+                        style="background:#27ae60; color:white; border:none; padding:10px; flex:1; cursor:pointer;">💾
+                    Guardar Cambios
+                </button>
+                <button id="btnCancelEdit"
+                        style="background:#c0392b; color:white; border:none; padding:10px; cursor:pointer;">Cancelar
+                </button>
+            </div>
         </div>
     </div>
 

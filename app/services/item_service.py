@@ -1,26 +1,36 @@
-from  app.services.gemini_service import BaseService
+from app.services.gemini_service import BaseService
 
 
 class ItemService(BaseService):
-    def generate(self, description, item_type):
-        system_instruction = """
-        Eres un experto creador de objetos para D&D 5e (2024).
-        Genera SIEMPRE un JSON válido con estas claves EXACTAS en español:
+    def generate_item(self, item_type, rarity, attunement=False, name=""):
+        attunement_str = "Requiere sintonización (Attunement)." if attunement else "NO requiere sintonización."
+        name_instruction = f"El objeto se llama '{name}'." if name else "Inventa un nombre místico y único."
 
+        system = """
+        Eres un maestro herrero arcano de D&D 5e (2024). Genera un objeto mágico.
+        Responde SOLO con este JSON exacto:
         {
-            "nombre": "Nombre del objeto",
-            "tipo": "Tipo (Arma, Poción, Anillo, etc)",
-            "rareza": "Común, Poco Común, Rara, Muy Rara, Legendaria",
-            "requiere_sintonizacion": boolean,
-            "dano": { "formula": "1d8 + 2", "tipo": "fuego" } (O null si no es arma),
-            "weapon_mastery": "Propiedad de maestría (Nick, Sap, Push, Topple) o null",
-            "efecto_mecanico": "Descripción de reglas y bonificadores",
-            "descripcion_vis": "Descripción visual y de sabor (flavor text)"
+            "name": "Nombre del Objeto",
+            "type": "Tipo (Espada, Anillo, etc)",
+            "rarity": "Rareza",
+            "requires_attunement": true/false,
+            "description": "Descripción física y visual detallada.",
+            "mechanics": "Reglas de juego, bonificadores, daño y efectos mágicos (D&D 5e).",
+            "value": "Precio estimado en po"
         }
         """
 
-        prompt = f"Crea un objeto de tipo '{item_type}' basado en: {description}. Usa reglas de 2024."
-        return self._generate_content(system_instruction, prompt)
+        prompt = f"""
+        Genera un objeto mágico con estas características:
+        - Tipo: {item_type}
+        - Rareza: {rarity}
+        - {attunement_str}
+        - {name_instruction}
+
+        Asegúrate de que las mecánicas sean equilibradas para su rareza.
+        """
+
+        return self._generate_content(system, prompt)
 
 
 item_service = ItemService()

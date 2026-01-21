@@ -2,20 +2,35 @@ const API_URL = "http://localhost:5001/api/items/generate";
 let currentData = null;
 
 const els = {
+    name: document.getElementById('itemName'),
     type: document.getElementById('itemType'),
-    desc: document.getElementById('desc'),
+    rarity: document.getElementById('itemRarity'),
+    attunement: document.getElementById('itemAttunement'),
     btnGen: document.getElementById('btnGen'),
+
+    btnEdit: document.getElementById('btnEdit'),
     btnExp: document.getElementById('btnExp'),
     content: document.getElementById('resultContent'),
-    loader: document.getElementById('loader')
+    loader: document.getElementById('loader'),
+
+    editorContainer: document.getElementById('formEditorContainer'),
+    btnSave: document.getElementById('btnSaveChanges'),
+    btnCancel: document.getElementById('btnCancelEdit'),
+
+    eName: document.getElementById('editName'),
+    eType: document.getElementById('editType'),
+    eRarity: document.getElementById('editRarity'),
+    eDesc: document.getElementById('editDesc'),
+    eMech: document.getElementById('editMech')
 };
 
 els.btnGen.addEventListener('click', async () => {
-    if (!els.desc.value) return alert("Describe el objeto.");
-
     els.content.innerHTML = '';
+    els.editorContainer.style.display = 'none';
+    els.content.style.display = 'block';
     els.loader.style.display = 'block';
     els.btnGen.disabled = true;
+    els.btnEdit.style.display = 'none';
     els.btnExp.style.display = 'none';
 
     try {
@@ -23,20 +38,19 @@ els.btnGen.addEventListener('click', async () => {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                description: els.desc.value,
-                type: els.type ? els.type.value : "Cualquiera"
+                name: els.name.value,
+                item_type: els.type.value,
+                rarity: els.rarity.value,
+                attunement: els.attunement.checked
             })
         });
-        const data = await res.json();
 
+        const data = await res.json();
         if (data.error) throw new Error(data.error);
 
         currentData = data;
-        renderItem(data);
-        els.btnExp.style.display = 'block';
-
-        // --- GUARDAR EN HISTORIAL ---
-        if (typeof addToHistory === 'function') addToHistory(data);
+        window.renderItem(data);
+        if (typeof addToHistory === 'function') addToHistory(currentData, 'item');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -46,48 +60,61 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-function renderItem(data) {
-    els.content.innerHTML = `
-        <h1 style="color:var(--accent); margin:0;">${data.nombre}</h1>
-        <p style="font-style:italic;">${data.rareza} - ${data.tipo}</p>
-
-        ${data.dano ? `<span class="tag" style="background:#ddd; padding:2px 8px; border-radius:10px; margin-right:5px;">💥 ${data.dano.formula} ${data.dano.tipo}</span>` : ''}
-        ${data.weapon_mastery ? `<span class="tag" style="background:#fadbd8; color:#922b21; padding:2px 8px; border-radius:10px;">⚔️ Mastery: ${data.weapon_mastery}</span>` : ''}
-
-        <h3>Mecánica</h3>
-        <p>${data.efecto_mecanico}</p>
-
-        <h3>Descripción</h3>
-        <p style="font-style:italic;">${data.descripcion_vis}</p>
-    `;
-}
-
-els.btnExp.addEventListener('click', () => {
+// --- EDITAR ---
+els.btnEdit.addEventListener('click', () => {
     if(!currentData) return;
-    const isWeapon = !!currentData.dano;
+    els.eName.value = currentData.name || "";
+    els.eType.value = currentData.type || "";
+    els.eRarity.value = currentData.rarity || "";
+    els.eDesc.value = currentData.description || "";
+    els.eMech.value = currentData.mechanics || "";
 
-    const json = {
-        name: currentData.nombre,
-        type: isWeapon ? "weapon" : "equipment",
-        img: isWeapon ? "icons/svg/sword.svg" : "icons/svg/item-bag.svg",
-        system: {
-            description: { value: `<p>${currentData.descripcion_vis}</p><hr><p>${currentData.efecto_mecanico}</p>` },
-            rarity: (currentData.rareza || "common").toLowerCase().split(' ')[0],
-            equipped: true,
-            identified: true
-        }
+    els.content.style.display = 'none';
+    els.editorContainer.style.display = 'block';
+});
+
+els.btnCancel.addEventListener('click', () => {
+    els.editorContainer.style.display = 'none';
+    els.content.style.display = 'block';
+});
+
+els.btnSave.addEventListener('click', () => {
+    const newData = {
+        ...currentData,
+        name: els.eName.value,
+        type: els.eType.value,
+        rarity: els.eRarity.value,
+        description: els.eDesc.value,
+        mechanics: els.eMech.value
     };
 
-    if(isWeapon && currentData.dano) {
-        json.system.actionType = "mwak";
-        json.system.damage = {
-            parts: [[currentData.dano.formula + " + @mod", currentData.dano.tipo]]
-        };
-    }
+    currentData = newData;
+    window.renderItem(currentData);
+    els.editorContainer.style.display = 'none';
+    els.content.style.display = 'block';
 
-    const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `${currentData.nombre}_Foundry.json`;
-    a.click();
+    if (currentData._db_id && typeof updateHistoryItem === 'function') {
+        updateHistoryItem(currentData._db_id, currentData);
+    } else if (typeof addToHistory === 'function') {
+        addToHistory(currentData, 'item');
+    }
 });
+
+// --- RENDERIZAR ---
+window.renderItem = function(data) {
+    const s = (val) => val || '---';
+    els.content.innerHTML = `
+        <div style="border:2px solid #333; padding:20px; background:white;">
+            <h2 style="color:#8e44ad; border-bottom:2px solid #8e44ad;">${s(data.name)}</h2>
+            <p><em>${s(data.type)}, ${s(data.rarity)}</em></p>
+            <p>${s(data.description)}</p>
+            <div style="background:#f4f4f4; padding:10px; border-left:3px solid #8e44ad;">
+                <strong>Mecánicas:</strong> ${s(data.mechanics)}
+            </div>
+        </div>
+    `;
+    if(els.btnEdit) els.btnEdit.style.display = 'block';
+    if(els.btnExp) els.btnExp.style.display = 'block';
+};
+
+els.btnExp.addEventListener('click', () => { /* ... */ });

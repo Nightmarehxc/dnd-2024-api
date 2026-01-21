@@ -1,62 +1,64 @@
-import json
-import os
-import uuid
-from datetime import datetime
+from app import db
+from app.models import GeneratedItem
+from sqlalchemy import desc
 
 
 class HistoryService:
-    def __init__(self):
-        self.base_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
-        if not os.path.exists(self.base_dir):
-            os.makedirs(self.base_dir)
 
-    def _get_file_path(self, type_name):
-        safe_name = "".join([c for c in type_name if c.isalpha() or c == '_'])
-        return os.path.join(self.base_dir, f"history_{safe_name}.json")
+    def get_all_by_type(self, item_type):
+        # Busca en DB por tipo, ordenado por fecha (más nuevo primero)
+        items = GeneratedItem.query.filter_by(type=item_type) \
+            .order_by(desc(GeneratedItem.timestamp)) \
+            .all()
+        return [item.to_dict() for item in items]
 
-    def _read_file(self, type_name):
-        path = self._get_file_path(type_name)
-        if not os.path.exists(path):
-            return []
-        try:
-            with open(path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            return []
+    def save_item(self, item_type, data):
+        # Intentamos encontrar el nombre dentro del JSON, sea cual sea el formato
+        name = (data.get('nombre') or
+                data.get('name') or
+                data.get('shop_name') or
+                data.get('title') or
+                "Sin Nombre")
 
-    def _write_file(self, type_name, data):
-        path = self._get_file_path(type_name)
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        new_item = GeneratedItem(
+            type=item_type,
+            name=name,
+            data=data
+        )
 
-    def get_all(self, type_name):
-        return self._read_file(type_name)
+        db.session.add(new_item)
+        db.session.commit()
+        return new_item.to_dict()
 
-    def save_entry(self, data, type_name):
-        history = self._read_file(type_name)
+    def delete_item(self, item_id):
+        item = GeneratedItem.query.get(item_id)
+        if item:
+            db.session.delete(item)
+            db.session.commit()
+            return True
+        return False
 
-        # --- CORRECCIÓN AQUÍ: Añadido 'nombre_tienda' a la detección ---
-        name = data.get('nombre') or data.get('titulo') or data.get('nombre_tienda') or "Sin nombre"
+    def update_item(self, item_id, new_data):
+        item = GeneratedItem.query.get(item_id)
+        if item:
+            # Actualizar nombre si ha cambiado en el JSON
+            new_name = (new_data.get('nombre') or
+                        new_data.get('name') or
+                        new_data.get('shop_name') or
+                        new_data.get('title'))
+            if new_name:
+                item.name = new_name
 
-        new_entry = {
-            "id": str(uuid.uuid4()),
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "type": type_name,
-            "name": name,
-            "data": data
-        }
+            # Actualizar el JSON
+            item.data = new_data
 
-        history.insert(0, new_entry)
-        history = history[:50]
+            # Forzar detección de cambios en JSON (para SQLAlchemy)
+            from sqlalchemy.orm.attributes import flag_modified
+            flag_modified(item, "data")
 
-        self._write_file(type_name, history)
-        return new_entry
-
-    def delete_entry(self, item_id, type_name):
-        history = self._read_file(type_name)
-        new_history = [item for item in history if item['id'] != item_id]
-        self._write_file(type_name, new_history)
-        return {"status": "deleted", "id": item_id}
+            db.session.commit()
+            return item.to_dict()
+        return None
 
 
 history_service = HistoryService()
