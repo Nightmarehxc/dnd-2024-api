@@ -1,5 +1,5 @@
 const API_URL = "http://localhost:5001/api/journal/generate";
-let currentData = null;
+
 
 const els = {
     notes: document.getElementById('rawNotes'),
@@ -53,14 +53,13 @@ els.btnGen.addEventListener('click', async () => {
 
         if (!res.ok || data.error) throw new Error(data.error || "Error desconocido");
 
-        currentData = data;
+        // 2. USAR GLOBAL para que el manager lo vea si fuera necesario
+        window.currentData = data;
         window.renderJournal(data);
 
-        // Guardar automáticamente en historial
-        // El backend ya devuelve el _db_id, así que al recargar loadHistory ya estará ahí
         if (typeof addToHistory === 'function') {
-            // Pasamos 'data' que ya incluye session_title
-            // addToHistory se encargará de enviarlo al endpoint /api/history/journal
+            // Añadimos el name aquí también por seguridad para el historial
+            data.name = data.session_title;
             addToHistory(data, 'journal');
         }
 
@@ -101,14 +100,16 @@ window.renderJournal = function(data) {
 
 // --- EDITAR ---
 els.btnEdit.addEventListener('click', () => {
-    if(!currentData) return;
-    els.eTitle.value = currentData.session_title || "";
-    els.eRecap.value = currentData.epic_recap || "";
+    // 3. LEER DE LA GLOBAL (la que actualiza el historial al restaurar)
+    if(!window.currentData) return;
+
+    els.eTitle.value = window.currentData.session_title || "";
+    els.eRecap.value = window.currentData.epic_recap || "";
 
     const safeJoin = (val) => Array.isArray(val) ? val.join('\n') : String(val || "");
-    els.eLoot.value = safeJoin(currentData.loot_gained);
-    els.eNPCs.value = safeJoin(currentData.npcs_met);
-    els.eQuests.value = safeJoin(currentData.quests_updated);
+    els.eLoot.value = safeJoin(window.currentData.loot_gained);
+    els.eNPCs.value = safeJoin(window.currentData.npcs_met);
+    els.eQuests.value = safeJoin(window.currentData.quests_updated);
 
     els.content.style.display = 'none';
     els.editorContainer.style.display = 'block';
@@ -120,41 +121,46 @@ els.btnCancel.addEventListener('click', () => {
 });
 
 els.btnSave.addEventListener('click', () => {
+    if(!window.currentData) return; // Seguridad
+
     const newData = {
-        ...currentData,
+        ...window.currentData, // Mantiene el _db_id si existe
         session_title: els.eTitle.value,
+        name: els.eTitle.value, // 4. IMPORTANTE: Sincronizar 'name' para el historial
         epic_recap: els.eRecap.value,
         loot_gained: els.eLoot.value.split('\n').filter(l => l.trim() !== ""),
         npcs_met: els.eNPCs.value.split('\n').filter(l => l.trim() !== ""),
         quests_updated: els.eQuests.value.split('\n').filter(l => l.trim() !== "")
     };
 
-    currentData = newData;
-    window.renderJournal(currentData);
+    window.currentData = newData; // Actualizar global
+    window.renderJournal(newData);
     els.editorContainer.style.display = 'none';
     els.content.style.display = 'block';
 
     // Lógica para ACTUALIZAR o CREAR nuevo
-    if (currentData._db_id && typeof updateHistoryItem === 'function') {
-        updateHistoryItem(currentData._db_id, currentData);
+    // Ahora window.currentData sí tendrá el _db_id inyectado por restoreItem
+    if (window.currentData._db_id && typeof updateHistoryItem === 'function') {
+        updateHistoryItem(window.currentData._db_id, window.currentData);
     } else if (typeof addToHistory === 'function') {
-        addToHistory(currentData, 'journal');
+        addToHistory(window.currentData, 'journal');
     }
 });
 
 // --- EXPORTAR ---
 els.btnExp.addEventListener('click', () => {
-    if(!currentData) return;
+    if(!window.currentData) return;
     const ensureArray = (val) => Array.isArray(val) ? val : (val ? [val] : []);
+    const data = window.currentData;
 
-    let content = `<h2>${currentData.session_title}</h2>`;
-    content += `<p><i>${currentData.epic_recap}</i></p><hr>`;
-    content += `<h3>Botín</h3><ul>${ensureArray(currentData.loot_gained).map(i=>`<li>${i}</li>`).join('')}</ul>`;
-    content += `<h3>NPCs</h3><ul>${ensureArray(currentData.npcs_met).map(i=>`<li>${i}</li>`).join('')}</ul>`;
-    content += `<h3>Misiones</h3><ul>${ensureArray(currentData.quests_updated).map(i=>`<li>${i}</li>`).join('')}</ul>`;
+    let content = `<h2>${data.session_title}</h2>`;
+    content += `<p><i>${data.epic_recap}</i></p><hr>`;
+    content += `<h3>Botín</h3><ul>${ensureArray(data.loot_gained).map(i=>`<li>${i}</li>`).join('')}</ul>`;
+    content += `<h3>NPCs</h3><ul>${ensureArray(data.npcs_met).map(i=>`<li>${i}</li>`).join('')}</ul>`;
+    content += `<h3>Misiones</h3><ul>${ensureArray(data.quests_updated).map(i=>`<li>${i}</li>`).join('')}</ul>`;
 
     const json = {
-        name: currentData.session_title,
+        name: data.session_title,
         type: "journal",
         pages: [{ name: "Resumen", type: "text", text: { content: content, format: 1 } }]
     };
@@ -162,6 +168,6 @@ els.btnExp.addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Sesion_${(currentData.session_title || 'sin_titulo').replace(/\s+/g, '_')}.json`;
+    a.download = `Sesion_${(data.session_title || 'sin_titulo').replace(/\s+/g, '_')}.json`;
     a.click();
 });

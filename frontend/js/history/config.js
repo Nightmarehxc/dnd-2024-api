@@ -25,7 +25,7 @@ window.HISTORY_CONFIG = {
     'monster':   { icon: '👹', renderer: 'renderMonster' },
     'inn':       { icon: '🍺', renderer: 'renderInn' },
     'quest':     { icon: '📜', renderer: 'renderQuest' },
-    'ruins':     { icon: '🏚️', renderer: 'renderRuins' }
+    'ruins':     { icon: '🏚️', renderer: 'renderRuins' },
     'journal':   { icon: '📖', renderer: 'renderJournal' }
 };
 
