@@ -5,16 +5,14 @@ const els = {
     notes: document.getElementById('rawNotes'),
     tone: document.getElementById('tone'),
     btnGen: document.getElementById('btnGen'),
-
+    // ... resto de elementos igual ...
     btnEdit: document.getElementById('btnEdit'),
     btnExp: document.getElementById('btnExp'),
     content: document.getElementById('resultContent'),
     loader: document.getElementById('loader'),
-
     editorContainer: document.getElementById('formEditorContainer'),
     btnSave: document.getElementById('btnSaveChanges'),
     btnCancel: document.getElementById('btnCancelEdit'),
-
     eTitle: document.getElementById('editTitle'),
     eRecap: document.getElementById('editRecap'),
     eLoot: document.getElementById('editLoot'),
@@ -44,37 +42,78 @@ els.btnGen.addEventListener('click', async () => {
             })
         });
 
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
+        // --- DEBUGGING AVANZADO ---
+        const text = await res.text(); // Leemos como texto primero
+        let data;
+
+        try {
+            data = JSON.parse(text); // Intentamos parsear manualmente
+        } catch (e) {
+            // Si falla el parseo, es que el servidor devolvió HTML (Error 500)
+            console.error("Respuesta del servidor no es JSON:", text);
+            throw new Error(`Error del Servidor (ver consola): ${text.substring(0, 100)}...`);
+        }
+
+        if (!res.ok || data.error) throw new Error(data.error || "Error desconocido en la API");
 
         currentData = data;
         window.renderJournal(data);
 
-        // Guardar con tipo 'journal'
+        // Guardar visualmente en historial
         if (typeof addToHistory === 'function') {
             addToHistory({ ...data, nombre: data.session_title, tipo_item: "Crónica" }, 'journal');
         }
 
     } catch (err) {
-        els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
+        els.content.innerHTML = `<div style="color:red; padding:20px; border:1px solid red; background:#ffecec;">
+            <strong>Ocurrió un error:</strong><br>${err.message}
+        </div>`;
     } finally {
         els.loader.style.display = 'none';
         els.btnGen.disabled = false;
     }
 });
 
-// --- EDITAR ---
+// ... (El resto del código: btnEdit, btnSave, renderJournal, etc. se mantiene igual que la versión anterior) ...
+
+// --- RENDERIZADO GLOBAL (Asegúrate de tener esta versión robusta) ---
+window.renderJournal = function(data) {
+    const s = (val) => val || '';
+    const ensureArray = (val) => Array.isArray(val) ? val : (val ? [val] : []);
+
+    const lootHtml = ensureArray(data.loot_gained).map(i => `<li>${i}</li>`).join('');
+    const npcsHtml = ensureArray(data.npcs_met).map(i => `<li>${i}</li>`).join('');
+    const questsHtml = ensureArray(data.quests_updated).map(i => `<li>${i}</li>`).join('');
+
+    els.content.innerHTML = `
+        <div class="recap-card">
+            <h2 style="color:#c0392b; margin-top:0;">${s(data.session_title)}</h2>
+            <div class="recap-text">"${s(data.epic_recap)}"</div>
+            <div class="lists-grid">
+                <div class="list-box"><h4>💰 Botín</h4><ul>${lootHtml || '<li>Nada</li>'}</ul></div>
+                <div class="list-box"><h4>👥 NPCs</h4><ul>${npcsHtml || '<li>Nadie</li>'}</ul></div>
+                <div class="list-box"><h4>⚔️ Misiones</h4><ul>${questsHtml || '<li>Sin cambios</li>'}</ul></div>
+            </div>
+        </div>
+    `;
+
+    if(els.btnEdit) els.btnEdit.style.display = 'block';
+    if(els.btnExp) els.btnExp.style.display = 'block';
+};
+
+// ... (Resto de eventos btnEdit, btnSave, btnExp igual) ...
+// Copia los eventos de edición del mensaje anterior si no los tienes.
+// Lo crucial arriba es el bloque try/catch modificado dentro de btnGen.
+// Aquí te dejo el resto de eventos para que el fichero esté completo y no falle nada:
+
 els.btnEdit.addEventListener('click', () => {
     if(!currentData) return;
-
     els.eTitle.value = currentData.session_title || "";
     els.eRecap.value = currentData.epic_recap || "";
-
-    // Convertir Arrays a Texto (uno por línea) para editar fácil
-    els.eLoot.value = (currentData.loot_gained || []).join('\n');
-    els.eNPCs.value = (currentData.npcs_met || []).join('\n');
-    els.eQuests.value = (currentData.quests_updated || []).join('\n');
-
+    const safeJoin = (val) => Array.isArray(val) ? val.join('\n') : String(val || "");
+    els.eLoot.value = safeJoin(currentData.loot_gained);
+    els.eNPCs.value = safeJoin(currentData.npcs_met);
+    els.eQuests.value = safeJoin(currentData.quests_updated);
     els.content.style.display = 'none';
     els.editorContainer.style.display = 'block';
 });
@@ -85,17 +124,14 @@ els.btnCancel.addEventListener('click', () => {
 });
 
 els.btnSave.addEventListener('click', () => {
-    // Reconstruir objeto
     const newData = {
         ...currentData,
         session_title: els.eTitle.value,
         epic_recap: els.eRecap.value,
-        // Convertir texto multilinea de vuelta a Arrays
         loot_gained: els.eLoot.value.split('\n').filter(l => l.trim() !== ""),
         npcs_met: els.eNPCs.value.split('\n').filter(l => l.trim() !== ""),
         quests_updated: els.eQuests.value.split('\n').filter(l => l.trim() !== "")
     };
-
     currentData = newData;
     window.renderJournal(currentData);
     els.editorContainer.style.display = 'none';
@@ -108,61 +144,20 @@ els.btnSave.addEventListener('click', () => {
     }
 });
 
-// --- RENDERIZADO GLOBAL ---
-window.renderJournal = function(data) {
-    const s = (val) => val || '';
-
-    const lootHtml = (data.loot_gained || []).map(i => `<li>${i}</li>`).join('');
-    const npcsHtml = (data.npcs_met || []).map(i => `<li>${i}</li>`).join('');
-    const questsHtml = (data.quests_updated || []).map(i => `<li>${i}</li>`).join('');
-
-    els.content.innerHTML = `
-        <div class="recap-card">
-            <h2 style="color:#c0392b; margin-top:0;">${s(data.session_title)}</h2>
-
-            <div class="recap-text">
-                "${s(data.epic_recap)}"
-            </div>
-
-            <div class="lists-grid">
-                <div class="list-box">
-                    <h4>💰 Botín</h4>
-                    <ul>${lootHtml || '<li>Nada relevante</li>'}</ul>
-                </div>
-                <div class="list-box">
-                    <h4>👥 NPCs</h4>
-                    <ul>${npcsHtml || '<li>Nadie nuevo</li>'}</ul>
-                </div>
-                <div class="list-box">
-                    <h4>⚔️ Misiones</h4>
-                    <ul>${questsHtml || '<li>Sin cambios</li>'}</ul>
-                </div>
-            </div>
-        </div>
-    `;
-
-    if(els.btnEdit) els.btnEdit.style.display = 'block';
-    if(els.btnExp) els.btnExp.style.display = 'block';
-};
-
-// --- EXPORTAR ---
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
-
-    // Crear formato Journal de Foundry VTT
+    const ensureArray = (val) => Array.isArray(val) ? val : (val ? [val] : []);
     let content = `<h2>${currentData.session_title}</h2>`;
     content += `<p><i>${currentData.epic_recap}</i></p><hr>`;
-
-    content += `<h3>Botín</h3><ul>${(currentData.loot_gained||[]).map(i=>`<li>${i}</li>`).join('')}</ul>`;
-    content += `<h3>NPCs</h3><ul>${(currentData.npcs_met||[]).map(i=>`<li>${i}</li>`).join('')}</ul>`;
-    content += `<h3>Misiones</h3><ul>${(currentData.quests_updated||[]).map(i=>`<li>${i}</li>`).join('')}</ul>`;
+    content += `<h3>Botín</h3><ul>${ensureArray(currentData.loot_gained).map(i=>`<li>${i}</li>`).join('')}</ul>`;
+    content += `<h3>NPCs</h3><ul>${ensureArray(currentData.npcs_met).map(i=>`<li>${i}</li>`).join('')}</ul>`;
+    content += `<h3>Misiones</h3><ul>${ensureArray(currentData.quests_updated).map(i=>`<li>${i}</li>`).join('')}</ul>`;
 
     const json = {
         name: currentData.session_title,
         type: "journal",
         pages: [{ name: "Resumen", type: "text", text: { content: content, format: 1 } }]
     };
-
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);

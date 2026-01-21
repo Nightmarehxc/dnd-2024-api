@@ -35,7 +35,7 @@ def create_app(config_name='default'):
         encounters, cities, shops, images, history,
         factions, villains, quests, riddles, rules, travel, alchemy,
         dungeons, librarian, dreams, mysteries, contracts, ruins, monsters,
-        inns
+        inns,journal
     )
 
     app.register_blueprint(adventures.bp)
@@ -64,6 +64,7 @@ def create_app(config_name='default'):
     app.register_blueprint(ruins.bp)
     app.register_blueprint(monsters.bp)
     app.register_blueprint(inns.bp)
+    app.register_blueprint(journal.bp)
 
     # Crear tablas
     with app.app_context():

@@ -79,8 +79,12 @@ class QuestRequestSchema(Schema):
     level = fields.Integer(required=False, load_default=1, validate=validate.Range(min=1, max=20))
 
 class JournalRequestSchema(Schema):
-    raw_notes = fields.String(required=True)  # "Mataron goblin, llave roja..."
-    tone = fields.String(required=False, load_default="Épico") # "Serio", "Cómico", etc.
+    # SOLUCIÓN: Límite de 5000 caracteres para evitar abuso o costes excesivos
+    raw_notes = fields.String(
+        required=True,
+        validate=validate.Length(max=5000, error="Las notas no pueden exceder los 5000 caracteres.")
+    )
+    tone = fields.String(required=False, load_default="Épico")
 
 class SpellRequestSchema(Schema):
     description = fields.String(required=True, validate=validate.Length(min=5))
