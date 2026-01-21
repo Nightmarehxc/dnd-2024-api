@@ -388,7 +388,7 @@ Los DMs suelen usar los sueños para dar pistas o avanzar la trama.
 
     Valor: Narrativa potente para cuando los personajes hacen un Descanso Largo.
 
-### 26.️ 🏚️ Historiador de Ruinas (Ruins Lore)
+### 26.️ 🏚️ Historiador de Ruinas (Ruins Lore) ✅
 
 Para darle sentido a tu "Dungeon Architect" o "Cities".
 

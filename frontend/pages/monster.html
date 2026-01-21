@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Laboratorio de Monstruos</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Estilos estilo "Stat Block" de D&D */
+        .stat-block {
+            background: #fdf6e3;
+            border: 2px solid #b5a282;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            padding: 15px;
+            font-family: 'Georgia', serif;
+            margin-bottom: 20px;
+            color: #58180d;
+        }
+        .stat-block h2 { margin-top: 0; color: #822000; border-bottom: 2px solid #822000; }
+        .stat-line { margin: 5px 0; }
+        .red-line { height: 2px; background: #822000; margin: 10px 0; }
+        .ability-score { text-align: center; display: inline-block; width: 15%; }
+        .action-name { font-weight: bold; font-style: italic; }
+
+        /* Editor JSON */
+        #jsonEditorContainer {
+            display: none;
+            background: #2c3e50;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        #jsonTextarea {
+            width: 100%;
+            height: 300px;
+            background: #ecf0f1;
+            font-family: monospace;
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+        }
+        .btn-edit { background: #e67e22; margin-top: 10px; }
+        .btn-save-changes { background: #27ae60; margin-top: 10px; width: 100%; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">👹 Laboratorio de Monstruos</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Configurar Experimento</h2>
+
+            <label>Monstruo Base</label>
+            <input type="text" id="baseMonster" placeholder="Ej: Ogro, Lobo, Goblin...">
+
+            <label>Plantilla / Tema</label>
+            <input type="text" id="theme" placeholder="Ej: Cibernético, Fúngico, Infernal...">
+
+            <label>CR Objetivo (Opcional)</label>
+            <input type="text" id="targetCR" placeholder="Ej: 5 (Dejar vacío para mantener original)">
+
+            <button class="btn-generate" id="btnGen" style="background:#8e44ad;">Mutar Monstruo</button>
+
+            <hr>
+
+            <button class="btn-edit" id="btnEdit" style="display:none;">📝 Editar Manualmente (JSON)</button>
+            <button class="btn-export" id="btnExp" style="display:none; background:#2980b9;">Exportar a Foundry</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🧬 Recombinando ADN...</div>
+
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">La mesa de operaciones está vacía.</p>
+            </div>
+
+            <div id="jsonEditorContainer">
+                <h4 style="color:white; margin-top:0;">Editor de Código Genético</h4>
+                <textarea id="jsonTextarea"></textarea>
+                <button class="btn-save-changes" id="btnSaveChanges">💾 Aplicar Cambios</button>
+                <small style="color:#bdc3c7;">Cuidado: Si rompes el formato JSON, el monstruo morirá.</small>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">🧪 Especímenes</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script src="../js/history.js"></script>
+    <script src="../js/monster.js"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@ from marshmallow import ValidationError
 from flasgger import Swagger
 from app.routes import characters, npcs, items, adventures, history, shops, images, cities, riddles, \
     encounters, loot, rules, quests, journal, spells, villains, travel, factions, alchemy, library, \
-    dungeons, contracts, mysteries, dreams, librarian  # <--- IMPORTAR
+    dungeons, contracts, mysteries, dreams, librarian, ruins, monsters  # <--- IMPORTAR
 from config import config
 
 def create_app(config_name='default'):
@@ -67,6 +67,8 @@ def create_app(config_name='default'):
     app.register_blueprint(dreams.bp)
     app.register_blueprint(mysteries.bp)
     app.register_blueprint(contracts.bp)
+    app.register_blueprint(ruins.bp)
+    app.register_blueprint(monsters.bp)
     # --- SERVIR FRONTEND (NUEVO) ---
     # Calculamos la ruta absoluta a la carpeta 'frontend'
     # app.root_path apunta a /tu/proyecto/app

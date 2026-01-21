@@ -25,6 +25,10 @@ function getCurrentType() {
     if (path.includes('dream.html')) return 'dream';
     if (path.includes('mystery.html')) return 'mystery';
     if (path.includes('contract.html')) return 'contract';
+    if (path.includes('ruins.html')) return 'ruins';
+    if (path.includes('monster.html')) return 'monster';
+
+
     return null;
 }
 
@@ -52,6 +56,8 @@ const ICONS = {
     'dream': '🔮',
     'mystery': '🕵️',
     'contract': '⚖️',
+    'ruins': '🏚️',
+    'monster': '👹',
 };
 
 // --- 1. CARGAR LISTA ---
@@ -141,6 +147,8 @@ function restoreItem(id) {
         if (pageType === 'dream' && typeof renderDream === 'function') renderDream(data);
         if (pageType === 'mystery' && typeof renderMystery === 'function') renderMystery(data);
         if (pageType === 'contract' && typeof renderContract === 'function') renderContract(data);
+        if (pageType === 'ruins' && typeof renderRuins === 'function') renderRuins(data);
+        if (pageType === 'monster' && typeof renderMonster === 'function') renderMonster(data);
 
 
         const btnExp = document.getElementById('btnExp');

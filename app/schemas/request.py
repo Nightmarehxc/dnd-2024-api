@@ -100,8 +100,6 @@ class AlchemyRequestSchema(Schema):
     item_type = fields.String(required=True, validate=validate.OneOf(["Poción", "Veneno", "Aceite", "Elixir", "Ungüento"]))
     rarity = fields.String(required=False, load_default="Común")
 
-# ... imports existentes ...
-
 class DungeonRequestSchema(Schema):
     theme = fields.String(required=True, validate=validate.Length(min=3))
     level = fields.Integer(required=False, load_default=1, validate=validate.Range(min=1, max=20))
@@ -121,3 +119,12 @@ class MysteryRequestSchema(Schema):
 class ContractRequestSchema(Schema):
     patron = fields.String(required=True)   # Diablo, Hada, Gremio
     desire = fields.String(required=True)   # Qué quiere el jugador (Poder, Oro)
+
+class RuinsLoreRequestSchema(Schema):
+    name = fields.String(required=True)  # Nombre del lugar
+    ruin_type = fields.String(required=False, load_default="Estructura Antigua")
+
+class MonsterRequestSchema(Schema):
+    base_monster = fields.String(required=True) # Ej: Ogro, Goblin
+    theme = fields.String(required=True)        # Ej: Cibernético, Infernal
+    target_cr = fields.String(required=False, allow_none=True) # Ej: 5 (Opcional)
