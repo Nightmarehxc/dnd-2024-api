@@ -79,7 +79,8 @@ class QuestRequestSchema(Schema):
     level = fields.Integer(required=False, load_default=1, validate=validate.Range(min=1, max=20))
 
 class JournalRequestSchema(Schema):
-    notes = fields.String(required=True, validate=validate.Length(min=10))
+    raw_notes = fields.String(required=True)  # "Mataron goblin, llave roja..."
+    tone = fields.String(required=False, load_default="Épico") # "Serio", "Cómico", etc.
 
 class SpellRequestSchema(Schema):
     description = fields.String(required=True, validate=validate.Length(min=5))

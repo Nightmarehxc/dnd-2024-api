@@ -1,21 +1,23 @@
 from flask import Blueprint, request, jsonify
-from marshmallow import ValidationError
 from app.services.journal_service import journal_service
 from app.schemas.request import JournalRequestSchema
 
 bp = Blueprint('journal', __name__, url_prefix='/api/journal')
 
+
 @bp.route('/generate', methods=['POST'])
-def generate_chronicle():
-    schema = JournalRequestSchema()
+def generate():
     try:
-        data = schema.load(request.json)
-    except ValidationError as err:
-        return jsonify({"error": "Notas inválidas", "detalles": err.messages}), 400
+        # Validar los datos recibidos (raw_notes, tone)
+        data = JournalRequestSchema().load(request.json)
 
-    result = journal_service.generate_chronicle(data['notes'])
+        # Llamar al servicio
+        result = journal_service.generate_recap(
+            raw_notes=data['raw_notes'],
+            tone=data['tone']
+        )
+        return jsonify(result)
 
-    if "error" in result:
-        return jsonify(result), 500
-
-    return jsonify(result)
+    except Exception as e:
+        print(f"Error Journal: {e}")
+        return jsonify({"error": str(e)}), 400

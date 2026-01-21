@@ -2,87 +2,120 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>El Cronista</title>
+    <title>El Cronista (Recap)</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-        .parchment {
-            background-color: #fcf5e5;
-            padding: 30px;
-            border: 1px solid #d4c5a3;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            font-family: 'Georgia', serif;
-            line-height: 1.6;
-            color: #2c3e50;
-        }
-        .parchment h1 {
-            font-family: 'Cinzel', serif; /* Si tuvieras la fuente, si no usará serif */
-            color: #8e44ad;
-            border-bottom: 2px solid #8e44ad;
-            padding-bottom: 10px;
-            text-align: center;
-        }
-        .narrative-text {
-            font-size: 1.1em;
-            margin-bottom: 20px;
-            text-align: justify;
-        }
-        .section-title {
-            font-weight: bold;
-            color: #c0392b;
+        #formEditorContainer {
+            display: none;
+            background: #2c3e50;
+            padding: 15px;
+            border-radius: 5px;
             margin-top: 20px;
-            text-transform: uppercase;
-            font-size: 0.9em;
-            letter-spacing: 1px;
+            color: white;
         }
-        ul.clean-list {
-            list-style: none;
-            padding: 0;
+        label { display: block; margin-top: 8px; font-weight: bold; font-size: 0.9em; color:#bdc3c7;}
+        input, textarea, select { width: 100%; padding: 8px; margin-top: 2px; border-radius: 4px; border:none; }
+
+        /* Estilo de Tarjeta de Resumen */
+        .recap-card {
+            background: #fff;
+            padding: 25px;
+            border-left: 5px solid #c0392b; /* Rojo épico */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        ul.clean-list li {
-            padding: 5px 0;
-            border-bottom: 1px dashed #e0e0e0;
+        .recap-text {
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-size: 1.1em;
+            color: #444;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
         }
-        ul.clean-list li:before {
-            content: "• ";
-            color: #c0392b;
-            font-weight: bold;
+        .lists-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
         }
+        .list-box h4 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; }
+        .list-box ul { padding-left: 20px; margin: 0; font-size: 0.9em; color: #555; }
+        .list-box li { margin-bottom: 5px; }
     </style>
 </head>
 <body>
-<header>
-    <div class="brand">🖋️ El Cronista</div>
-    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-</header>
+    <header>
+        <div class="brand">📝 El Cronista</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
 
-<div class="generator-layout">
-    <div class="panel">
-        <h2>Notas de la Sesión</h2>
-        <p style="font-size:0.9em; color:#666; margin-bottom:10px;">Pega aquí tus apuntes rápidos, sucios y
-            desordenados.</p>
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Resumen de Sesión</h2>
+            <p style="font-size:0.9em; color:#7f8c8d;">Pega tus notas desordenadas aquí. La IA las ordenará.</p>
 
-        <textarea id="notes" rows="15"
-                  placeholder="Ej: Entramos en la cueva. El bárbaro rompió la puerta. Salieron 3 esqueletos. Casi morimos pero el mago usó bola de fuego. Encontramos una espada mágica y volvimos al pueblo a cobrar la recompensa de 50 oros."></textarea>
+            <label>Notas de la Partida</label>
+            <textarea id="rawNotes" rows="10" placeholder="Ej: Mataron a los goblins, el bardo intentó seducir al dragón (falló), encontraron una espada +1 en el cofre, conocieron a un viejo llamado Gandalf..."></textarea>
 
-        <button class="btn-generate" id="btnGen">Escribir Crónica</button>
-        <button class="btn-export" id="btnExp" style="display:none;">Guardar en Diario</button>
-    </div>
+            <label>Tono del Resumen</label>
+            <select id="tone">
+                <option value="Épico">Épico (Serie de TV)</option>
+                <option value="Cómico">Cómico / Bardesco</option>
+                <option value="Oscuro">Oscuro / Lovecraftiano</option>
+                <option value="Formal">Informe Militar</option>
+            </select>
 
-    <div class="panel result-panel">
-        <div id="loader" class="loader">🕯️ Mojando la pluma en tinta...</div>
-        <div id="resultContent">
-            <p style="text-align:center; margin-top:150px; color:#aaa;">La historia cobrará vida aquí</p>
+            <button class="btn-generate" id="btnGen" style="background:#c0392b; margin-top:15px;">Organizar Caos</button>
+
+            <hr>
+            <button class="btn-edit" id="btnEdit" style="display:none; background:#f39c12; width:100%;">✏️ Corregir</button>
+            <button class="btn-export" id="btnExp" style="display:none; background:#2980b9; width:100%; margin-top:5px;">Exportar</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">✍️ Escribiendo la crónica...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">Esperando notas...</p>
+            </div>
+
+            <div id="formEditorContainer">
+                <h3 style="margin-top:0;">Editar Crónica</h3>
+
+                <label>Título Sesión</label><input type="text" id="editTitle">
+
+                <label>Resumen Narrativo</label>
+                <textarea id="editRecap" rows="6"></textarea>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                    <div>
+                        <label>💰 Botín (Uno por línea)</label>
+                        <textarea id="editLoot" rows="6"></textarea>
+                    </div>
+                    <div>
+                        <label>👥 NPCs (Uno por línea)</label>
+                        <textarea id="editNPCs" rows="6"></textarea>
+                    </div>
+                    <div>
+                        <label>⚔️ Misiones (Uno por línea)</label>
+                        <textarea id="editQuests" rows="6"></textarea>
+                    </div>
+                </div>
+
+                <div class="editor-actions">
+                    <button id="btnSaveChanges" style="background:#27ae60; color:white; border:none; padding:10px; flex:1; cursor:pointer;">💾 Guardar</button>
+                    <button id="btnCancelEdit" style="background:#c0392b; color:white; border:none; padding:10px; cursor:pointer;">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📜 Archivos</div>
+            <div class="history-list" id="historyList"></div>
         </div>
     </div>
 
-    <div class="history-panel">
-        <div class="history-header">📚 Tomos Anteriores</div>
-        <div class="history-list" id="historyList"></div>
-    </div>
-</div>
-
-<script src="../js/history/config.js"></script>
-<script src="../js/history/manager.js"></script>
-<script src="../js/journal.js"></script>
+    <script src="../js/history/config.js"></script>
+    <script src="../js/history/manager.js"></script>
+    <script src="../js/journal.js"></script>
 </body>
 </html>

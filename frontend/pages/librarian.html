@@ -2,52 +2,105 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>El Bibliotecario</title>
+    <title>La Gran Biblioteca</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        #formEditorContainer {
+            display: none;
+            background: #2c3e50;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            color: white;
+        }
+        label { display: block; margin-top: 8px; font-weight: bold; font-size: 0.9em; color:#bdc3c7;}
+        input, textarea, select { width: 100%; padding: 8px; margin-top: 2px; border-radius: 4px; border:none; }
+        .book-page {
+            background: #fdf6e3;
+            color: #2c3e50;
+            padding: 40px;
+            font-family: 'Georgia', serif;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            border: 1px solid #d4c4a8;
+            position: relative;
+        }
+        .book-page::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 2px solid #eaddcf;
+            margin: 10px;
+            pointer-events: none;
+        }
+        .editor-actions { margin-top: 15px; display: flex; gap: 10px; }
+    </style>
 </head>
 <body>
-<header>
-    <div class="brand">📚 El Bibliotecario</div>
-    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-</header>
+    <header>
+        <div class="brand">📚 El Bibliotecario</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
 
-<div class="generator-layout">
-    <div class="panel">
-        <h2>Escribir Documento</h2>
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Escribir Tomo</h2>
 
-        <label>Tema o Título</label>
-        <textarea id="topic" rows="3"
-                  placeholder="Ej: La cría de dragones, Historia de la ciudad perdida..."></textarea>
+            <label>Tipo de Libro</label>
+            <input type="text" id="bType" placeholder="Ej: Grimorio, Diario de Viaje, Tratado...">
 
-        <label>Formato</label>
-        <select id="type">
-            <option value="Libro Antiguo">Libro Antiguo</option>
-            <option value="Pergamino">Pergamino Enrollado</option>
-            <option value="Carta Personal">Carta Personal</option>
-            <option value="Diario de Viaje">Diario de Viaje</option>
-            <option value="Tablilla de Piedra">Tablilla de Piedra</option>
-            <option value="Nota Arrugada">Nota Arrugada</option>
-        </select>
+            <label>Tema / Título</label>
+            <input type="text" id="bTopic" placeholder="Ej: Historia de los Dragones Rojos...">
 
-        <button class="btn-generate" id="btnGen" style="background:#8d6e63;">Investigar</button>
-        <button class="btn-export" id="btnExp" style="display:none;">Crear Journal (Foundry)</button>
-    </div>
+            <label>Tono</label>
+            <select id="bTone">
+                <option value="Académico">Académico / Serio</option>
+                <option value="Místico">Místico / Oscuro</option>
+                <option value="Poético">Poético / Épico</option>
+                <option value="Locura">Desvaríos / Locura</option>
+                <option value="Práctico">Manual Práctico</option>
+            </select>
 
-    <div class="panel result-panel">
-        <div id="loader" class="loader">📖 Buscando en los archivos...</div>
-        <div id="resultContent">
-            <p style="text-align:center; margin-top:150px; color:#aaa;">El conocimiento espera...</p>
+            <button class="btn-generate" id="btnGen" style="background:#8e44ad; margin-top:15px;">Investigar</button>
+
+            <hr>
+            <button class="btn-edit" id="btnEdit" style="display:none; background:#f39c12; width:100%;">🖋️ Reescribir</button>
+            <button class="btn-export" id="btnExp" style="display:none; background:#2980b9; width:100%; margin-top:5px;">Exportar</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">📖 Consultando los archivos...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">Silencio en la biblioteca.</p>
+            </div>
+
+            <div id="formEditorContainer">
+                <h3 style="margin-top:0;">Restaurar Manuscrito</h3>
+
+                <label>Título</label><input type="text" id="editTitle">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div><label>Autor</label><input type="text" id="editAuthor"></div>
+                    <div><label>Tipo</label><input type="text" id="editType"></div>
+                </div>
+
+                <label>Descripción Física</label><textarea id="editDesc" rows="2"></textarea>
+                <label>Contenido del Texto</label><textarea id="editContent" rows="8"></textarea>
+                <label>Secreto Oculto</label><textarea id="editSecret" rows="2" style="background:#34495e; color:#ecf0f1;"></textarea>
+
+                <div class="editor-actions">
+                    <button id="btnSaveChanges" style="background:#27ae60; color:white; border:none; padding:10px; flex:1; cursor:pointer;">💾 Guardar Cambios</button>
+                    <button id="btnCancelEdit" style="background:#c0392b; color:white; border:none; padding:10px; cursor:pointer;">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">📜 Estanterías</div>
+            <div class="history-list" id="historyList"></div>
         </div>
     </div>
 
-    <div class="history-panel">
-        <div class="history-header">📂 Biblioteca</div>
-        <div class="history-list" id="historyList"></div>
-    </div>
-</div>
-
-<script src="../js/history/config.js"></script>
-<script src="../js/history/manager.js"></script>
-<script src="../js/librarian.js"></script>
+    <script src="../js/history/config.js"></script>
+    <script src="../js/history/manager.js"></script>
+    <script src="../js/librarian.js"></script>
 </body>
 </html>

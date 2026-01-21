@@ -19,6 +19,7 @@ window.HISTORY_CONFIG = {
     'dungeon':   { icon: '🗝️', renderer: 'renderDungeon' }, // Asegura que este nombre coincida con tu JS
     'faction':   { icon: '🛡️', renderer: 'renderFaction' },
     'villain':   { icon: '👺', renderer: 'renderVillain' },
+    'librarian': { icon: '📚', renderer: 'renderBook' },
 
     // --- EXTRAS ---
     'monster':   { icon: '👹', renderer: 'renderMonster' },
