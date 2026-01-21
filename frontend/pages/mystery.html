@@ -6,44 +6,46 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="brand">🕵️ Generador de Misterios</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">🕵️ Generador de Misterios</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Plantear el Caso</h2>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Plantear el Caso</h2>
 
-            <label>Escenario / Lugar</label>
-            <textarea id="setting" rows="3" placeholder="Ej: Una mansión noble durante una tormenta, un barco en alta mar..."></textarea>
+        <label>Escenario / Lugar</label>
+        <textarea id="setting" rows="3"
+                  placeholder="Ej: Una mansión noble durante una tormenta, un barco en alta mar..."></textarea>
 
-            <label>Complejidad</label>
-            <select id="difficulty">
-                <option value="Fácil">Fácil (Pistas obvias)</option>
-                <option value="Medio">Medio (Un giro)</option>
-                <option value="Difícil">Difícil (Pistas falsas)</option>
-                <option value="Imposible">Sherlock Holmes (Muy complejo)</option>
-            </select>
+        <label>Complejidad</label>
+        <select id="difficulty">
+            <option value="Fácil">Fácil (Pistas obvias)</option>
+            <option value="Medio">Medio (Un giro)</option>
+            <option value="Difícil">Difícil (Pistas falsas)</option>
+            <option value="Imposible">Sherlock Holmes (Muy complejo)</option>
+        </select>
 
-            <button class="btn-generate" id="btnGen" style="background:#34495e;">Crear Caso</button>
-            <button class="btn-export" id="btnExp" style="display:none;">Archivar Caso</button>
-        </div>
+        <button class="btn-generate" id="btnGen" style="background:#34495e;">Crear Caso</button>
+        <button class="btn-export" id="btnExp" style="display:none;">Archivar Caso</button>
+    </div>
 
-        <div class="panel result-panel">
-            <div id="loader" class="loader">🔍 Buscando huellas...</div>
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">El crimen aún no se ha cometido.</p>
-            </div>
-        </div>
-
-        <div class="history-panel">
-            <div class="history-header">📁 Archivos Policiales</div>
-            <div class="history-list" id="historyList"></div>
+    <div class="panel result-panel">
+        <div id="loader" class="loader">🔍 Buscando huellas...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">El crimen aún no se ha cometido.</p>
         </div>
     </div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/mystery.js"></script>
+    <div class="history-panel">
+        <div class="history-header">📁 Archivos Policiales</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/mystery.js"></script>
 </body>
 </html>

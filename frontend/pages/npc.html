@@ -111,60 +111,70 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="brand">🎭 Generador de NPCs</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">🎭 Generador de NPCs</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Configuración</h2>
-            <label>Descripción / Concepto</label>
-            <textarea id="desc" rows="6" placeholder="Ej: Un capitán de la guardia corrupto que acepta sobornos pero protege a los suyos..."></textarea>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Configuración</h2>
+        <label>Descripción / Concepto</label>
+        <textarea id="desc" rows="6"
+                  placeholder="Ej: Un capitán de la guardia corrupto que acepta sobornos pero protege a los suyos..."></textarea>
 
-            <button class="btn-generate" id="btnGen">Invocar NPC</button>
+        <button class="btn-generate" id="btnGen">Invocar NPC</button>
 
-            <button class="btn-generate" id="btnChat" style="background-color: #2980b9; display: none; margin-top: 10px;">💬 Hablar con NPC</button>
-            <button class="btn-generate" id="btnImg" style="background-color: #8e44ad; display: none; margin-top: 10px;">🎨 Generar Retrato</button>
+        <button class="btn-generate" id="btnChat" style="background-color: #2980b9; display: none; margin-top: 10px;">💬
+            Hablar con NPC
+        </button>
+        <button class="btn-generate" id="btnImg" style="background-color: #8e44ad; display: none; margin-top: 10px;">🎨
+            Generar Retrato
+        </button>
 
-            <button class="btn-export" id="btnExp">Exportar a Foundry VTT</button>
+        <button class="btn-export" id="btnExp">Exportar a Foundry VTT</button>
+    </div>
+
+    <div class="panel result-panel">
+        <div id="imgContainer" style="text-align: center; margin-bottom: 20px; display: none;">
+            <img id="generatedImg" src=""
+                 style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid var(--accent);">
         </div>
 
-        <div class="panel result-panel">
-            <div id="imgContainer" style="text-align: center; margin-bottom: 20px; display: none;">
-                <img id="generatedImg" src="" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid var(--accent);">
-            </div>
-
-            <div id="loader" class="loader">🔮 Creando vida...</div>
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">El NPC aparecerá aquí</p>
-            </div>
-        </div>
-
-        <div class="history-panel">
-            <div class="history-header">📚 Historial de NPCs</div>
-            <div class="history-list" id="historyList"></div>
+        <div id="loader" class="loader">🔮 Creando vida...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">El NPC aparecerá aquí</p>
         </div>
     </div>
 
-    <div id="chatModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 style="margin:0">💬 Interrogatorio</h3>
-                <span class="close-modal" id="closeModal">&times;</span>
-            </div>
-            <div id="chatHistory" class="chat-history">
-                </div>
+    <div class="history-panel">
+        <div class="history-header">📚 Historial de NPCs</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
 
-            <div class="chat-input-area">
-                <button id="btnMic" style="background:#e74c3c; width:50px; border-radius:50%;">🎤</button>
-                <input type="text" id="chatInput" placeholder="Escribe o pulsa el micro para hablar..." autocomplete="off">
-                <button id="btnSend">Enviar</button>
-            </div>
-            <div id="recordingStatus" style="display:none; text-align:center; color:red; font-weight:bold; padding:5px; background:#fff;">🔴 Grabando... (Suelta para enviar)</div>
+<div id="chatModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 style="margin:0">💬 Interrogatorio</h3>
+            <span class="close-modal" id="closeModal">&times;</span>
+        </div>
+        <div id="chatHistory" class="chat-history">
+        </div>
+
+        <div class="chat-input-area">
+            <button id="btnMic" style="background:#e74c3c; width:50px; border-radius:50%;">🎤</button>
+            <input type="text" id="chatInput" placeholder="Escribe o pulsa el micro para hablar..." autocomplete="off">
+            <button id="btnSend">Enviar</button>
+        </div>
+        <div id="recordingStatus"
+             style="display:none; text-align:center; color:red; font-weight:bold; padding:5px; background:#fff;">🔴
+            Grabando... (Suelta para enviar)
         </div>
     </div>
-    <script src="../js/history.js"></script>
-    <script src="../js/npc.js"></script>
+</div>
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/npc.js"></script>
 </body>
 </html>

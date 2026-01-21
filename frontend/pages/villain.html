@@ -46,44 +46,46 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="brand">👺 Arquitecto de Villanos</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">👺 Arquitecto de Villanos</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Diseño del Antagonista</h2>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Diseño del Antagonista</h2>
 
-            <label>Temática / Campaña</label>
-            <textarea id="theme" rows="4" placeholder="Ej: Terror Gótico con vampiros, Piratas del Mar Astral, Intriga política en la capital..."></textarea>
+        <label>Temática / Campaña</label>
+        <textarea id="theme" rows="4"
+                  placeholder="Ej: Terror Gótico con vampiros, Piratas del Mar Astral, Intriga política en la capital..."></textarea>
 
-            <label>Rango de Niveles</label>
-            <select id="levelRange">
-                <option value="1-5">Niveles 1-5 (Amenaza Local)</option>
-                <option value="5-10">Niveles 5-10 (Amenaza Regional)</option>
-                <option value="10-15">Niveles 10-15 (Amenaza Nacional)</option>
-                <option value="15-20">Niveles 15-20 (Amenaza Mundial/Cósmica)</option>
-            </select>
+        <label>Rango de Niveles</label>
+        <select id="levelRange">
+            <option value="1-5">Niveles 1-5 (Amenaza Local)</option>
+            <option value="5-10">Niveles 5-10 (Amenaza Regional)</option>
+            <option value="10-15">Niveles 10-15 (Amenaza Nacional)</option>
+            <option value="15-20">Niveles 15-20 (Amenaza Mundial/Cósmica)</option>
+        </select>
 
-            <button class="btn-generate" id="btnGen">Invocar Villano</button>
-            <button class="btn-export" id="btnExp" style="display:none;">Exportar Dossier</button>
-        </div>
+        <button class="btn-generate" id="btnGen">Invocar Villano</button>
+        <button class="btn-export" id="btnExp" style="display:none;">Exportar Dossier</button>
+    </div>
 
-        <div class="panel result-panel">
-            <div id="loader" class="loader">🌑 Convocando a las sombras...</div>
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">El BBEG aparecerá aquí</p>
-            </div>
-        </div>
-
-        <div class="history-panel">
-            <div class="history-header">💀 Galería de Infames</div>
-            <div class="history-list" id="historyList"></div>
+    <div class="panel result-panel">
+        <div id="loader" class="loader">🌑 Convocando a las sombras...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">El BBEG aparecerá aquí</p>
         </div>
     </div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/villain.js"></script>
+    <div class="history-panel">
+        <div class="history-header">💀 Galería de Infames</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/villain.js"></script>
 </body>
 </html>

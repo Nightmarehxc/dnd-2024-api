@@ -6,46 +6,47 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="brand">🗺️ Gestor de Aventuras</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">🗺️ Gestor de Aventuras</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Parámetros de la Aventura</h2>
-            <label>Temática / Sinopsis</label>
-            <textarea id="theme" rows="5" placeholder="Ej: Un misterio de asesinato en una mansión flotante durante una tormenta..."></textarea>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Parámetros de la Aventura</h2>
+        <label>Temática / Sinopsis</label>
+        <textarea id="theme" rows="5"
+                  placeholder="Ej: Un misterio de asesinato en una mansión flotante durante una tormenta..."></textarea>
 
-            <div style="display: flex; gap: 10px;">
-                <div style="flex:1">
-                    <label>Jugadores</label>
-                    <input type="number" id="players" value="4" min="1" max="8">
-                </div>
-                <div style="flex:1">
-                    <label>Nivel Party</label>
-                    <input type="number" id="level" value="3" min="1" max="20">
-                </div>
+        <div style="display: flex; gap: 10px;">
+            <div style="flex:1">
+                <label>Jugadores</label>
+                <input type="number" id="players" value="4" min="1" max="8">
             </div>
-
-            <button class="btn-generate" id="btnGen">Escribir Crónica</button>
-            <button class="btn-export" id="btnExp">Exportar Journal (Foundry)</button>
-        </div>
-
-        <div class="panel result-panel">
-            <div id="loader" class="loader">📜 Consultando los astros...</div>
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">La aventura se escribirá aquí</p>
+            <div style="flex:1">
+                <label>Nivel Party</label>
+                <input type="number" id="level" value="3" min="1" max="20">
             </div>
         </div>
 
-        <div class="history-panel">
-            <div class="history-header">📚 Biblioteca de Crónicas</div>
-            <div class="history-list" id="historyList"></div>
+        <button class="btn-generate" id="btnGen">Escribir Crónica</button>
+        <button class="btn-export" id="btnExp">Exportar Journal (Foundry)</button>
+    </div>
+
+    <div class="panel result-panel">
+        <div id="loader" class="loader">📜 Consultando los astros...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">La aventura se escribirá aquí</p>
         </div>
     </div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/adventure.js"></script>
+    <div class="history-panel">
+        <div class="history-header">📚 Biblioteca de Crónicas</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/adventure.js"></script>
 </body>
 </html>

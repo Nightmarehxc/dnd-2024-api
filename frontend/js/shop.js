@@ -2,20 +2,42 @@ const API_URL = "http://localhost:5001/api/shops/generate";
 let currentData = null;
 
 const els = {
-    type: document.getElementById('shopType'),
-    loc: document.getElementById('location'),
+    type: document.getElementById('type'),
+    location: document.getElementById('location'),
+    cityList: document.getElementById('cityList'),
+    level: document.getElementById('level'),
     btnGen: document.getElementById('btnGen'),
+    btnEdit: document.getElementById('btnEdit'),
     btnExp: document.getElementById('btnExp'),
     content: document.getElementById('resultContent'),
-    loader: document.getElementById('loader')
+    loader: document.getElementById('loader'),
+    editorContainer: document.getElementById('jsonEditorContainer'),
+    textarea: document.getElementById('jsonTextarea'),
+    btnSave: document.getElementById('btnSaveChanges')
 };
 
+// Cargar ciudades al inicio
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        const history = JSON.parse(localStorage.getItem('dnd_app_history') || '[]');
+        const cities = history.filter(item => item.type === 'city');
+        cities.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.nombre || c.name;
+            els.cityList.appendChild(opt);
+        });
+    } catch(e) {}
+});
+
+// GENERAR
 els.btnGen.addEventListener('click', async () => {
     if (!els.type.value) return alert("Define el tipo de tienda.");
 
     els.content.innerHTML = '';
+    els.editorContainer.style.display = 'none';
     els.loader.style.display = 'block';
     els.btnGen.disabled = true;
+    els.btnEdit.style.display = 'none';
     els.btnExp.style.display = 'none';
 
     try {
@@ -24,7 +46,9 @@ els.btnGen.addEventListener('click', async () => {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 shop_type: els.type.value,
-                location: els.loc.value
+                // CAMBIO IMPORTANTE: Convertir a entero
+                level: parseInt(els.level.value) || 1, 
+                location: els.location.value
             })
         });
 
@@ -33,20 +57,13 @@ els.btnGen.addEventListener('click', async () => {
 
         currentData = data;
         renderShop(data);
+        
+        els.btnEdit.style.display = 'block';
         els.btnExp.style.display = 'block';
 
-        // Intentar detectar ciudad para guardarlo en historial
-        if (els.loc.value && !currentData.city_reference) {
-            // Si el usuario escribió "Baldur's Gate (Puerto)", extraemos "Baldur's Gate"
-            const match = els.loc.value.match(/^(.*?)(\s\(|$)/);
-            if (match) currentData.city_reference = match[1];
+        if (typeof addToHistory === 'function') {
+            addToHistory({ ...data, nombre: data.shop_name, tipo_item: "Tienda" }, 'shop');
         }
-
-        const historyItem = {
-            ...data,
-            nombre: data.nombre_tienda // Para que history.js lo muestre bien
-        };
-        if (typeof addToHistory === 'function') addToHistory(historyItem);
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -56,94 +73,97 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
+// EDITAR JSON
+els.btnEdit.addEventListener('click', () => {
+    if(!currentData) return;
+    els.textarea.value = JSON.stringify(currentData, null, 4);
+    els.editorContainer.style.display = 'block';
+    els.editorContainer.scrollIntoView({behavior: "smooth"});
+});
+
+els.btnSave.addEventListener('click', () => {
+    try {
+        const newData = JSON.parse(els.textarea.value);
+        currentData = newData;
+        renderShop(currentData);
+        els.editorContainer.style.display = 'none';
+        alert("✅ Inventario actualizado.");
+    } catch (e) {
+        alert("❌ Error JSON: " + e.message);
+    }
+});
+
+// RENDERIZAR
 function renderShop(data) {
     const s = (val) => val || '---';
+    
+    const inventoryHeader = `
+        <div style="display:grid; grid-template-columns:1fr 80px 60px; gap:10px; border-bottom:2px solid #333; padding-bottom:5px; font-weight:bold; margin-bottom:10px;">
+            <span>Artículo</span>
+            <span style="text-align:right;">Precio</span>
+            <span style="text-align:center;">Stock</span>
+        </div>
+    `;
 
-    const itemsHtml = (data.inventario || []).map(item => `
-        <div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee;">
-            <span><strong>${item.nombre}</strong> <small style="color:#888;">(${item.tipo})</small></span>
-            <span style="font-weight:bold; color:#d35400;">${item.precio_gp} gp</span>
+    const inventoryHtml = (data.inventory || []).map(i => `
+        <div class="item-row">
+            <div>
+                <span class="item-name">${i.item}</span>
+                <span class="item-desc">${i.desc}</span>
+            </div>
+            <div class="item-price">${i.price}</div>
+            <div class="item-stock">${i.stock}</div>
         </div>
     `).join('');
 
-    const vendedorHtml = data.vendedor ? `
-        <div style="background:#fff; padding:10px; border:1px solid #ddd; border-radius:5px; margin-top:10px;">
-            <strong>🤵 ${data.vendedor.nombre}</strong> (${data.vendedor.raza})<br>
-            <em style="font-size:0.9em; color:#555;">"${data.vendedor.personalidad}"</em>
-        </div>
-    ` : '';
-
-    // --- ENLACE CRUZADO A CIUDAD ---
-    let cityLinkHtml = '';
-    // Buscamos si existe una referencia directa o intentamos parsear la ubicación
-    let cityRef = data.city_reference;
-
-    // Si no viene referencia explícita, intentamos extraerla del string "location"
-    if (!cityRef && data.location) {
-        const match = data.location.match(/^(.*?)(\s\(|$)/);
-        if (match) cityRef = match[1];
-    }
-
-    if (cityRef) {
-        cityLinkHtml = `
-            <div style="text-align:center; margin-bottom:15px;">
-                <a href="city.html?load_city=${encodeURIComponent(cityRef)}"
-                   class="btn-generate"
-                   style="background:#34495e; padding:8px 15px; font-size:0.85rem; text-decoration:none; display:inline-block; width:auto;">
-                   🏙️ Ir a ${cityRef}
-                </a>
-            </div>
-        `;
-    }
-    // -------------------------------
+    const locationInfo = data.location ? `<br><small>📍 ${data.location}</small>` : '';
 
     els.content.innerHTML = `
-        ${cityLinkHtml}
-        <h1 style="color:var(--accent); text-align:center; margin-bottom:5px;">${s(data.nombre_tienda)}</h1>
-        <p style="text-align:center; font-style:italic; color:#666;">${s(data.tipo)}</p>
-
-        <div style="background:#fdf2e9; padding:15px; border-radius:5px; border-left:4px solid #e67e22; margin-bottom:20px;">
-            ${s(data.descripcion_ambiente)}
+        <div style="text-align:center; border-bottom:2px solid #f39c12; padding-bottom:15px; margin-bottom:20px;">
+            <h1 style="color:#e67e22; margin:0;">${s(data.shop_name)}</h1>
+            <p style="font-style:italic; color:#7f8c8d;">${s(data.shop_type)} ${locationInfo}</p>
+            <p>${s(data.description)}</p>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-            <div>
-                <h3 style="border-bottom:2px solid var(--accent);">📦 Inventario</h3>
-                ${itemsHtml}
-            </div>
-            <div>
-                <h3 style="border-bottom:2px solid var(--accent);">👤 Propietario</h3>
-                ${vendedorHtml}
+        <div style="background:#fdf2e9; padding:15px; border-radius:5px; margin-bottom:20px;">
+            <h3 style="color:#d35400; margin-top:0;">🧑‍💼 ${s(data.shopkeeper?.name)}</h3>
+            <p><strong>Raza:</strong> ${s(data.shopkeeper?.race)} | <strong>Rasgos:</strong> ${s(data.shopkeeper?.traits)}</p>
+            <p style="font-size:0.9em; color:#c0392b;"><strong>✨ Especialidad:</strong> ${s(data.special_feature)}</p>
+        </div>
 
-                ${data.secreto ? `
-                    <div style="margin-top:20px; padding:10px; background:#e74c3c; color:white; border-radius:5px; font-size:0.9em;">
-                        <strong>👁️ SECRETO (DM):</strong> ${data.secreto}
-                    </div>
-                ` : ''}
-            </div>
+        <div>
+            <h3 style="color:#2c3e50;">📦 Inventario</h3>
+            ${inventoryHeader}
+            ${inventoryHtml}
         </div>
     `;
 }
 
+// EXPORTAR
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
+    
+    let content = `<h2>${currentData.shop_name}</h2>`;
+    content += `<p><i>${currentData.shop_type} - ${currentData.location || ''}</i></p>`;
+    content += `<p>${currentData.description}</p><hr>`;
+    content += `<p><b>Tendero:</b> ${currentData.shopkeeper.name} (${currentData.shopkeeper.race})</p>`;
+    content += `<p><b>Especial:</b> ${currentData.special_feature}</p>`;
+    
+    content += `<h3>Inventario</h3><table><tr><th>Objeto</th><th>Precio</th><th>Stock</th></tr>`;
+    (currentData.inventory || []).forEach(i => {
+        content += `<tr><td><b>${i.item}</b><br><i>${i.desc}</i></td><td>${i.price}</td><td>${i.stock}</td></tr>`;
+    });
+    content += `</table>`;
 
-    // Export format for Foundry
     const json = {
-        name: currentData.nombre_tienda,
+        name: currentData.shop_name,
         type: "journal",
-        pages: [
-            {
-                name: "Tienda",
-                type: "text",
-                text: { content: els.content.innerHTML, format: 1 }
-            }
-        ]
+        pages: [{ name: "Libro de Cuentas", type: "text", text: { content: content, format: 1 } }]
     };
 
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Tienda_${currentData.nombre_tienda.replace(/\s+/g, '_')}.json`;
+    a.download = `Tienda_${currentData.shop_name.replace(/\s+/g, '_')}.json`;
     a.click();
 });

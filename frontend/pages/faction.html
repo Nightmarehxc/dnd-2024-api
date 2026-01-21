@@ -6,43 +6,44 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="brand">🛡️ Gestor de Facciones</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">🛡️ Gestor de Facciones</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Crear Organización</h2>
-            <label>Tipo de Facción</label>
-            <select id="fType">
-                <option value="Gremio de Ladrones">Gremio de Ladrones</option>
-                <option value="Orden de Caballeros">Orden de Caballeros</option>
-                <option value="Culto Oscuro">Culto Oscuro</option>
-                <option value="Sindicato Mercantil">Sindicato Mercantil</option>
-                <option value="Círculo de Druidas">Círculo de Druidas</option>
-                <option value="Academia de Magia">Academia de Magia</option>
-            </select>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Crear Organización</h2>
+        <label>Tipo de Facción</label>
+        <select id="fType">
+            <option value="Gremio de Ladrones">Gremio de Ladrones</option>
+            <option value="Orden de Caballeros">Orden de Caballeros</option>
+            <option value="Culto Oscuro">Culto Oscuro</option>
+            <option value="Sindicato Mercantil">Sindicato Mercantil</option>
+            <option value="Círculo de Druidas">Círculo de Druidas</option>
+            <option value="Academia de Magia">Academia de Magia</option>
+        </select>
 
-            <label>Contexto / Ubicación</label>
-            <input type="text" id="fTheme" placeholder="Ej: Ciudad de Aguasprofundas, Bajos fondos...">
+        <label>Contexto / Ubicación</label>
+        <input type="text" id="fTheme" placeholder="Ej: Ciudad de Aguasprofundas, Bajos fondos...">
 
-            <button class="btn-generate" id="btnGen">Fundar Facción</button>
-            <button class="btn-export" id="btnExp" style="display:none;">Exportar Informe</button>
-        </div>
-
-        <div class="panel result-panel">
-            <div id="loader" class="loader">🤝 Reuniendo al consejo...</div>
-            <div id="resultContent"><p style="text-align:center; margin-top:150px; color:#aaa;">Los datos aparecerán aquí</p></div>
-        </div>
-
-        <div class="history-panel">
-            <div class="history-header">📂 Archivos Secretos</div>
-            <div class="history-list" id="historyList"></div>
-        </div>
+        <button class="btn-generate" id="btnGen">Fundar Facción</button>
+        <button class="btn-export" id="btnExp" style="display:none;">Exportar Informe</button>
     </div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/faction.js"></script>
+    <div class="panel result-panel">
+        <div id="loader" class="loader">🤝 Reuniendo al consejo...</div>
+        <div id="resultContent"><p style="text-align:center; margin-top:150px; color:#aaa;">Los datos aparecerán
+            aquí</p></div>
+    </div>
+
+    <div class="history-panel">
+        <div class="history-header">📂 Archivos Secretos</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/faction.js"></script>
 </body>
 </html>

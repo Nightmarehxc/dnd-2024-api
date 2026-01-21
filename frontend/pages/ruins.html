@@ -6,48 +6,49 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="brand">🏚️ Historiador de Ruinas</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">🏚️ Historiador de Ruinas</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Analizar Lugar</h2>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Analizar Lugar</h2>
 
-            <label>Nombre del Lugar</label>
-            <input type="text" id="name" placeholder="Ej: Fuerte del Alba, La Cripta de los Susurros...">
+        <label>Nombre del Lugar</label>
+        <input type="text" id="name" placeholder="Ej: Fuerte del Alba, La Cripta de los Susurros...">
 
-            <label>Tipo de Ruina</label>
-            <select id="type">
-                <option value="Castillo / Fortaleza">Castillo / Fortaleza</option>
-                <option value="Templo / Santuario">Templo / Santuario</option>
-                <option value="Torre de Mago">Torre de Mago</option>
-                <option value="Ciudad / Asentamiento">Ciudad / Asentamiento</option>
-                <option value="Mina / Cantera">Mina / Cantera</option>
-                <option value="Academia / Biblioteca">Academia / Biblioteca</option>
-                <option value="Prisión">Prisión</option>
-                <option value="Tumba / Necrópolis">Tumba / Necrópolis</option>
-            </select>
+        <label>Tipo de Ruina</label>
+        <select id="type">
+            <option value="Castillo / Fortaleza">Castillo / Fortaleza</option>
+            <option value="Templo / Santuario">Templo / Santuario</option>
+            <option value="Torre de Mago">Torre de Mago</option>
+            <option value="Ciudad / Asentamiento">Ciudad / Asentamiento</option>
+            <option value="Mina / Cantera">Mina / Cantera</option>
+            <option value="Academia / Biblioteca">Academia / Biblioteca</option>
+            <option value="Prisión">Prisión</option>
+            <option value="Tumba / Necrópolis">Tumba / Necrópolis</option>
+        </select>
 
-            <button class="btn-generate" id="btnGen" style="background:#5d4037;">Desenterrar Historia</button>
-            <button class="btn-export" id="btnExp" style="display:none;">Crear Journal</button>
-        </div>
+        <button class="btn-generate" id="btnGen" style="background:#5d4037;">Desenterrar Historia</button>
+        <button class="btn-export" id="btnExp" style="display:none;">Crear Journal</button>
+    </div>
 
-        <div class="panel result-panel">
-            <div id="loader" class="loader">⛏️ Excavando el pasado...</div>
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">Las piedras guardan silencio...</p>
-            </div>
-        </div>
-
-        <div class="history-panel">
-            <div class="history-header">🗺️ Archivo Arqueológico</div>
-            <div class="history-list" id="historyList"></div>
+    <div class="panel result-panel">
+        <div id="loader" class="loader">⛏️ Excavando el pasado...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">Las piedras guardan silencio...</p>
         </div>
     </div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/ruins.js"></script>
+    <div class="history-panel">
+        <div class="history-header">🗺️ Archivo Arqueológico</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/ruins.js"></script>
 </body>
 </html>

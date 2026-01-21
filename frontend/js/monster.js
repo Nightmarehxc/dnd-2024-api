@@ -6,22 +6,21 @@ const els = {
     theme: document.getElementById('theme'),
     cr: document.getElementById('targetCR'),
     btnGen: document.getElementById('btnGen'),
-    btnEdit: document.getElementById('btnEdit'), // Botón Editar
+    btnEdit: document.getElementById('btnEdit'),
     btnExp: document.getElementById('btnExp'),
     content: document.getElementById('resultContent'),
     loader: document.getElementById('loader'),
-    // Elementos del Editor
     editorContainer: document.getElementById('jsonEditorContainer'),
     textarea: document.getElementById('jsonTextarea'),
     btnSave: document.getElementById('btnSaveChanges')
 };
 
-// --- 1. GENERAR MONSTRUO ---
+// --- 1. GENERAR ---
 els.btnGen.addEventListener('click', async () => {
-    if (!els.base.value || !els.theme.value) return alert("Faltan datos básicos.");
+    if (!els.base.value || !els.theme.value) return alert("Faltan datos.");
 
     els.content.innerHTML = '';
-    els.editorContainer.style.display = 'none'; // Ocultar editor si estaba abierto
+    els.editorContainer.style.display = 'none';
     els.loader.style.display = 'block';
     els.btnGen.disabled = true;
     els.btnEdit.style.display = 'none';
@@ -44,7 +43,6 @@ els.btnGen.addEventListener('click', async () => {
         currentData = data;
         renderMonster(data);
 
-        // Mostrar botones de acción
         els.btnEdit.style.display = 'block';
         els.btnExp.style.display = 'block';
 
@@ -60,55 +58,39 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-// --- 2. ABRIR EDITOR JSON ---
+// --- 2. EDITAR JSON ---
 els.btnEdit.addEventListener('click', () => {
     if(!currentData) return;
-    // Rellenar el textarea con los datos actuales bonitos
     els.textarea.value = JSON.stringify(currentData, null, 4);
-    // Mostrar el contenedor
     els.editorContainer.style.display = 'block';
-    // Scroll hacia el editor
     els.editorContainer.scrollIntoView({behavior: "smooth"});
 });
 
-// --- 3. GUARDAR CAMBIOS (JSON -> VISTA) ---
 els.btnSave.addEventListener('click', () => {
     try {
-        // Parsear el texto
         const newData = JSON.parse(els.textarea.value);
-
-        // Actualizar datos actuales
         currentData = newData;
-
-        // Regenerar la vista bonita
         renderMonster(currentData);
-
-        // Ocultar editor
         els.editorContainer.style.display = 'none';
-
-        // (Opcional) Actualizar historial si quisieras, pero requeriría lógica extra
-        alert("✅ Monstruo actualizado correctamente.");
-
+        alert("✅ Actualizado.");
     } catch (e) {
-        alert("❌ Error en el JSON: " + e.message + "\n\nRevisa las comillas y comas.");
+        alert("❌ Error JSON: " + e.message);
     }
 });
 
-// --- RENDERIZAR FICHA (STAT BLOCK) ---
+// --- 3. RENDERIZAR ---
 function renderMonster(data) {
     const s = (val) => val || '---';
     const stats = data.stats || {};
 
-    // Función auxiliar para calcular modificador: (Score - 10) / 2
     const getMod = (score) => {
         const mod = Math.floor((score - 10) / 2);
         return mod >= 0 ? `+${mod}` : mod;
     };
 
-    // Generar HTML de Atributos
     let statsHtml = '';
     ['STR','DEX','CON','INT','WIS','CHA'].forEach(stat => {
-        const val = stats[stat] || 10;
+        const val = parseInt(stats[stat]) || 10;
         statsHtml += `
             <div class="ability-score">
                 <strong>${stat}</strong><br>
@@ -117,7 +99,6 @@ function renderMonster(data) {
         `;
     });
 
-    // Generar HTML de Rasgos y Acciones
     const traitsHtml = (data.traits || []).map(t => `<p><strong>${t.name}.</strong> ${t.desc}</p>`).join('');
     const actionsHtml = (data.actions || []).map(a => `<p class="stat-line"><span class="action-name">${a.name}.</span> ${a.desc}</p>`).join('');
 
@@ -127,49 +108,119 @@ function renderMonster(data) {
             <div style="font-style:italic;">${s(data.type)}, ${s(data.alignment)}</div>
             <div class="red-line"></div>
 
-            <p class="stat-line"><strong>Armor Class</strong> ${s(data.ac)}</p>
-            <p class="stat-line"><strong>Hit Points</strong> ${s(data.hp)}</p>
+            <p class="stat-line"><strong>AC</strong> ${s(data.ac)}</p>
+            <p class="stat-line"><strong>HP</strong> ${s(data.hp)}</p>
             <p class="stat-line"><strong>Speed</strong> ${s(data.speed)}</p>
 
             <div class="red-line"></div>
-            <div style="display:flex; justify-content:space-between;">
-                ${statsHtml}
-            </div>
+            <div style="display:flex; justify-content:space-between;">${statsHtml}</div>
             <div class="red-line"></div>
 
-            <p class="stat-line"><strong>Saving Throws</strong> ${s(data.saves)}</p>
-            <p class="stat-line"><strong>Skills</strong> ${s(data.skills)}</p>
-            <p class="stat-line"><strong>Senses</strong> ${s(data.senses)}</p>
-            <p class="stat-line"><strong>Languages</strong> ${s(data.languages)}</p>
-            <p class="stat-line"><strong>Challenge</strong> ${s(data.cr)}</p>
+            <p class="stat-line"><strong>Saves:</strong> ${s(data.saves)}</p>
+            <p class="stat-line"><strong>Skills:</strong> ${s(data.skills)}</p>
+            <p class="stat-line"><strong>Senses:</strong> ${s(data.senses)}</p>
+            <p class="stat-line"><strong>CR:</strong> ${s(data.cr)}</p>
 
             <div class="red-line"></div>
             ${traitsHtml}
 
-            <h3 style="color:#822000; border-bottom:1px solid #822000;">Actions</h3>
+            <h3 style="color:#822000; border-bottom:1px solid #822000;">Acciones</h3>
             ${actionsHtml}
 
-            <div style="margin-top:15px; border-top:1px solid #aaa; padding-top:10px; font-style:italic; font-size:0.9em;">
-                <strong>Visual:</strong> ${s(data.visual)}
+            <div style="margin-top:15px; padding-top:10px; border-top:1px solid #aaa; font-style:italic; font-size:0.9em;">
+                ${s(data.visual)}
             </div>
         </div>
     `;
 }
 
-// --- EXPORTAR A FOUNDRY ---
+// --- 4. EXPORTAR A FOUNDRY (Lógica Compleja) ---
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
+
+    // 1. Procesar Stats (STR -> str)
+    const abilities = {};
+    const keys = { 'STR': 'str', 'DEX': 'dex', 'CON': 'con', 'INT': 'int', 'WIS': 'wis', 'CHA': 'cha' };
+
+    // Default 10 si no existe
+    Object.keys(keys).forEach(k => {
+        abilities[keys[k]] = {
+            value: parseInt(currentData.stats[k]) || 10,
+            mod: Math.floor(((parseInt(currentData.stats[k]) || 10) - 10) / 2)
+        };
+    });
+
+    // 2. Procesar HP (Separar "50 (6d10)" -> 50 y fórmula)
+    let hpVal = 10;
+    let hpFormula = "";
+    if (currentData.hp) {
+        // Intentar sacar el primer número
+        const matchVal = currentData.hp.toString().match(/^(\d+)/);
+        if (matchVal) hpVal = parseInt(matchVal[1]);
+
+        // Intentar sacar fórmula entre paréntesis
+        const matchForm = currentData.hp.toString().match(/\((.*?)\)/);
+        if (matchForm) hpFormula = matchForm[1];
+    }
+
+    // 3. Crear Items (Rasgos y Acciones)
+    const items = [];
+
+    // Rasgos -> Feats
+    (currentData.traits || []).forEach(t => {
+        items.push({
+            name: t.name,
+            type: "feat",
+            system: {
+                description: { value: t.desc },
+                activation: { type: "", cost: 0 },
+                duration: { value: "", units: "" }
+            }
+        });
+    });
+
+    // Acciones -> Weapons (Para que se puedan tirar dados)
+    (currentData.actions || []).forEach(a => {
+        items.push({
+            name: a.name,
+            type: "weapon", // "weapon" permite tiradas de ataque/daño en Foundry
+            system: {
+                description: { value: a.desc },
+                activation: { type: "action", cost: 1 },
+                actionType: "mwak", // Melee Weapon Attack por defecto
+                equipped: true
+            }
+        });
+    });
+
+    // 4. Construir JSON Final
     const json = {
         name: currentData.name,
         type: "npc",
+        img: "icons/svg/mystery-man.svg",
         system: {
-            details: { biography: { value: currentData.visual } },
-            attributes: { ac: { value: currentData.ac }, hp: { value: parseInt(currentData.hp) || 10 } }
-        }
+            attributes: {
+                ac: { value: parseInt(currentData.ac) || 10 },
+                hp: { value: hpVal, max: hpVal, formula: hpFormula },
+                speed: { value: currentData.speed || "30 ft" }
+            },
+            abilities: abilities,
+            details: {
+                alignment: currentData.alignment || "Neutral",
+                cr: parseFloat(currentData.cr) || 1,
+                biography: { value: currentData.visual || "" },
+                type: { value: currentData.type || "custom" }
+            },
+            traits: {
+                languages: { value: [currentData.languages || "Common"] }
+            }
+        },
+        items: items // <--- Aquí van las armas y poderes
     };
+
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `${currentData.name.replace(/\s+/g, '_')}.json`;
+    a.download = `${currentData.name.replace(/\s+/g, '_')}_Foundry.json`;
     a.click();
 });

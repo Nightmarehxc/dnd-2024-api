@@ -51,39 +51,40 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="brand">✨ Forja Arcana</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">✨ Forja Arcana</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Investigar Hechizo</h2>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Investigar Hechizo</h2>
 
-            <label>Concepto / Efecto</label>
-            <textarea id="desc" rows="4" placeholder="Ej: Un muro de hielo que explota si lo tocan..."></textarea>
+        <label>Concepto / Efecto</label>
+        <textarea id="desc" rows="4" placeholder="Ej: Un muro de hielo que explota si lo tocan..."></textarea>
 
-            <label>Nivel Objetivo (Opcional)</label>
-            <input type="number" id="level" placeholder="Deja vacío para que la IA decida" min="0" max="9">
+        <label>Nivel Objetivo (Opcional)</label>
+        <input type="number" id="level" placeholder="Deja vacío para que la IA decida" min="0" max="9">
 
-            <button class="btn-generate" id="btnGen">Inscribir Pergamino</button>
-            <button class="btn-export" id="btnExp" style="display:none;">Exportar a Foundry VTT</button>
-        </div>
+        <button class="btn-generate" id="btnGen">Inscribir Pergamino</button>
+        <button class="btn-export" id="btnExp" style="display:none;">Exportar a Foundry VTT</button>
+    </div>
 
-        <div class="panel result-panel">
-            <div id="loader" class="loader">🔥 Canalizando energía del Weave...</div>
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">El hechizo se manifestará aquí</p>
-            </div>
-        </div>
-
-        <div class="history-panel">
-            <div class="history-header">📚 Grimorio Personal</div>
-            <div class="history-list" id="historyList"></div>
+    <div class="panel result-panel">
+        <div id="loader" class="loader">🔥 Canalizando energía del Weave...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">El hechizo se manifestará aquí</p>
         </div>
     </div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/spell.js"></script>
+    <div class="history-panel">
+        <div class="history-header">📚 Grimorio Personal</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/spell.js"></script>
 </body>
 </html>

@@ -46,10 +46,11 @@ class AdventureRequestSchema(Schema):
 
 # Esquema para Tiendas
 class ShopRequestSchema(Schema):
-    shop_type = fields.String(required=True, validate=validate.Length(min=3))
-    location = fields.String(required=False, load_default="Ciudad Genérica")
+    shop_type = fields.String(required=True)
+    # CAMBIO: Ahora es entero y validamos rango D&D
     level = fields.Integer(required=False, load_default=1, validate=validate.Range(min=1, max=20))
-    vendor_race = fields.String(required=False, load_default=None)
+    location = fields.String(required=False, load_default="")
+
 
 class CityRequestSchema(Schema):
     name = fields.String(required=False, load_default="Una ciudad sin nombre")
@@ -128,3 +129,13 @@ class MonsterRequestSchema(Schema):
     base_monster = fields.String(required=True) # Ej: Ogro, Goblin
     theme = fields.String(required=True)        # Ej: Cibernético, Infernal
     target_cr = fields.String(required=False, allow_none=True) # Ej: 5 (Opcional)
+
+class InnRequestSchema(Schema):
+    name = fields.String(required=False, load_default="")
+    comfort_level = fields.String(
+        required=False,
+        load_default="Modesta",
+        validate=validate.OneOf(["Miserable", "Pobre", "Modesta", "Confortable", "Rica", "Aristocrática"])
+    )
+    theme = fields.String(required=False, load_default="Fantasía Genérica")
+    city = fields.String(required=False, load_default="") # NUEVO: Ciudad vinculada

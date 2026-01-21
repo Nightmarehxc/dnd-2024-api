@@ -6,40 +6,41 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="brand">💰 La Bóveda del Tesoro</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">💰 La Bóveda del Tesoro</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Origen del Tesoro</h2>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Origen del Tesoro</h2>
 
-            <label>Tipo de Enemigo / Origen</label>
-            <input type="text" id="enemyType" placeholder="Ej: Guarida de Dragón Rojo, Campamento Goblin...">
+        <label>Tipo de Enemigo / Origen</label>
+        <input type="text" id="enemyType" placeholder="Ej: Guarida de Dragón Rojo, Campamento Goblin...">
 
-            <label>Nivel de Desafío (CR del Encuentro)</label>
-            <input type="number" id="cr" value="1" min="0" max="30">
-            <small style="color:#666; display:block; margin-bottom:10px;">Determina el valor y la magia del botín.</small>
+        <label>Nivel de Desafío (CR del Encuentro)</label>
+        <input type="number" id="cr" value="1" min="0" max="30">
+        <small style="color:#666; display:block; margin-bottom:10px;">Determina el valor y la magia del botín.</small>
 
-            <button class="btn-generate" id="btnGen">Abrir Cofre</button>
-            <button class="btn-export" id="btnExp">Exportar Botín</button>
-        </div>
+        <button class="btn-generate" id="btnGen">Abrir Cofre</button>
+        <button class="btn-export" id="btnExp">Exportar Botín</button>
+    </div>
 
-        <div class="panel result-panel">
-            <div id="loader" class="loader">🪙 Contando monedas...</div>
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">El contenido del tesoro aparecerá aquí</p>
-            </div>
-        </div>
-
-        <div class="history-panel">
-            <div class="history-header">📜 Historial de Saqueos</div>
-            <div class="history-list" id="historyList"></div>
+    <div class="panel result-panel">
+        <div id="loader" class="loader">🪙 Contando monedas...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">El contenido del tesoro aparecerá aquí</p>
         </div>
     </div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/loot.js"></script>
+    <div class="history-panel">
+        <div class="history-header">📜 Historial de Saqueos</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/loot.js"></script>
 </body>
 </html>

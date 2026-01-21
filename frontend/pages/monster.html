@@ -43,54 +43,55 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="brand">👹 Laboratorio de Monstruos</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">👹 Laboratorio de Monstruos</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Configurar Experimento</h2>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Configurar Experimento</h2>
 
-            <label>Monstruo Base</label>
-            <input type="text" id="baseMonster" placeholder="Ej: Ogro, Lobo, Goblin...">
+        <label>Monstruo Base</label>
+        <input type="text" id="baseMonster" placeholder="Ej: Ogro, Lobo, Goblin...">
 
-            <label>Plantilla / Tema</label>
-            <input type="text" id="theme" placeholder="Ej: Cibernético, Fúngico, Infernal...">
+        <label>Plantilla / Tema</label>
+        <input type="text" id="theme" placeholder="Ej: Cibernético, Fúngico, Infernal...">
 
-            <label>CR Objetivo (Opcional)</label>
-            <input type="text" id="targetCR" placeholder="Ej: 5 (Dejar vacío para mantener original)">
+        <label>CR Objetivo (Opcional)</label>
+        <input type="text" id="targetCR" placeholder="Ej: 5 (Dejar vacío para mantener original)">
 
-            <button class="btn-generate" id="btnGen" style="background:#8e44ad;">Mutar Monstruo</button>
+        <button class="btn-generate" id="btnGen" style="background:#8e44ad;">Mutar Monstruo</button>
 
-            <hr>
+        <hr>
 
-            <button class="btn-edit" id="btnEdit" style="display:none;">📝 Editar Manualmente (JSON)</button>
-            <button class="btn-export" id="btnExp" style="display:none; background:#2980b9;">Exportar a Foundry</button>
+        <button class="btn-edit" id="btnEdit" style="display:none;">📝 Editar Manualmente (JSON)</button>
+        <button class="btn-export" id="btnExp" style="display:none; background:#2980b9;">Exportar a Foundry</button>
+    </div>
+
+    <div class="panel result-panel">
+        <div id="loader" class="loader">🧬 Recombinando ADN...</div>
+
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">La mesa de operaciones está vacía.</p>
         </div>
 
-        <div class="panel result-panel">
-            <div id="loader" class="loader">🧬 Recombinando ADN...</div>
-
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">La mesa de operaciones está vacía.</p>
-            </div>
-
-            <div id="jsonEditorContainer">
-                <h4 style="color:white; margin-top:0;">Editor de Código Genético</h4>
-                <textarea id="jsonTextarea"></textarea>
-                <button class="btn-save-changes" id="btnSaveChanges">💾 Aplicar Cambios</button>
-                <small style="color:#bdc3c7;">Cuidado: Si rompes el formato JSON, el monstruo morirá.</small>
-            </div>
-        </div>
-
-        <div class="history-panel">
-            <div class="history-header">🧪 Especímenes</div>
-            <div class="history-list" id="historyList"></div>
+        <div id="jsonEditorContainer">
+            <h4 style="color:white; margin-top:0;">Editor de Código Genético</h4>
+            <textarea id="jsonTextarea"></textarea>
+            <button class="btn-save-changes" id="btnSaveChanges">💾 Aplicar Cambios</button>
+            <small style="color:#bdc3c7;">Cuidado: Si rompes el formato JSON, el monstruo morirá.</small>
         </div>
     </div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/monster.js"></script>
+    <div class="history-panel">
+        <div class="history-header">🧪 Especímenes</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/monster.js"></script>
 </body>
 </html>

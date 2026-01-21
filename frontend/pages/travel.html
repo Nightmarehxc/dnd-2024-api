@@ -81,39 +81,41 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="brand">⛺ Diario de Viaje</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">⛺ Diario de Viaje</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Planificar Ruta</h2>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Planificar Ruta</h2>
 
-            <label>Entorno / Bioma</label>
-            <textarea id="env" rows="3" placeholder="Ej: El Bosque de los Susurros, lleno de niebla y ruinas élficas..."></textarea>
+        <label>Entorno / Bioma</label>
+        <textarea id="env" rows="3"
+                  placeholder="Ej: El Bosque de los Susurros, lleno de niebla y ruinas élficas..."></textarea>
 
-            <label>Duración (Eventos)</label>
-            <input type="number" id="days" value="4" min="1" max="10">
+        <label>Duración (Eventos)</label>
+        <input type="number" id="days" value="4" min="1" max="10">
 
-            <button class="btn-generate" id="btnGen" style="background:#d35400;">Comenzar Viaje</button>
-            <button class="btn-export" id="btnExp" style="display:none;">Guardar Bitácora</button>
-        </div>
+        <button class="btn-generate" id="btnGen" style="background:#d35400;">Comenzar Viaje</button>
+        <button class="btn-export" id="btnExp" style="display:none;">Guardar Bitácora</button>
+    </div>
 
-        <div class="panel result-panel">
-            <div id="loader" class="loader">🐎 Ensillando los caballos...</div>
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">El camino se revelará aquí</p>
-            </div>
-        </div>
-
-        <div class="history-panel">
-            <div class="history-header">🗺️ Rutas Pasadas</div>
-            <div class="history-list" id="historyList"></div>
+    <div class="panel result-panel">
+        <div id="loader" class="loader">🐎 Ensillando los caballos...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">El camino se revelará aquí</p>
         </div>
     </div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/travel.js"></script>
+    <div class="history-panel">
+        <div class="history-header">🗺️ Rutas Pasadas</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/travel.js"></script>
 </body>
 </html>

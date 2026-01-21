@@ -236,7 +236,7 @@ El famoso "voy de Punto A a Punto B". A veces no quieres combate, sino "sabor".
 
     Valor: Hace que el mundo se sienta vivo y grande entre aventuras.
 
-### 17. 👹 Laboratorio de Monstruos (Monster Modder)
+### 17. 👹 Laboratorio de Monstruos (Monster Modder) ✅ 
 
 A veces el manual de monstruos se queda corto o los jugadores ya se saben las estadísticas de memoria.
 

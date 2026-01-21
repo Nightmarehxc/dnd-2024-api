@@ -73,66 +73,69 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="brand">🏰 Arquitecto de Ciudades</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">🏰 Arquitecto de Ciudades</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Fundación</h2>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Fundación</h2>
 
-            <label>Nombre de la Ciudad (Opcional)</label>
-            <input type="text" id="cityName" placeholder="Ej: Puerta de Baldur, Neverwinter...">
+        <label>Nombre de la Ciudad (Opcional)</label>
+        <input type="text" id="cityName" placeholder="Ej: Puerta de Baldur, Neverwinter...">
 
-            <label>Tamaño y Tipo</label>
-            <select id="cityType">
-                <option value="Aldea pequeña">Aldea (Poca gente)</option>
-                <option value="Pueblo fronterizo">Pueblo Fronterizo (Comercio)</option>
-                <option value="Ciudad amurallada">Ciudad Amurallada (Militar)</option>
-                <option value="Metrópolis mágica">Metrópolis Mágica (Alta Fantasía)</option>
-                <option value="Puerto comercial">Puerto Comercial (Piratas/Comercio)</option>
-            </select>
+        <label>Tamaño y Tipo</label>
+        <select id="cityType">
+            <option value="Aldea pequeña">Aldea (Poca gente)</option>
+            <option value="Pueblo fronterizo">Pueblo Fronterizo (Comercio)</option>
+            <option value="Ciudad amurallada">Ciudad Amurallada (Militar)</option>
+            <option value="Metrópolis mágica">Metrópolis Mágica (Alta Fantasía)</option>
+            <option value="Puerto comercial">Puerto Comercial (Piratas/Comercio)</option>
+        </select>
 
-            <label>Clima / Bioma</label>
-            <input type="text" id="biome" placeholder="Ej: Tundra helada, Desierto abrasador...">
+        <label>Clima / Bioma</label>
+        <input type="text" id="biome" placeholder="Ej: Tundra helada, Desierto abrasador...">
 
-            <button class="btn-generate" id="btnGen">Fundar Asentamiento</button>
-            <button class="btn-export" id="btnExp" style="display:none;">Exportar Mapa Textual</button>
-        </div>
+        <button class="btn-generate" id="btnGen">Fundar Asentamiento</button>
+        <button class="btn-export" id="btnExp" style="display:none;">Exportar Mapa Textual</button>
+    </div>
 
-        <div class="panel result-panel">
-            <div id="loader" class="loader">🧱 Colocando la primera piedra...</div>
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">La ciudad aparecerá aquí</p>
-            </div>
-        </div>
-
-        <div class="history-panel">
-            <div class="history-header">🗺️ Cartografía</div>
-            <div class="history-list" id="historyList"></div>
+    <div class="panel result-panel">
+        <div id="loader" class="loader">🧱 Colocando la primera piedra...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">La ciudad aparecerá aquí</p>
         </div>
     </div>
 
-    <div id="shopModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 style="margin:0">⚖️ Nuevo Comercio Local</h3>
-                <span class="close-modal" id="closeModal">&times;</span>
+    <div class="history-panel">
+        <div class="history-header">🗺️ Cartografía</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<div id="shopModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 style="margin:0">⚖️ Nuevo Comercio Local</h3>
+            <span class="close-modal" id="closeModal">&times;</span>
+        </div>
+        <div id="shopModalBody" class="modal-body">
+            <div id="shopLoader" style="text-align:center; display:none;">
+                <p>🔨 Construyendo el local...</p>
             </div>
-            <div id="shopModalBody" class="modal-body">
-                <div id="shopLoader" style="text-align:center; display:none;">
-                    <p>🔨 Construyendo el local...</p>
-                </div>
-                <div id="shopResultContent"></div>
-            </div>
-            <div style="padding:15px; background:#eee; text-align:right; border-bottom-left-radius:10px; border-bottom-right-radius:10px;">
-                <button id="btnSaveShop" class="btn-generate" style="width:auto; margin:0; font-size:0.9rem;">Guardar en Historial de Tiendas</button>
-            </div>
+            <div id="shopResultContent"></div>
+        </div>
+        <div style="padding:15px; background:#eee; text-align:right; border-bottom-left-radius:10px; border-bottom-right-radius:10px;">
+            <button id="btnSaveShop" class="btn-generate" style="width:auto; margin:0; font-size:0.9rem;">Guardar en
+                Historial de Tiendas
+            </button>
         </div>
     </div>
+</div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/city.js"></script>
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/city.js"></script>
 </body>
 </html>

@@ -50,36 +50,39 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="brand">🖋️ El Cronista</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">🖋️ El Cronista</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Notas de la Sesión</h2>
-            <p style="font-size:0.9em; color:#666; margin-bottom:10px;">Pega aquí tus apuntes rápidos, sucios y desordenados.</p>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Notas de la Sesión</h2>
+        <p style="font-size:0.9em; color:#666; margin-bottom:10px;">Pega aquí tus apuntes rápidos, sucios y
+            desordenados.</p>
 
-            <textarea id="notes" rows="15" placeholder="Ej: Entramos en la cueva. El bárbaro rompió la puerta. Salieron 3 esqueletos. Casi morimos pero el mago usó bola de fuego. Encontramos una espada mágica y volvimos al pueblo a cobrar la recompensa de 50 oros."></textarea>
+        <textarea id="notes" rows="15"
+                  placeholder="Ej: Entramos en la cueva. El bárbaro rompió la puerta. Salieron 3 esqueletos. Casi morimos pero el mago usó bola de fuego. Encontramos una espada mágica y volvimos al pueblo a cobrar la recompensa de 50 oros."></textarea>
 
-            <button class="btn-generate" id="btnGen">Escribir Crónica</button>
-            <button class="btn-export" id="btnExp" style="display:none;">Guardar en Diario</button>
-        </div>
+        <button class="btn-generate" id="btnGen">Escribir Crónica</button>
+        <button class="btn-export" id="btnExp" style="display:none;">Guardar en Diario</button>
+    </div>
 
-        <div class="panel result-panel">
-            <div id="loader" class="loader">🕯️ Mojando la pluma en tinta...</div>
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">La historia cobrará vida aquí</p>
-            </div>
-        </div>
-
-        <div class="history-panel">
-            <div class="history-header">📚 Tomos Anteriores</div>
-            <div class="history-list" id="historyList"></div>
+    <div class="panel result-panel">
+        <div id="loader" class="loader">🕯️ Mojando la pluma en tinta...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">La historia cobrará vida aquí</p>
         </div>
     </div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/journal.js"></script>
+    <div class="history-panel">
+        <div class="history-header">📚 Tomos Anteriores</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/journal.js"></script>
 </body>
 </html>

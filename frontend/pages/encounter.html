@@ -6,55 +6,56 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-    <header>
-        <div class="brand">⚔️ Sala de Guerra</div>
-        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-    </header>
+<header>
+    <div class="brand">⚔️ Sala de Guerra</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
 
-    <div class="generator-layout">
-        <div class="panel">
-            <h2>Configuración del Encuentro</h2>
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Configuración del Encuentro</h2>
 
-            <label>Entorno / Lugar</label>
-            <input type="text" id="environment" placeholder="Ej: Puente colgante sobre lava, Bosque embrujado...">
+        <label>Entorno / Lugar</label>
+        <input type="text" id="environment" placeholder="Ej: Puente colgante sobre lava, Bosque embrujado...">
 
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1">
-                    <label>Nivel del Grupo</label>
-                    <input type="number" id="level" value="3" min="1" max="20">
-                </div>
-                <div style="flex:1">
-                    <label>Jugadores</label>
-                    <input type="number" id="players" value="4" min="1" max="10">
-                </div>
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1">
+                <label>Nivel del Grupo</label>
+                <input type="number" id="level" value="3" min="1" max="20">
             </div>
-
-            <label>Dificultad</label>
-            <select id="difficulty">
-                <option value="Fácil">🟢 Fácil (Calentamiento)</option>
-                <option value="Medio">🟡 Medio (Recursos estándar)</option>
-                <option value="Difícil">🔴 Difícil (Riesgo real)</option>
-                <option value="Mortal">💀 Mortal (Posible TPK)</option>
-            </select>
-
-            <button class="btn-generate" id="btnGen">Diseñar Estrategia</button>
-            <button class="btn-export" id="btnExp">Exportar Journal (Foundry)</button>
-        </div>
-
-        <div class="panel result-panel">
-            <div id="loader" class="loader">🛡️ Afilando espadas...</div>
-            <div id="resultContent">
-                <p style="text-align:center; margin-top:150px; color:#aaa;">El plan de batalla aparecerá aquí</p>
+            <div style="flex:1">
+                <label>Jugadores</label>
+                <input type="number" id="players" value="4" min="1" max="10">
             </div>
         </div>
 
-        <div class="history-panel">
-            <div class="history-header">📜 Archivo de Batallas</div>
-            <div class="history-list" id="historyList"></div>
+        <label>Dificultad</label>
+        <select id="difficulty">
+            <option value="Fácil">🟢 Fácil (Calentamiento)</option>
+            <option value="Medio">🟡 Medio (Recursos estándar)</option>
+            <option value="Difícil">🔴 Difícil (Riesgo real)</option>
+            <option value="Mortal">💀 Mortal (Posible TPK)</option>
+        </select>
+
+        <button class="btn-generate" id="btnGen">Diseñar Estrategia</button>
+        <button class="btn-export" id="btnExp">Exportar Journal (Foundry)</button>
+    </div>
+
+    <div class="panel result-panel">
+        <div id="loader" class="loader">🛡️ Afilando espadas...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">El plan de batalla aparecerá aquí</p>
         </div>
     </div>
 
-    <script src="../js/history.js"></script>
-    <script src="../js/encounter.js"></script>
+    <div class="history-panel">
+        <div class="history-header">📜 Archivo de Batallas</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/encounter.js"></script>
 </body>
 </html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generador de Posadas</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .menu-grid-items {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            font-size: 0.9em;
+            border-bottom: 1px dashed #ccc;
+            padding: 5px 0;
+        }
+        .price-tag { color: #c0392b; font-weight: bold; }
+
+        /* Estilos Editor JSON */
+        #jsonEditorContainer {
+            display: none;
+            background: #2c3e50;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        #jsonTextarea {
+            width: 100%;
+            height: 300px;
+            background: #ecf0f1;
+            font-family: monospace;
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+        }
+        .btn-edit { background: #e67e22; margin-top: 10px; }
+        .btn-save-changes { background: #27ae60; margin-top: 10px; width: 100%; }
+    </style>
+</head>
+<body>
+<header>
+    <div class="brand">🍺 La Taberna Infinita</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
+
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Abrir Establecimiento</h2>
+
+        <label>Nombre (Opcional)</label>
+        <input type="text" id="name" placeholder="Ej: El Poni Pisador...">
+
+        <label>Ubicación (Ciudad)</label>
+        <input type="text" id="city" list="cityList" placeholder="Escribe o selecciona una ciudad generada...">
+        <datalist id="cityList">
+        </datalist>
+
+        <label>Nivel de Vida</label>
+        <select id="comfort">
+            <option value="Miserable">Miserable (Sórdida)</option>
+            <option value="Pobre">Pobre (Barata)</option>
+            <option value="Modesta" selected>Modesta (Estándar)</option>
+            <option value="Confortable">Confortable (Buena)</option>
+            <option value="Rica">Rica (Lujosa)</option>
+            <option value="Aristocrática">Aristocrática (Exclusiva)</option>
+        </select>
+
+        <label>Ambiente / Temática</label>
+        <input type="text" id="theme" placeholder="Ej: Frecuentada por piratas, embrujada...">
+
+        <button class="btn-generate" id="btnGen" style="background:#d35400;">Servir Cerveza</button>
+
+        <hr>
+        <button class="btn-edit" id="btnEdit" style="display:none;">📝 Editar Manualmente (JSON)</button>
+        <button class="btn-export" id="btnExp" style="display:none;">Crear Journal (Foundry)</button>
+    </div>
+
+    <div class="panel result-panel">
+        <div id="loader" class="loader">🍻 Limpiando las mesas...</div>
+
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">El fuego de la chimenea está apagado.</p>
+        </div>
+
+        <div id="jsonEditorContainer">
+            <h4 style="color:white; margin-top:0;">Libro de Cuentas (JSON)</h4>
+            <textarea id="jsonTextarea"></textarea>
+            <button class="btn-save-changes" id="btnSaveChanges">💾 Guardar Cambios</button>
+        </div>
+    </div>
+
+    <div class="history-panel">
+        <div class="history-header">🏘️ Guía de Posadas</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/inn.js"></script>
+</body>
+</html>
