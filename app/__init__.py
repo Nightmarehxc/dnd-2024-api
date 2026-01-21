@@ -1,67 +1,57 @@
-import os
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask
 from flask_cors import CORS
-from marshmallow import ValidationError
-from flasgger import Swagger
-from app.routes import characters, npcs, items, adventures, history, shops, images, cities, riddles, \
-    encounters, loot, rules, quests, journal, spells, villains, travel, factions, alchemy, library, \
-    dungeons, contracts, mysteries, dreams, librarian, ruins, monsters, inns  # <--- IMPORTAR
-from config import config
+from flask_sqlalchemy import SQLAlchemy  # <--- 1. Importar
+import os
+
+# 2. Inicializar DB fuera de la función
+db = SQLAlchemy()
+
 
 def create_app(config_name='default'):
     app = Flask(__name__)
-    app.config.from_object(config[config_name])
+
+    # Configuración básica
+    app.config.from_object('config.Config')
+
+    # 3. Configuración SQLite
+    # Esto creará un archivo "dnd_database.sqlite" en la carpeta raíz
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    db_path = os.path.join(basedir, '../dnd_database.sqlite')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
     CORS(app)
 
-    # --- CONFIGURACIÓN SWAGGER ---
-    swagger_config = {
-        "headers": [],
-        "specs": [
-            {
-                "endpoint": 'apispec',
-                "route": '/apispec.json',
-                "rule_filter": lambda rule: True,
-                "model_filter": lambda tag: True,
-            }
-        ],
-        "static_url_path": "/flasgger_static",
-        "swagger_ui": True,
-        "specs_route": "/apidocs/"
-    }
+    # 4. Iniciar DB con la app
+    db.init_app(app)
 
-    template = {
-        "swagger": "2.0",
-        "info": {
-            "title": "D&D 2024 AI Generator API",
-            "description": "API generadora de contenido para Dungeons & Dragons 5e (Ruleset 2024) impulsada por Gemini.",
-            "version": "1.0.0"
-        }
-    }
+    # Registro de Blueprints (Mantén los que ya tienes)
+    from app.routes import (
+        adventures, characters, items, spells, npcs, loot,
+        encounters, cities, shops, images, history,  # Asegúrate de que history está aquí
+        factions, villains, quests, riddles, rules, travel, alchemy,
+        dungeons, librarian, dreams, mysteries, contracts, ruins, monsters,
+        inns
+    )
 
-    Swagger(app, config=swagger_config, template=template)
-
-    # Registrar Blueprints (API)
-    from app.routes import characters, npcs, items
-    app.register_blueprint(characters.bp)
-    app.register_blueprint(npcs.bp)
-    app.register_blueprint(items.bp)
     app.register_blueprint(adventures.bp)
-    app.register_blueprint(history.bp)
+    app.register_blueprint(characters.bp)
+    app.register_blueprint(items.bp)
+    app.register_blueprint(spells.bp)
+    app.register_blueprint(npcs.bp)
+    app.register_blueprint(loot.bp)
+    app.register_blueprint(encounters.bp)
+    app.register_blueprint(cities.bp)
     app.register_blueprint(shops.bp)
     app.register_blueprint(images.bp)
-    app.register_blueprint(cities.bp)
-    app.register_blueprint(riddles.bp)
-    app.register_blueprint(encounters.bp)
-    app.register_blueprint(loot.bp)
-    app.register_blueprint(rules.bp)
-    app.register_blueprint(quests.bp)
-    app.register_blueprint(journal.bp)
-    app.register_blueprint(spells.bp)
-    app.register_blueprint(villains.bp)
-    app.register_blueprint(travel.bp)
+    app.register_blueprint(history.bp)
     app.register_blueprint(factions.bp)
+    app.register_blueprint(villains.bp)
+    app.register_blueprint(quests.bp)
+    app.register_blueprint(riddles.bp)
+    app.register_blueprint(rules.bp)
+    app.register_blueprint(travel.bp)
     app.register_blueprint(alchemy.bp)
-    app.register_blueprint(library.bp)
     app.register_blueprint(dungeons.bp)
     app.register_blueprint(librarian.bp)
     app.register_blueprint(dreams.bp)
@@ -70,24 +60,9 @@ def create_app(config_name='default'):
     app.register_blueprint(ruins.bp)
     app.register_blueprint(monsters.bp)
     app.register_blueprint(inns.bp)
-    # --- SERVIR FRONTEND (NUEVO) ---
-    # Calculamos la ruta absoluta a la carpeta 'frontend'
-    # app.root_path apunta a /tu/proyecto/app
-    frontend_folder = os.path.join(app.root_path, '../frontend')
 
-    @app.route('/')
-    def index():
-        """Sirve el dashboard principal"""
-        return send_from_directory(frontend_folder, 'index.html')
-
-    @app.route('/<path:path>')
-    def serve_frontend_files(path):
-        """Sirve CSS, JS y subpáginas automáticamente"""
-        return send_from_directory(frontend_folder, path)
-
-    # Manejadores de errores
-    @app.errorhandler(ValidationError)
-    def handle_marshmallow_validation(err):
-        return jsonify({"error": "Error de validación", "messages": err.messages}), 400
+    # 5. Crear tablas automáticamente si no existen
+    with app.app_context():
+        db.create_all()
 
     return app

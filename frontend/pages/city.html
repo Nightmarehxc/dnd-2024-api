@@ -5,137 +5,139 @@
     <title>Generador de Ciudades</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
-        /* Estilos del Modal para Tiendas */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.6);
-            backdrop-filter: blur(3px);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 0;
-            border: 1px solid #888;
-            width: 90%;
-            max-width: 700px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .modal-header {
-            background: var(--accent);
-            color: white;
-            padding: 15px;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .close-modal {
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .modal-body {
+        /* --- NUEVOS ESTILOS PARA EL FORMULARIO DE EDICIÓN --- */
+        #formEditorContainer {
+            display: none; /* Oculto por defecto */
+            background: #fff;
             padding: 20px;
+            border: 2px solid #2c3e50;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-
-        /* Botón pequeño para generar tienda */
-        .btn-mini-shop {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            font-size: 0.8em;
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #bdc3c7;
             border-radius: 4px;
-            cursor: pointer;
-            margin-left: 10px;
-            transition: transform 0.2s;
+            font-family: inherit;
         }
-        .btn-mini-shop:hover {
-            background-color: #2ecc71;
-            transform: scale(1.05);
+        .form-full {
+            grid-column: 1 / -1;
         }
+        .editor-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn-save-changes { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; flex-grow: 1; font-weight: bold; }
+        .btn-cancel-edit { background: #c0392b; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+
+        .btn-edit { background: #f39c12; margin-top: 10px; width: 100%; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-<header>
-    <div class="brand">🏰 Arquitecto de Ciudades</div>
-    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
-</header>
+    <header>
+        <div class="brand">🏙️ Generador de Ciudades</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
 
-<div class="generator-layout">
-    <div class="panel">
-        <h2>Fundación</h2>
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Fundar Asentamiento</h2>
 
-        <label>Nombre de la Ciudad (Opcional)</label>
-        <input type="text" id="cityName" placeholder="Ej: Puerta de Baldur, Neverwinter...">
+            <label>Nombre de la Ciudad</label>
+            <input type="text" id="name" placeholder="Ej: Bastión de la Tormenta...">
 
-        <label>Tamaño y Tipo</label>
-        <select id="cityType">
-            <option value="Aldea pequeña">Aldea (Poca gente)</option>
-            <option value="Pueblo fronterizo">Pueblo Fronterizo (Comercio)</option>
-            <option value="Ciudad amurallada">Ciudad Amurallada (Militar)</option>
-            <option value="Metrópolis mágica">Metrópolis Mágica (Alta Fantasía)</option>
-            <option value="Puerto comercial">Puerto Comercial (Piratas/Comercio)</option>
-        </select>
+            <label>Tamaño</label>
+            <select id="size">
+                <option value="Aldea">Aldea (Pequeña)</option>
+                <option value="Pueblo">Pueblo (Mediano)</option>
+                <option value="Ciudad">Ciudad (Grande)</option>
+                <option value="Metrópolis">Metrópolis (Enorme)</option>
+                <option value="Capital">Capital (Masiva)</option>
+            </select>
 
-        <label>Clima / Bioma</label>
-        <input type="text" id="biome" placeholder="Ej: Tundra helada, Desierto abrasador...">
+            <label>Bioma / Clima</label>
+            <input type="text" id="biome" placeholder="Ej: Tundra helada, Costa tropical...">
 
-        <button class="btn-generate" id="btnGen">Fundar Asentamiento</button>
-        <button class="btn-export" id="btnExp" style="display:none;">Exportar Mapa Textual</button>
-    </div>
-
-    <div class="panel result-panel">
-        <div id="loader" class="loader">🧱 Colocando la primera piedra...</div>
-        <div id="resultContent">
-            <p style="text-align:center; margin-top:150px; color:#aaa;">La ciudad aparecerá aquí</p>
-        </div>
-    </div>
-
-    <div class="history-panel">
-        <div class="history-header">🗺️ Cartografía</div>
-        <div class="history-list" id="historyList"></div>
-    </div>
-</div>
-
-<div id="shopModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 style="margin:0">⚖️ Nuevo Comercio Local</h3>
-            <span class="close-modal" id="closeModal">&times;</span>
-        </div>
-        <div id="shopModalBody" class="modal-body">
-            <div id="shopLoader" style="text-align:center; display:none;">
-                <p>🔨 Construyendo el local...</p>
-            </div>
-            <div id="shopResultContent"></div>
-        </div>
-        <div style="padding:15px; background:#eee; text-align:right; border-bottom-left-radius:10px; border-bottom-right-radius:10px;">
-            <button id="btnSaveShop" class="btn-generate" style="width:auto; margin:0; font-size:0.9rem;">Guardar en
-                Historial de Tiendas
+            <button class="btn-generate" id="btnGen" style="background:#2980b9;">
+                Construir Ciudad (+ Locales)
             </button>
+
+            <hr>
+
+            <button class="btn-edit" id="btnEdit" style="display:none;">✏️ Editar Detalles</button>
+            <button class="btn-export" id="btnExp" style="display:none;">Exportar Journal</button>
+        </div>
+
+        <div class="panel result-panel">
+            <div id="loader" class="loader">🏗️ Levantando muros...</div>
+
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">El mapa está en blanco.</p>
+            </div>
+
+            <div id="formEditorContainer">
+                <h3 style="margin-top:0; color:#2c3e50; border-bottom:2px solid #eee; padding-bottom:10px;">Reformar Ciudad</h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="editName">
+                    </div>
+                    <div class="form-group">
+                        <label>Título / Apodo</label>
+                        <input type="text" id="editTitle">
+                    </div>
+                    <div class="form-group form-full">
+                        <label>Población</label>
+                        <input type="text" id="editPop">
+                    </div>
+                    <div class="form-group form-full">
+                        <label>Gobierno</label>
+                        <input type="text" id="editGov">
+                    </div>
+                    <div class="form-group form-full">
+                        <label>Atmósfera / Clima</label>
+                        <textarea id="editAtmos" rows="2"></textarea>
+                    </div>
+                    <div class="form-group form-full">
+                        <label>Conflicto Actual</label>
+                        <textarea id="editConflict" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="editor-actions">
+                    <button class="btn-save-changes" id="btnSaveChanges">💾 Guardar Cambios</button>
+                    <button class="btn-cancel-edit" id="btnCancelEdit">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-panel">
+            <div class="history-header">🗺️ Cartografía</div>
+            <div class="history-list" id="historyList"></div>
         </div>
     </div>
-</div>
 
-<script src="../js/history/config.js"></script>
-<script src="../js/history/manager.js"></script>
-<script src="../js/city.js"></script>
+    <script src="../js/history/config.js"></script>
+    <script src="../js/history/manager.js"></script>
+    <script src="../js/city.js"></script>
 </body>
 </html>
