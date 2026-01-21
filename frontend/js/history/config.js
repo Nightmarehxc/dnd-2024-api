@@ -26,6 +26,7 @@ window.HISTORY_CONFIG = {
     'inn':       { icon: '🍺', renderer: 'renderInn' },
     'quest':     { icon: '📜', renderer: 'renderQuest' },
     'ruins':     { icon: '🏚️', renderer: 'renderRuins' }
+    'journal':   { icon: '📖', renderer: 'renderJournal' }
 };
 
 // Función auxiliar global

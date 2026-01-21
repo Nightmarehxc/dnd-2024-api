@@ -5,7 +5,6 @@ const els = {
     notes: document.getElementById('rawNotes'),
     tone: document.getElementById('tone'),
     btnGen: document.getElementById('btnGen'),
-    // ... resto de elementos igual ...
     btnEdit: document.getElementById('btnEdit'),
     btnExp: document.getElementById('btnExp'),
     content: document.getElementById('resultContent'),
@@ -42,26 +41,27 @@ els.btnGen.addEventListener('click', async () => {
             })
         });
 
-        // --- DEBUGGING AVANZADO ---
-        const text = await res.text(); // Leemos como texto primero
+        const text = await res.text();
         let data;
 
         try {
-            data = JSON.parse(text); // Intentamos parsear manualmente
+            data = JSON.parse(text);
         } catch (e) {
-            // Si falla el parseo, es que el servidor devolvió HTML (Error 500)
-            console.error("Respuesta del servidor no es JSON:", text);
-            throw new Error(`Error del Servidor (ver consola): ${text.substring(0, 100)}...`);
+            console.error("Respuesta no es JSON:", text);
+            throw new Error(`Error del Servidor: ${text.substring(0, 100)}...`);
         }
 
-        if (!res.ok || data.error) throw new Error(data.error || "Error desconocido en la API");
+        if (!res.ok || data.error) throw new Error(data.error || "Error desconocido");
 
         currentData = data;
         window.renderJournal(data);
 
-        // Guardar visualmente en historial
+        // Guardar automáticamente en historial
+        // El backend ya devuelve el _db_id, así que al recargar loadHistory ya estará ahí
         if (typeof addToHistory === 'function') {
-            addToHistory({ ...data, nombre: data.session_title, tipo_item: "Crónica" }, 'journal');
+            // Pasamos 'data' que ya incluye session_title
+            // addToHistory se encargará de enviarlo al endpoint /api/history/journal
+            addToHistory(data, 'journal');
         }
 
     } catch (err) {
@@ -74,9 +74,7 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-// ... (El resto del código: btnEdit, btnSave, renderJournal, etc. se mantiene igual que la versión anterior) ...
-
-// --- RENDERIZADO GLOBAL (Asegúrate de tener esta versión robusta) ---
+// --- RENDERIZAR ---
 window.renderJournal = function(data) {
     const s = (val) => val || '';
     const ensureArray = (val) => Array.isArray(val) ? val : (val ? [val] : []);
@@ -101,19 +99,17 @@ window.renderJournal = function(data) {
     if(els.btnExp) els.btnExp.style.display = 'block';
 };
 
-// ... (Resto de eventos btnEdit, btnSave, btnExp igual) ...
-// Copia los eventos de edición del mensaje anterior si no los tienes.
-// Lo crucial arriba es el bloque try/catch modificado dentro de btnGen.
-// Aquí te dejo el resto de eventos para que el fichero esté completo y no falle nada:
-
+// --- EDITAR ---
 els.btnEdit.addEventListener('click', () => {
     if(!currentData) return;
     els.eTitle.value = currentData.session_title || "";
     els.eRecap.value = currentData.epic_recap || "";
+
     const safeJoin = (val) => Array.isArray(val) ? val.join('\n') : String(val || "");
     els.eLoot.value = safeJoin(currentData.loot_gained);
     els.eNPCs.value = safeJoin(currentData.npcs_met);
     els.eQuests.value = safeJoin(currentData.quests_updated);
+
     els.content.style.display = 'none';
     els.editorContainer.style.display = 'block';
 });
@@ -132,21 +128,25 @@ els.btnSave.addEventListener('click', () => {
         npcs_met: els.eNPCs.value.split('\n').filter(l => l.trim() !== ""),
         quests_updated: els.eQuests.value.split('\n').filter(l => l.trim() !== "")
     };
+
     currentData = newData;
     window.renderJournal(currentData);
     els.editorContainer.style.display = 'none';
     els.content.style.display = 'block';
 
+    // Lógica para ACTUALIZAR o CREAR nuevo
     if (currentData._db_id && typeof updateHistoryItem === 'function') {
-        updateHistoryItem(currentData._db_id, { ...currentData, nombre: currentData.session_title });
+        updateHistoryItem(currentData._db_id, currentData);
     } else if (typeof addToHistory === 'function') {
-        addToHistory({ ...currentData, nombre: currentData.session_title }, 'journal');
+        addToHistory(currentData, 'journal');
     }
 });
 
+// --- EXPORTAR ---
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
     const ensureArray = (val) => Array.isArray(val) ? val : (val ? [val] : []);
+
     let content = `<h2>${currentData.session_title}</h2>`;
     content += `<p><i>${currentData.epic_recap}</i></p><hr>`;
     content += `<h3>Botín</h3><ul>${ensureArray(currentData.loot_gained).map(i=>`<li>${i}</li>`).join('')}</ul>`;
@@ -158,9 +158,10 @@ els.btnExp.addEventListener('click', () => {
         type: "journal",
         pages: [{ name: "Resumen", type: "text", text: { content: content, format: 1 } }]
     };
+
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Sesion_${currentData.session_title.replace(/\s+/g, '_')}.json`;
+    a.download = `Sesion_${(currentData.session_title || 'sin_titulo').replace(/\s+/g, '_')}.json`;
     a.click();
 });
