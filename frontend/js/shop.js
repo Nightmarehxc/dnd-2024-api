@@ -11,12 +11,14 @@ const els = {
     btnExp: document.getElementById('btnExp'),
     content: document.getElementById('resultContent'),
     loader: document.getElementById('loader'),
+    // Elementos del Editor
     editorContainer: document.getElementById('jsonEditorContainer'),
     textarea: document.getElementById('jsonTextarea'),
-    btnSave: document.getElementById('btnSaveChanges')
+    btnSave: document.getElementById('btnSaveChanges'),
+    btnCancel: document.getElementById('btnCancelEdit')
 };
 
-// Cargar ciudades al inicio
+// --- AL CARGAR: RELLENAR LISTA DE CIUDADES ---
 document.addEventListener('DOMContentLoaded', () => {
     try {
         const history = JSON.parse(localStorage.getItem('dnd_app_history') || '[]');
@@ -26,12 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
             opt.value = c.nombre || c.name;
             els.cityList.appendChild(opt);
         });
-    } catch(e) {}
+    } catch(e) { console.error("Error cargando ciudades", e); }
 });
 
-// GENERAR
+// --- GENERAR ---
 els.btnGen.addEventListener('click', async () => {
-    if (!els.type.value) return alert("Define el tipo de tienda.");
+    if (!els.type.value) return alert("Indica el tipo de tienda.");
 
     els.content.innerHTML = '';
     els.editorContainer.style.display = 'none';
@@ -46,8 +48,7 @@ els.btnGen.addEventListener('click', async () => {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 shop_type: els.type.value,
-                // CAMBIO IMPORTANTE: Convertir a entero
-                level: parseInt(els.level.value) || 1, 
+                level: parseInt(els.level.value) || 1,
                 location: els.location.value
             })
         });
@@ -57,7 +58,7 @@ els.btnGen.addEventListener('click', async () => {
 
         currentData = data;
         renderShop(data);
-        
+
         els.btnEdit.style.display = 'block';
         els.btnExp.style.display = 'block';
 
@@ -73,30 +74,62 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-// EDITAR JSON
+// --- FUNCIONALIDAD DE EDICIÓN ---
+
+// 1. Abrir Editor
 els.btnEdit.addEventListener('click', () => {
     if(!currentData) return;
+    // Formateamos el JSON para que sea legible (indentación de 4 espacios)
     els.textarea.value = JSON.stringify(currentData, null, 4);
     els.editorContainer.style.display = 'block';
+    // Scroll suave hacia el editor
     els.editorContainer.scrollIntoView({behavior: "smooth"});
 });
 
+// 2. Cancelar Edición
+els.btnCancel.addEventListener('click', () => {
+    els.editorContainer.style.display = 'none';
+    els.content.scrollIntoView({behavior: "smooth"});
+});
+
+// 3. Guardar Cambios
 els.btnSave.addEventListener('click', () => {
     try {
+        // Intentamos parsear el texto editado
         const newData = JSON.parse(els.textarea.value);
+
+        // Validar mínimos
+        if (!newData.shop_name) throw new Error("Falta el nombre de la tienda.");
+
+        // Actualizamos los datos actuales
         currentData = newData;
+
+        // Renderizamos de nuevo la vista bonita
         renderShop(currentData);
         els.editorContainer.style.display = 'none';
-        alert("✅ Inventario actualizado.");
+
+        // --- ACTUALIZACIÓN PERSISTENTE ---
+        // Guardamos la versión editada en el historial para no perderla
+        if (typeof addToHistory === 'function') {
+            // Nota: addToHistory normalmente añade al principio.
+            // Si quisieras actualizar el existente, requeriría lógica extra en history.js,
+            // pero añadirlo de nuevo asegura que la versión más reciente esté arriba.
+            addToHistory({ ...currentData, nombre: currentData.shop_name, tipo_item: "Tienda" }, 'shop');
+        }
+
+        alert("✅ Tienda actualizada y guardada.");
+        els.content.scrollIntoView({behavior: "smooth"});
+
     } catch (e) {
-        alert("❌ Error JSON: " + e.message);
+        alert("❌ Error en el formato JSON:\n" + e.message + "\n\nRevisa que todas las comillas y comas estén bien.");
     }
 });
 
-// RENDERIZAR
+// --- RENDERIZADO ---
 function renderShop(data) {
     const s = (val) => val || '---';
-    
+
+    // Encabezado Inventario
     const inventoryHeader = `
         <div style="display:grid; grid-template-columns:1fr 80px 60px; gap:10px; border-bottom:2px solid #333; padding-bottom:5px; font-weight:bold; margin-bottom:10px;">
             <span>Artículo</span>
@@ -105,6 +138,7 @@ function renderShop(data) {
         </div>
     `;
 
+    // Lista Items
     const inventoryHtml = (data.inventory || []).map(i => `
         <div class="item-row">
             <div>
@@ -139,7 +173,7 @@ function renderShop(data) {
     `;
 }
 
-// EXPORTAR
+// --- EXPORTAR A FOUNDRY ---
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
     

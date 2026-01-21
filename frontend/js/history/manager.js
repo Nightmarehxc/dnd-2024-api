@@ -114,7 +114,7 @@ function restoreItem(id) {
             const btnEdit = document.getElementById('btnEdit');
             if (btnEdit) {
                 // Solo mostramos editar si es un tipo soportado (ej: monster, inn)
-                if (['monster', 'inn'].includes(type)) {
+                if (['monster', 'inn','shop','city'].includes(type)) {
                     btnEdit.style.display = 'block';
                 } else {
                     btnEdit.style.display = 'none';
