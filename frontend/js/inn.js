@@ -69,13 +69,13 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-// --- EDITAR ---
+// --- EDIT ---
 els.btnEdit.addEventListener('click', () => {
     if(!currentData) return;
-    els.eName.value = currentData.nombre || "";
-    els.eKeeper.value = currentData.posadero?.nombre || "";
-    els.eKeeperRace.value = currentData.posadero?.raza || "";
-    els.eRumor.value = currentData.rumor_local || "";
+    els.eName.value = currentData.name || "";
+    els.eKeeper.value = currentData.innkeeper_name || "";
+    els.eKeeperRace.value = currentData.innkeeper_race || "";
+    els.eRumor.value = currentData.rumor || "";
 
     els.content.style.display = 'none';
     els.editorContainer.style.display = 'block';
@@ -89,9 +89,10 @@ els.btnCancel.addEventListener('click', () => {
 els.btnSave.addEventListener('click', () => {
     const newData = {
         ...currentData,
-        nombre: els.eName.value,
-        posadero: { ...currentData.posadero, nombre: els.eKeeper.value, raza: els.eKeeperRace.value },
-        rumor_local: els.eRumor.value
+        name: els.eName.value,
+        innkeeper_name: els.eKeeper.value,
+        innkeeper_race: els.eKeeperRace.value,
+        rumor: els.eRumor.value
     };
 
     currentData = newData;
@@ -106,22 +107,22 @@ els.btnSave.addEventListener('click', () => {
     }
 });
 
-// --- RENDERIZAR ---
+// --- RENDER ---
 window.renderInn = function(data) {
-    currentData = data;  // Sincronizar con local
+    currentData = data;  // Sync with local
     const s = (val) => val || '---';
-    const menuHtml = (data.menu || []).map(m => `<li><b>${m.plato}</b> (${m.precio})</li>`).join('');
+    const menuHtml = (data.menu || []).map(m => `<li><b>${m.name}</b> (${m.price})</li>`).join('');
 
     els.content.innerHTML = `
-        <h2 style="color:#d35400;">${s(data.nombre)}</h2>
-        <p><em>${s(data.nivel_vida)}</em> - ${s(data.descripcion)}</p>
+        <h2 style="color:#d35400;">${s(data.name)}</h2>
+        <p><em>${s(data.comfort_level)}</em> - ${s(data.description)}</p>
         <div style="background:#fbeee6; padding:15px; border-radius:5px;">
-            <h3>🧑‍🍳 ${s(data.posadero?.nombre)}</h3>
-            <p>${s(data.posadero?.raza)} - "${s(data.posadero?.personalidad)}"</p>
+            <h3>🧑‍🍳 ${s(data.innkeeper_name)}</h3>
+            <p>${s(data.innkeeper_race)} - "${s(data.innkeeper_personality)}"</p>
         </div>
-        <p><strong>🗣️ Rumor:</strong> ${s(data.rumor_local)}</p>
+        <p><strong>🗣️ Rumor:</strong> ${s(data.rumor)}</p>
         <hr>
-        <h4>Menú</h4><ul>${menuHtml}</ul>
+        <h4>Menu</h4><ul>${menuHtml}</ul>
     `;
     if(els.btnEdit) els.btnEdit.style.display = 'block';
     if(els.btnExp) els.btnExp.style.display = 'block';

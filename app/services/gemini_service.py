@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from flask import current_app
 from google import genai
@@ -6,6 +7,7 @@ from google.genai import types
 
 
 class BaseService:
+
     def __init__(self):
         self.client = None
 
@@ -39,6 +41,7 @@ class BaseService:
 
     def _generate_text(self, system_instruction, user_input, audio_bytes=None):
         """Genera respuesta de texto, aceptando texto O audio input"""
+        print(current_app.config['MODEL_AI'])
         client = self._get_client()
         try:
             contents = [system_instruction]
@@ -55,7 +58,7 @@ class BaseService:
                 contents.append(user_input)
 
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model=current_app.config['MODEL_AI'],
                 contents=contents,
                 config=types.GenerateContentConfig(
                     temperature=0.8
@@ -67,9 +70,10 @@ class BaseService:
 
     def _generate_content(self, system_instruction, user_prompt):
         client = self._get_client()
+        print(current_app.config['MODEL_AI'])
         try:
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model=current_app.config['MODEL_AI'],
                 contents=f"{system_instruction}\n\nTarea: {user_prompt}",
                 config=types.GenerateContentConfig(
                     response_mime_type='application/json',

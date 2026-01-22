@@ -153,11 +153,6 @@ els.btnSave.addEventListener('click', () => {
 });
 
 // --- RENDERIZADO ---
-window.renderCity = function(data) {
-    currentData = data;  // Sincronizar con local
-    renderCity(data);
-};
-
 function renderCity(data) {
     const s = (val) => val || '---';
 

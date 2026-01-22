@@ -53,15 +53,15 @@ class Character(BaseGenerated):
 
     def get_data(self):
         return {
-            'nombre': self.name,
-            'clase': self.clase,
-            'nivel': self.nivel,
-            'especie': self.especie,
-            'alineamiento': self.alineamiento,
-            'estadisticas': self.estadisticas,
-            'equipo_destacado': self.equipo_destacado,
-            'trasfondo': self.trasfondo,
-            'resumen_historia': self.resumen_historia
+            'name': self.name,
+            'class': self.clase,
+            'level': self.nivel,
+            'race': self.especie,
+            'alignment': self.alineamiento,
+            'stats': self.estadisticas,
+            'equipment': self.equipo_destacado,
+            'background_details': self.trasfondo,
+            'summary': self.resumen_historia
         }
 
 
@@ -72,7 +72,7 @@ class NPC(BaseGenerated):
     raza = db.Column(db.String(50))
     alineamiento = db.Column(db.String(50))
     
-    estadisticas = db.Column(db.JSON)  # Estadísticas D&D
+    estadisticas = db.Column(db.JSON)  # D&D Stats
     personalidad = db.Column(db.JSON)  # traits, ideals, bonds, flaws
     hp = db.Column(db.Integer)
     ca = db.Column(db.Integer)
@@ -83,18 +83,18 @@ class NPC(BaseGenerated):
 
     def get_data(self):
         return {
-            'nombre': self.name,
-            'rol': self.rol,
-            'raza': self.raza,
-            'alineamiento': self.alineamiento,
-            'estadisticas': self.estadisticas,
-            'personalidad': self.personalidad,
+            'name': self.name,
+            'role': self.rol,
+            'race': self.raza,
+            'alignment': self.alineamiento,
+            'stats': self.estadisticas,
+            'personality': self.personalidad,
             'hp': self.hp,
             'ca': self.ca,
-            'velocidad': self.velocidad,
-            'ataques': self.ataques,
-            'habilidad_especial': self.habilidad_especial,
-            'gancho_trama': self.gancho_trama
+            'speed': self.velocidad,
+            'attacks': self.ataques,
+            'special_ability': self.habilidad_especial,
+            'plot_hook': self.gancho_trama
         }
 
 
@@ -182,13 +182,13 @@ class Shop(BaseGenerated):
 
     def get_data(self):
         return {
-            'shop_name': self.name,
-            'propietario': self.propietario,
-            'especialidad': self.especialidad,
-            'ubicacion': self.ubicacion,
-            'inventario': self.inventario,
-            'ambiente': self.ambiente,
-            'secreto': self.secreto
+            'name': self.name,
+            'shopkeeper_name': self.propietario,
+            'specialty': self.especialidad,
+            'location': self.ubicacion,
+            'inventory': self.inventario,
+            'atmosphere': self.ambiente,
+            'secret': self.secreto
         }
 
 
@@ -197,7 +197,7 @@ class Inn(BaseGenerated):
     
     tabernero = db.Column(db.String(100))
     raza_tabernero = db.Column(db.String(50))
-    confort = db.Column(db.String(50))  # Lujoso, Confortable, Básico, etc.
+    confort = db.Column(db.String(50))  # Poor, Modest, Rich, etc.
     
     rumor = db.Column(db.Text)
     ambiente = db.Column(db.Text)
@@ -205,13 +205,13 @@ class Inn(BaseGenerated):
 
     def get_data(self):
         return {
-            'nombre': self.name,
-            'tabernero': self.tabernero,
-            'raza_tabernero': self.raza_tabernero,
-            'confort': self.confort,
+            'name': self.name,
+            'innkeeper_name': self.tabernero,
+            'innkeeper_race': self.raza_tabernero,
+            'comfort_level': self.confort,
             'rumor': self.rumor,
-            'ambiente': self.ambiente,
-            'ofertas_especiales': self.ofertas_especiales
+            'atmosphere': self.ambiente,
+            'special_offers': self.ofertas_especiales
         }
 
 
@@ -273,17 +273,17 @@ class Monster(BaseGenerated):
 
     def get_data(self):
         return {
-            'nombre': self.name,
-            'tipo': self.tipo,
-            'tamaño': self.tamaño,
-            'alineamiento': self.alineamiento,
+            'name': self.name,
+            'type': self.tipo,
+            'size': self.tamaño,
+            'alignment': self.alineamiento,
             'ca': self.ca,
             'hp': self.hp,
-            'velocidad': self.velocidad,
-            'estadisticas': self.estadisticas,
-            'habilidades': self.habilidades,
-            'resistencias': self.resistencias,
-            'acciones': self.acciones
+            'speed': self.velocidad,
+            'stats': self.estadisticas,
+            'skills': self.habilidades,
+            'resistances': self.resistencias,
+            'actions': self.acciones
         }
 
 
@@ -301,14 +301,14 @@ class Spell(BaseGenerated):
 
     def get_data(self):
         return {
-            'nombre': self.name,
-            'nivel': self.nivel,
-            'escuela': self.escuela,
-            'tiempo_lanzamiento': self.tiempo_lanzamiento,
-            'rango': self.rango,
-            'componentes': self.componentes,
-            'duracion': self.duracion,
-            'descripcion': self.descripcion
+            'name': self.name,
+            'level': self.nivel,
+            'school': self.escuela,
+            'casting_time': self.tiempo_lanzamiento,
+            'range': self.rango,
+            'components': self.componentes,
+            'duration': self.duracion,
+            'description': self.descripcion
         }
 
 
@@ -320,18 +320,18 @@ class Item(BaseGenerated):
     valor = db.Column(db.String(50))
     
     descripcion = db.Column(db.Text)
-    mecanica = db.Column(db.Text)
+    mechanics = db.Column(db.Text)
     propiedades = db.Column(db.JSON)
 
     def get_data(self):
         return {
-            'nombre': self.name,
-            'tipo': self.tipo,
+            'name': self.name,
+            'type': self.tipo,
             'rarity': self.rareza,
-            'valor': self.valor,
-            'descripcion': self.descripcion,
-            'mecanica': self.mecanica,
-            'propiedades': self.propiedades
+            'value': self.valor,
+            'description': self.descripcion,
+            'mechanics': self.mechanics,
+            'properties': self.propiedades
         }
 
 
