@@ -30,7 +30,7 @@ els.btnGen.addEventListener('click', async () => {
         currentData = data;
         renderFaction(data);
         els.btnExp.style.display = 'block';
-        if (typeof addToHistory === 'function') addToHistory({...data, nombre: data.nombre});
+        if (typeof addToHistory === 'function') addToHistory({...data, nombre: data.nombre}, 'factions');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -39,6 +39,12 @@ els.btnGen.addEventListener('click', async () => {
         els.btnGen.disabled = false;
     }
 });
+
+// Global renderer para el historial
+window.renderFaction = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderFaction(data);
+};
 
 function renderFaction(data) {
     const s = (val) => val || '---';

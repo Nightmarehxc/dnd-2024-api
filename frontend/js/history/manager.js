@@ -13,6 +13,7 @@ async function loadHistory() {
     try {
         const res = await fetch(`${HISTORY_API_BASE}/${PAGE_TYPE}`);
         const history = await res.json();
+        console.log(`📥 Historial cargado (${PAGE_TYPE}):`, history);  // DEBUG
         renderHistoryList(history);
     } catch (e) {
         console.error("Error historial:", e);
@@ -21,11 +22,15 @@ async function loadHistory() {
 }
 
 function renderHistoryList(history) {
+    console.log('📋 renderHistoryList llamado con:', history);  // DEBUG
     historyContainer.innerHTML = '';
     if (!history || history.length === 0) {
+        console.warn('⚠️ Historial vacío o no definido');  // DEBUG
         historyContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px; font-size:0.9em;">Sin registros</p>';
         return;
     }
+    
+    console.log(`✅ Renderizando ${history.length} items`);  // DEBUG
 
     history.forEach(item => {
         // Aseguramos config por defecto
@@ -57,6 +62,8 @@ function renderHistoryList(history) {
 async function addToHistory(data, forcedType = null) {
     const targetType = forcedType || PAGE_TYPE;
     if (!targetType) return;
+    
+    console.log(`📤 addToHistory - Guardando ${targetType}:`, data);  // DEBUG
 
     try {
         await fetch(`${HISTORY_API_BASE}/${targetType}`, {
@@ -66,7 +73,10 @@ async function addToHistory(data, forcedType = null) {
         });
 
         // Si estamos en la misma página, recargamos la lista
-        if (targetType === PAGE_TYPE) loadHistory();
+        if (targetType === PAGE_TYPE) {
+            console.log('🔄 Recargando historial...');  // DEBUG
+            loadHistory();
+        }
         else console.log(`✅ Guardado en background: ${targetType}`);
 
     } catch (e) { console.error("Error guardando:", e); }
@@ -89,6 +99,7 @@ async function updateHistoryItem(id, data) {
 
 // --- 4. RESTAURAR ---
 function restoreItem(id) {
+    console.log('🔄 Restaurando item ID:', id);  // DEBUG
     // Usamos '==' para que coincida "5" (string dataset) con 5 (number argumento)
     const itemDiv = Array.from(document.querySelectorAll('.history-item'))
         .find(div => div.dataset.id == id);
@@ -97,6 +108,7 @@ function restoreItem(id) {
         try {
             const data = JSON.parse(itemDiv.dataset.json);
             const type = itemDiv.dataset.type;
+            console.log('📦 Datos restaurados:', { type, data });  // DEBUG
 
             // 💡 CLAVE: Inyectamos el ID de la base de datos en el objeto en memoria
             data._db_id = id;
@@ -108,9 +120,19 @@ function restoreItem(id) {
             // Renderizar usando la configuración
             if (window.HISTORY_CONFIG && window.HISTORY_CONFIG[type]) {
                 const rendererName = window.HISTORY_CONFIG[type].renderer;
+                console.log(`📡 Llamando renderer: ${rendererName}`);  // DEBUG
                 if (typeof window[rendererName] === 'function') {
-                    window[rendererName](data);
+                    try {
+                        window[rendererName](data);
+                        console.log('✅ Renderer ejecutado exitosamente');  // DEBUG
+                    } catch (renderError) {
+                        console.error(`❌ Error en renderer ${rendererName}:`, renderError);  // DEBUG
+                    }
+                } else {
+                    console.error(`❌ Renderer no existe: ${rendererName}`);  // DEBUG
                 }
+            } else {
+                console.error(`❌ Config no existe para tipo: ${type}`);  // DEBUG
             }
 
             // Mostrar botones UI
@@ -118,8 +140,9 @@ function restoreItem(id) {
             if (btnExp) btnExp.style.display = 'block';
 
             const btnEdit = document.getElementById('btnEdit');
-            // Permitimos editar en estas herramientas
-            if (btnEdit && ['monster', 'inn', 'shop', 'city','item','journal'].includes(type)) {
+            // Permitimos editar en todas las herramientas editables
+            const editableTypes = ['monsters', 'inns', 'shops', 'cities','items','journals','npcs','characters','spells','quests','riddles','adventures','dungeons','mysteries','villains','factions'];
+            if (btnEdit && editableTypes.includes(type)) {
                 btnEdit.style.display = 'block';
             }
 

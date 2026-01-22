@@ -46,11 +46,19 @@ els.btnGen.addEventListener('click', async () => {
         });
 
         const data = await res.json();
+        console.log('🔴 RESPUESTA CRUDA DEL API:', data);  // DEBUG CRÍTICO
+        console.log('¿Contiene rol?', 'rol' in data);  // DEBUG
+        console.log('¿Contiene nombre?', 'nombre' in data);  // DEBUG
+        
         if (data.error) throw new Error(data.error);
 
+        console.log('🎭 NPC generado:', data);  // DEBUG
         currentData = data;
         window.renderNPC(data);
-        if (typeof addToHistory === 'function') addToHistory(currentData, 'npc');
+        if (typeof addToHistory === 'function') {
+            console.log('📝 Guardando en historial...', data);  // DEBUG
+            addToHistory(currentData, 'npcs');
+        }
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -112,12 +120,15 @@ els.btnSave.addEventListener('click', () => {
     if (currentData._db_id && typeof updateHistoryItem === 'function') {
         updateHistoryItem(currentData._db_id, currentData);
     } else if (typeof addToHistory === 'function') {
-        addToHistory(currentData, 'npc');
+        addToHistory(currentData, 'npcs');
     }
 });
 
 // --- RENDERIZAR ---
 window.renderNPC = function(data) {
+    // 🔑 IMPORTANTE: Actualizar currentData local para que funcione editar/exportar
+    currentData = data;
+    
     const s = (val) => val || '---';
 
     // Función auxiliar para renderizar la personalidad (que puede ser objeto o string)

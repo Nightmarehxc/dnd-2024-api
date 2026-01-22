@@ -9,26 +9,32 @@ class SpellService(BaseService):
         Eres un Archimago experto en la creación de nuevos hechizos (Homebrew) para D&D 5e (2024).
         Tu prioridad absoluta es el BALANCE MATEMÁTICO. Usa la "Dungeon Master's Guide" para calcular el daño/efecto por nivel.
 
-        Genera SIEMPRE un JSON válido con esta estructura:
+        Genera SIEMPRE un JSON válido con esta estructura (snake_case español):
         {
             "nombre": "Nombre Arcano del Hechizo",
-            "nivel_escuela": "Ej: Evocación de nivel 3",
-            "tiempo_casteo": "Ej: 1 acción",
-            "alcance": "Ej: 60 pies (18 m)",
+            "nivel": 3,
+            "escuela": "Evocación",
+            "tiempo_casteo": "1 acción",
+            "alcance": "60 pies (18 m)",
             "componentes": "V, S, M (descripción del material)",
-            "duracion": "Ej: Instantáneo o Concentración, hasta 1 minuto",
+            "duracion": "Instantáneo o Concentración, hasta 1 minuto",
             "descripcion": "Texto completo de reglas. Usa lenguaje técnico de D&D (Tirada de salvación, daño, condiciones).",
-            "a_niveles_superiores": "Texto de mejora por slot superior (o null si no aplica).",
-            "clases": ["Mago", "Hechicero", "Brujo"]
+            "mejora_nivel_superior": "Texto de mejora por slot superior (o vacío si no aplica)"
         }
         """
 
         prompt = f"""
         Diseña un nuevo hechizo {lvl_str} basado en esta idea: "{description}".
         Hazlo creativo pero mecánicamente justo.
+        
+        IMPORTANTE: Usa claves en español (snake_case):
+        "nombre", "nivel" (como número), "escuela", "tiempo_casteo", "alcance", "componentes", "duracion", "descripcion", "mejora_nivel_superior"
+        NO incluyas "clases" - eso se gestiona en BD separadamente.
         """
 
-        return self._generate_content(system_instruction, prompt)
+        result = self._generate_content(system_instruction, prompt)
+        print(f"✨ Spell generado por Gemini: {result}")  # DEBUG
+        return result
 
 
 spell_service = SpellService()

@@ -4,36 +4,85 @@
 
 // Usamos window.HISTORY_CONFIG para asegurar que manager.js lo vea
 window.HISTORY_CONFIG = {
-    // --- BÁSICOS ---
-    'character': { icon: '👤', renderer: 'renderCharacter' },
-    'npc':       { icon: '🎭', renderer: 'renderNPC' },
-    'item':      { icon: '⚔️', renderer: 'renderItem' },
-    'loot':      { icon: '💎', renderer: 'renderLoot' },
-    'spell':     { icon: '✨', renderer: 'renderSpell' },
-    'shop':      { icon: '💰', renderer: 'renderShop' },
+    // --- PERSONAJES Y NPCS ---
+    'characters': { icon: '👤', renderer: 'renderCharacter' },
+    'npcs':       { icon: '🎭', renderer: 'renderNPC' },
 
-    // --- MUNDO ---
-    'city':      { icon: '🏰', renderer: 'renderCity' },
-    'adventure': { icon: '🗺️', renderer: 'renderAdventure' },
-    'encounter': { icon: '⚔️', renderer: 'renderEncounter' },
-    'dungeon':   { icon: '🗝️', renderer: 'renderDungeon' }, // Asegura que este nombre coincida con tu JS
-    'faction':   { icon: '🛡️', renderer: 'renderFaction' },
-    'villain':   { icon: '👺', renderer: 'renderVillain' },
-    'librarian': { icon: '📚', renderer: 'renderBook' },
+    // --- ITEMS Y OBJETOS ---
+    'items':      { icon: '⚔️', renderer: 'renderItem' },
+    'loot':       { icon: '💎', renderer: 'renderLoot' },
+    'spells':     { icon: '✨', renderer: 'renderSpell' },
 
-    // --- EXTRAS ---
-    'monster':   { icon: '👹', renderer: 'renderMonster' },
-    'inn':       { icon: '🍺', renderer: 'renderInn' },
-    'quest':     { icon: '📜', renderer: 'renderQuest' },
-    'ruins':     { icon: '🏚️', renderer: 'renderRuins' },
-    'journal':   { icon: '📖', renderer: 'renderJournal' }
+    // --- COMERCIO Y LUGARES ---
+    'shops':      { icon: '💰', renderer: 'renderShop' },
+    'inns':       { icon: '🍺', renderer: 'renderInn' },
+    'cities':     { icon: '🏰', renderer: 'renderCity' },
+
+    // --- AVENTURA Y EXPLORACIÓN ---
+    'adventures': { icon: '🗺️', renderer: 'renderAdventure' },
+    'dungeons':   { icon: '🗝️', renderer: 'renderDungeon' },
+    'encounters': { icon: '⚔️', renderer: 'renderEncounter' },
+    'travel':     { icon: '🛤️', renderer: 'renderTravel' },
+    'ruins':      { icon: '🏚️', renderer: 'renderRuins' },
+
+    // --- CONTENIDO Y DESAFÍOS ---
+    'riddles':    { icon: '🎭', renderer: 'renderRiddle' },
+    'quests':     { icon: '📜', renderer: 'renderQuest' },
+    'mysteries':  { icon: '🔍', renderer: 'renderMystery' },
+
+    // --- CRIATURAS Y ANTAGONISTAS ---
+    'monsters':   { icon: '👹', renderer: 'renderMonster' },
+    'villains':   { icon: '😈', renderer: 'renderVillain' },
+
+    // --- FACCIONES Y SOCIEDADES ---
+    'factions':   { icon: '🛡️', renderer: 'renderFaction' },
+
+    // --- DOCUMENTOS Y REFERENCIAS ---
+    'journals':   { icon: '📖', renderer: 'renderJournal' },
+    'librarian':  { icon: '📚', renderer: 'renderBook' },
+
+    // --- MISCELÁNEA (tipos no mapeados a modelos específicos) ---
+    'alchemy':    { icon: '🧪', renderer: 'renderAlchemy' },
+    'contract':  { icon: '📋', renderer: 'renderContract' },
+    'dream':     { icon: '💭', renderer: 'renderDream' },
+    'rules':     { icon: '⚖️', renderer: 'renderRules' }
 };
 
-// Función auxiliar global
+// Función auxiliar global - Mapea nombres de archivos a tipos de config
 window.detectPageType = function() {
-    const path = window.location.pathname;
-    for (const type in window.HISTORY_CONFIG) {
-        if (path.includes(type)) return type;
+    const path = window.location.pathname.toLowerCase();
+    
+    // Mapeo de nombres de página a tipos
+    const pageToType = {
+        'character': 'characters',
+        'npc': 'npcs',
+        'item': 'items',
+        'spell': 'spells',
+        'shop': 'shops',
+        'inn': 'inns',
+        'city': 'cities',
+        'adventure': 'adventures',
+        'dungeon': 'dungeons',
+        'encounter': 'encounters',
+        'travel': 'travel',
+        'ruins': 'ruins',
+        'riddle': 'riddles',
+        'quest': 'quests',
+        'mystery': 'mysteries',
+        'monster': 'monsters',
+        'villain': 'villains',
+        'faction': 'factions',
+        'journal': 'journals',
+        'librarian': 'librarian',
+        'alchemy': 'alchemy',
+        'contract': 'contract',
+        'dream': 'dream',
+        'rules': 'rules'
+    };
+    
+    // Buscar en el path
+    for (const [pageName, typeName] of Object.entries(pageToType)) {
+        if (path.includes(pageName)) return typeName;
     }
     return null;
 };

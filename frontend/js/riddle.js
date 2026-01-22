@@ -35,7 +35,7 @@ els.btnGen.addEventListener('click', async () => {
         renderRiddle(data);
         els.btnExp.style.display = 'block';
 
-        if (typeof addToHistory === 'function') addToHistory(data);
+        if (typeof addToHistory === 'function') addToHistory(data, 'riddles');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -44,6 +44,12 @@ els.btnGen.addEventListener('click', async () => {
         els.btnGen.disabled = false;
     }
 });
+
+// Global renderer para el historial
+window.renderRiddle = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderRiddle(data);
+};
 
 function renderRiddle(data) {
     const s = (val) => val || '---';

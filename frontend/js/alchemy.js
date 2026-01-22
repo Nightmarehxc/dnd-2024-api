@@ -28,7 +28,7 @@ els.btnGen.addEventListener('click', async () => {
         currentData = data;
         renderAlchemy(data);
         els.btnExp.style.display = 'block';
-        if (typeof addToHistory === 'function') addToHistory({...data, nombre: data.nombre});
+        if (typeof addToHistory === 'function') addToHistory({...data, nombre: data.nombre}, 'alchemy');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -37,6 +37,12 @@ els.btnGen.addEventListener('click', async () => {
         els.btnGen.disabled = false;
     }
 });
+
+// Global renderer para el historial
+window.renderAlchemy = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderAlchemy(data);
+};
 
 function renderAlchemy(data) {
     const s = (val) => val || '---';

@@ -36,7 +36,7 @@ els.btnGen.addEventListener('click', async () => {
         els.btnExp.style.display = 'block';
 
         if (typeof addToHistory === 'function') {
-            addToHistory({ ...data, nombre: `Sueño (${els.tone.value})` });
+            addToHistory({ ...data, nombre: `Sueño (${els.tone.value})` }, 'dreams');
         }
 
     } catch (err) {
@@ -46,6 +46,12 @@ els.btnGen.addEventListener('click', async () => {
         els.btnGen.disabled = false;
     }
 });
+
+// Global renderer para el historial
+window.renderDream = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderDream(data);
+};
 
 function renderDream(data) {
     const s = (val) => val || '---';

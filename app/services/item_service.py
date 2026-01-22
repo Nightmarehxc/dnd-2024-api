@@ -8,15 +8,15 @@ class ItemService(BaseService):
 
         system = """
         Eres un maestro herrero arcano de D&D 5e (2024). Genera un objeto mágico.
-        Responde SOLO con este JSON exacto:
+        Responde SOLO con este JSON exacto (snake_case español):
         {
-            "name": "Nombre del Objeto",
-            "type": "Tipo (Espada, Anillo, etc)",
-            "rarity": "Rareza",
-            "requires_attunement": true/false,
-            "description": "Descripción física y visual detallada.",
-            "mechanics": "Reglas de juego, bonificadores, daño y efectos mágicos (D&D 5e).",
-            "value": "Precio estimado en po"
+            "nombre": "Nombre del Objeto",
+            "tipo": "Tipo (Espada, Anillo, etc)",
+            "rareza": "Rareza",
+            "sintonizacion": true/false,
+            "descripcion": "Descripción física y visual detallada.",
+            "mecanicas": "Reglas de juego, bonificadores, daño y efectos mágicos (D&D 5e).",
+            "valor": "Precio estimado en po"
         }
         """
 
@@ -28,9 +28,14 @@ class ItemService(BaseService):
         - {name_instruction}
 
         Asegúrate de que las mecánicas sean equilibradas para su rareza.
+        
+        IMPORTANTE: Usa claves en español (snake_case):
+        "nombre", "tipo", "rareza", "sintonizacion", "descripcion", "mecanicas", "valor"
         """
 
-        return self._generate_content(system, prompt)
+        result = self._generate_content(system, prompt)
+        print(f"⚔️ Item generado por Gemini: {result}")  # DEBUG
+        return result
 
 
 item_service = ItemService()

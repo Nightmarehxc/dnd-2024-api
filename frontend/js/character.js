@@ -49,7 +49,7 @@ els.btnGen.addEventListener('click', async () => {
         currentData = data;
         renderCharacterSheet(data);
         els.btnExp.style.display = 'block';
-        if (typeof addToHistory === 'function') addToHistory(data);
+        if (typeof addToHistory === 'function') addToHistory(currentData, 'characters');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">${err.message}</p>`;
@@ -80,7 +80,7 @@ if (els.btnImport) {
                 currentData = data.character;
                 renderCharacterSheet(currentData);
                 els.btnExp.style.display = 'block';
-                if (typeof addToHistory === 'function') addToHistory({...currentData, nombre: currentData.nombre || "Importado"});
+                if (typeof addToHistory === 'function') addToHistory({...currentData, nombre: currentData.nombre || "Importado"}, 'characters');
             }
         } catch (err) {
             console.error(err);
@@ -98,6 +98,12 @@ if (els.btnImport) {
 
 function getMod(score) { return Math.floor((score - 10) / 2); }
 function fmtMod(mod) { return mod >= 0 ? `+${mod}` : mod; }
+
+// Renderer global para el historial
+window.renderCharacter = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderCharacterSheet(data);
+};
 
 function renderCharacterSheet(data) {
     const s = (val) => val || '---';

@@ -33,7 +33,7 @@ els.btnAsk.addEventListener('click', async () => {
 
         // Guardamos en historial con un "nombre" generado
         const historyData = { ...data, nombre: data.tema || "Consulta de Reglas" };
-        if (typeof addToHistory === 'function') addToHistory(historyData);
+        if (typeof addToHistory === 'function') addToHistory(historyData, 'rules');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -42,6 +42,12 @@ els.btnAsk.addEventListener('click', async () => {
         els.btnAsk.disabled = false;
     }
 });
+
+// Global renderer para el historial (nota: la config usa renderRules pero la función es renderRule)
+window.renderRules = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderRule(data);
+};
 
 function renderRule(data) {
     const s = (val) => val || '---';

@@ -31,7 +31,9 @@ class NPCService(BaseService):
         """
 
         prompt = f"Genera un NPC completo con stats de combate (HP, CA, Ataques) basado en: {description}."
-        return self._generate_content(system_instruction, prompt)
+        result = self._generate_content(system_instruction, prompt)
+        print(f"🎭 NPC generado por Gemini: {result}")  # DEBUG
+        return result
 
 
 

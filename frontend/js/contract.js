@@ -36,7 +36,7 @@ els.btnGen.addEventListener('click', async () => {
         els.btnExp.style.display = 'block';
 
         if (typeof addToHistory === 'function') {
-            addToHistory({ ...data, nombre: `Contrato: ${data.titulo}` });
+            addToHistory({ ...data, nombre: `Contrato: ${data.titulo}` }, 'contracts');
         }
 
     } catch (err) {
@@ -46,6 +46,12 @@ els.btnGen.addEventListener('click', async () => {
         els.btnGen.disabled = false;
     }
 });
+
+// Global renderer para el historial
+window.renderContract = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderContract(data);
+};
 
 function renderContract(data) {
     const s = (val) => val || '---';

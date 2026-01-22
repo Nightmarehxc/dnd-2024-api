@@ -64,17 +64,17 @@ els.btnGen.addEventListener('click', async () => {
 
         // GUARDADO AUTOMÁTICO EN HISTORIAL
         if (typeof addToHistory === 'function') {
-            await addToHistory({ ...data, nombre: data.nombre, tipo_item: "Ciudad" });
+            await addToHistory({ ...data, nombre: data.nombre, tipo_item: "Ciudad" }, 'cities');
 
             // Guardar Negocios Vinculados
             if (data.linked_data) {
                 if (data.linked_data.inn && !data.linked_data.inn.error) {
                     const inn = data.linked_data.inn;
-                    await addToHistory({ ...inn, nombre: inn.nombre }, 'inn');
+                    await addToHistory({ ...inn, nombre: inn.nombre }, 'inns');
                 }
                 if (data.linked_data.shop && !data.linked_data.shop.error) {
                     const shop = data.linked_data.shop;
-                    await addToHistory({ ...shop, nombre: shop.shop_name }, 'shop');
+                    await addToHistory({ ...shop, nombre: shop.shop_name }, 'shops');
                 }
             }
         }
@@ -141,7 +141,7 @@ els.btnSave.addEventListener('click', () => {
             updateHistoryItem(currentData._db_id, currentData);
         } else if (typeof addToHistory === 'function') {
             // Si es nuevo (recién generado y editado antes de guardar), creamos
-            addToHistory(currentData, 'city');
+            addToHistory(currentData, 'cities');
         }
 
         alert("✅ Ciudad actualizada.");
@@ -153,6 +153,11 @@ els.btnSave.addEventListener('click', () => {
 });
 
 // --- RENDERIZADO ---
+window.renderCity = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderCity(data);
+};
+
 function renderCity(data) {
     const s = (val) => val || '---';
 

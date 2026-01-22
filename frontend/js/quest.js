@@ -34,7 +34,7 @@ els.btnGen.addEventListener('click', async () => {
 
         // Guardar en historial
         const historyData = { ...data, nombre: `Tablón: ${els.loc.value}` };
-        if (typeof addToHistory === 'function') addToHistory(historyData);
+        if (typeof addToHistory === 'function') addToHistory(historyData, 'quests');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -43,6 +43,12 @@ els.btnGen.addEventListener('click', async () => {
         els.btnGen.disabled = false;
     }
 });
+
+// Renderer global para el historial
+window.renderQuest = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderQuests(data);
+};
 
 function renderQuests(data) {
     const s = (val) => val || '---';

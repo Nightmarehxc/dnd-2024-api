@@ -21,21 +21,19 @@ class ShopService(BaseService):
 
         system = """
         Eres un experto comerciante de D&D 5e (2024). Genera una tienda detallada y EQUILIBRADA.
-        Responde SIEMPRE con este JSON exacto:
+        Responde SIEMPRE con este JSON exacto (snake_case español):
         {
-            "shop_name": "Nombre Creativo",
-            "shop_type": "Tipo de tienda",
-            "location": "Ciudad o lugar",
-            "description": "Descripción visual y olfativa del local.",
-            "shopkeeper": {
-                "name": "Nombre",
-                "race": "Raza",
-                "traits": "Personalidad o rasgo físico."
-            },
-            "inventory": [
-                {"item": "Nombre Objeto", "price": "X po", "stock": 1, "desc": "Breve detalle (ej: +1, oxidado)"}
+            "nombre": "Nombre Creativo de la Tienda",
+            "tipo": "Tipo de tienda",
+            "ubicacion": "Ciudad o lugar",
+            "descripcion": "Descripción visual y olfativa del local.",
+            "tendero_nombre": "Nombre del tendero",
+            "tendero_raza": "Raza",
+            "tendero_personalidad": "Personalidad o rasgo físico.",
+            "inventario": [
+                {"articulo": "Nombre Objeto", "precio": "X po", "stock": 1, "detalle": "Breve detalle (ej: +1, oxidado)"}
             ],
-            "special_feature": "Algo único de esta tienda (ej: descuento a bardos, trastienda ilegal)."
+            "caracteristica_especial": "Algo único de esta tienda (ej: descuento a bardos, trastienda ilegal)."
         }
         """
 
@@ -47,9 +45,15 @@ class ShopService(BaseService):
         {level_guidance}
 
         Genera entre 5 y 10 items acordes a este nivel de poder y economía.
+        
+        IMPORTANTE: Usa claves en español (snake_case):
+        "nombre", "tipo", "ubicacion", "descripcion", "tendero_nombre", "tendero_raza", 
+        "tendero_personalidad", "inventario" (array), "caracteristica_especial"
         """
 
-        return self._generate_content(system, prompt)
+        result = self._generate_content(system, prompt)
+        print(f"💰 Shop generado por Gemini: {result}")  # DEBUG
+        return result
 
 
 shop_service = ShopService()

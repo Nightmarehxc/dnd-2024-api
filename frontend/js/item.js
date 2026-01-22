@@ -50,7 +50,7 @@ els.btnGen.addEventListener('click', async () => {
 
         currentData = data;
         window.renderItem(data);
-        if (typeof addToHistory === 'function') addToHistory(currentData, 'item');
+        if (typeof addToHistory === 'function') addToHistory(currentData, 'items');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -96,12 +96,13 @@ els.btnSave.addEventListener('click', () => {
     if (currentData._db_id && typeof updateHistoryItem === 'function') {
         updateHistoryItem(currentData._db_id, currentData);
     } else if (typeof addToHistory === 'function') {
-        addToHistory(currentData, 'item');
+        addToHistory(currentData, 'items');
     }
 });
 
 // --- RENDERIZAR ---
 window.renderItem = function(data) {
+    currentData = data;  // Sincronizar con local
     const s = (val) => val || '---';
     els.content.innerHTML = `
         <div style="border:2px solid #333; padding:20px; background:white;">

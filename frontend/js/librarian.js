@@ -53,7 +53,7 @@ els.btnGen.addEventListener('click', async () => {
         currentData = data;
         window.renderBook(data);
         // Guardar como 'librarian' o 'library' según tu config.js (asumo 'librarian')
-        if (typeof addToHistory === 'function') addToHistory(currentData, 'librarian');
+        if (typeof addToHistory === 'function') addToHistory(currentData, 'librarians');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -101,13 +101,14 @@ els.btnSave.addEventListener('click', () => {
     if (currentData._db_id && typeof updateHistoryItem === 'function') {
         updateHistoryItem(currentData._db_id, currentData);
     } else if (typeof addToHistory === 'function') {
-        addToHistory(currentData, 'librarian');
+        addToHistory(currentData, 'librarians');
     }
 });
 
 // --- RENDERIZADO GLOBAL ---
 // Nota: en config.js debes tener 'librarian': { renderer: 'renderBook' }
 window.renderBook = function(data) {
+    currentData = data;  // Sincronizar con local
     const s = (val) => val || '';
 
     els.content.innerHTML = `

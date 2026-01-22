@@ -36,7 +36,7 @@ els.btnGen.addEventListener('click', async () => {
         els.btnExp.style.display = 'block';
 
         if (typeof addToHistory === 'function') {
-            addToHistory({ ...data, nombre: data.titulo });
+            addToHistory({ ...data, nombre: data.titulo }, 'mysteries');
         }
 
     } catch (err) {
@@ -46,6 +46,12 @@ els.btnGen.addEventListener('click', async () => {
         els.btnGen.disabled = false;
     }
 });
+
+// Global renderer para el historial
+window.renderMystery = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderMystery(data);
+};
 
 function renderMystery(data) {
     const s = (val) => val || '---';

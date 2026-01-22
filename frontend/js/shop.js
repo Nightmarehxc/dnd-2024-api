@@ -63,7 +63,7 @@ els.btnGen.addEventListener('click', async () => {
         els.btnExp.style.display = 'block';
 
         if (typeof addToHistory === 'function') {
-            addToHistory({ ...data, nombre: data.shop_name, tipo_item: "Tienda" }, 'shop');
+            addToHistory({ ...data, nombre: data.shop_name, tipo_item: "Tienda" }, 'shops');
         }
 
     } catch (err) {
@@ -107,7 +107,7 @@ els.btnSave.addEventListener('click', () => {
         if (currentData._db_id && typeof updateHistoryItem === 'function') {
             updateHistoryItem(currentData._db_id, currentData);
         } else if (typeof addToHistory === 'function') {
-            addToHistory(currentData, 'shop');
+            addToHistory(currentData, 'shops');
         }
 
         alert("✅ Inventario actualizado.");
@@ -115,7 +115,8 @@ els.btnSave.addEventListener('click', () => {
 });
 
 // --- RENDERIZADO ---
-function renderShop(data) {
+window.renderShop = function(data) {
+    currentData = data;  // Sincronizar con local
     const s = (val) => val || '---';
 
     // Encabezado Inventario

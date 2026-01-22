@@ -36,7 +36,7 @@ els.btnGen.addEventListener('click', async () => {
         els.btnExp.style.display = 'block';
 
         if (typeof addToHistory === 'function') {
-            addToHistory({ ...data, nombre: data.nombre, tipo_item: "Ruina" });
+            addToHistory({ ...data, nombre: data.nombre, tipo_item: "Ruina" }, 'ruins');
         }
 
     } catch (err) {
@@ -46,6 +46,12 @@ els.btnGen.addEventListener('click', async () => {
         els.btnGen.disabled = false;
     }
 });
+
+// Global renderer para el historial
+window.renderRuins = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderRuins(data);
+};
 
 function renderRuins(data) {
     const s = (val) => val || '---';

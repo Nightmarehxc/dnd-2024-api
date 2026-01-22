@@ -59,7 +59,7 @@ els.btnGen.addEventListener('click', async () => {
 
         currentData = data;
         window.renderInn(data);
-        if (typeof addToHistory === 'function') addToHistory(currentData, 'inn');
+        if (typeof addToHistory === 'function') addToHistory(currentData, 'inns');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -102,12 +102,13 @@ els.btnSave.addEventListener('click', () => {
     if (currentData._db_id && typeof updateHistoryItem === 'function') {
         updateHistoryItem(currentData._db_id, currentData);
     } else if (typeof addToHistory === 'function') {
-        addToHistory(currentData, 'inn');
+        addToHistory(currentData, 'inns');
     }
 });
 
 // --- RENDERIZAR ---
 window.renderInn = function(data) {
+    currentData = data;  // Sincronizar con local
     const s = (val) => val || '---';
     const menuHtml = (data.menu || []).map(m => `<li><b>${m.plato}</b> (${m.precio})</li>`).join('');
 

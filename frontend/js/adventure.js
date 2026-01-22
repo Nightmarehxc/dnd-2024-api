@@ -41,7 +41,7 @@ els.btnGen.addEventListener('click', async () => {
         els.btnExp.style.display = 'block';
 
         // --- GUARDAR EN HISTORIAL (NUEVO) ---
-        if (typeof addToHistory === 'function') addToHistory(data);
+        if (typeof addToHistory === 'function') addToHistory(data, 'adventures');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -50,6 +50,12 @@ els.btnGen.addEventListener('click', async () => {
         els.btnGen.disabled = false;
     }
 });
+
+// Global renderer para el historial
+window.renderAdventure = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderAdventure(data);
+};
 
 function renderAdventure(data) {
     const s = (val) => val || '---';

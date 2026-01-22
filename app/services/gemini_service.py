@@ -19,18 +19,22 @@ class BaseService:
         text = response.text.strip()
         try:
             # 1. Intento directo
-            return json.loads(text)
+            result = json.loads(text)
+            print(f"✅ JSON parseado de Gemini: {result}")  # DEBUG
+            return result
         except json.JSONDecodeError:
             # 2. Búsqueda de patrón { ... }
             match = re.search(r'\{.*\}', text, re.DOTALL)
             if match:
                 clean_json = match.group(0)
                 try:
-                    return json.loads(clean_json)
+                    result = json.loads(clean_json)
+                    print(f"✅ JSON limpiado: {result}")  # DEBUG
+                    return result
                 except json.JSONDecodeError:
                     pass
 
-            print(f"ERROR JSON: {text}")
+            print(f"❌ ERROR JSON: {text}")
             return {"error": "La IA no generó un JSON válido", "raw": text}
 
     def _generate_text(self, system_instruction, user_input, audio_bytes=None):

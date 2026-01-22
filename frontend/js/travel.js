@@ -36,7 +36,7 @@ els.btnGen.addEventListener('click', async () => {
         els.btnExp.style.display = 'block';
 
         const historyData = { ...data, nombre: `Viaje: ${els.env.value.substring(0, 20)}...` };
-        if (typeof addToHistory === 'function') addToHistory(historyData);
+        if (typeof addToHistory === 'function') addToHistory(historyData, 'travel');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -45,6 +45,12 @@ els.btnGen.addEventListener('click', async () => {
         els.btnGen.disabled = false;
     }
 });
+
+// Global renderer para el historial
+window.renderTravel = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderTravel(data);
+};
 
 function renderTravel(data) {
     const s = (val) => val || '---';
