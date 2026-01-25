@@ -112,7 +112,9 @@ class DungeonRequestSchema(Schema):
 
 class LibrarianRequestSchema(Schema):
     topic = fields.String(required=True, validate=validate.Length(min=3))  # Tema del libro
-    type = fields.String(required=False, load_default="Libro Antiguo")     # Libro, Pergamino, Carta...
+    book_type = fields.String(required=False, load_default="Libro Antiguo")     # Libro, Pergamino, Carta...
+    tone = fields.String(required=False, load_default="Académico")  # Tono del libro
+    author_style = fields.String(required=False, load_default="")
 
 class DreamRequestSchema(Schema):
     context = fields.String(required=True)  # Contexto del personaje o situación

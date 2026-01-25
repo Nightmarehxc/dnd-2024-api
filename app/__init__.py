@@ -66,9 +66,13 @@ def create_app(config_name='default'):
     app.register_blueprint(inns.bp)
     app.register_blueprint(journal.bp)
 
-    # Crear tablas
+    # Crear tablas - Importar TODOS los modelos para que se registren
     with app.app_context():
-        from app.models import GeneratedItem
+        from app.models import (
+            Character, NPC, Adventure, City, Dungeon, Shop, Inn, Riddle, Quest,
+            Monster, Spell, Item, Journal, Faction, Mystery, Villain, GeneratedItem, Alchemy, Librarian, Dream
+        )
         db.create_all()
+        print("✅ Base de datos creada/verificada correctamente")
 
     return app

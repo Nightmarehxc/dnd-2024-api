@@ -51,25 +51,32 @@ window.renderRules = function(data) {
 
 function renderRule(data) {
     const s = (val) => val || '---';
+    
+    // Support both English and Spanish keys for backward compatibility
+    const topic = data.topic || data.tema;
+    const explanation = data.explanation || data.explicacion;
+    const majorChange = data.major_change || data.cambio_importante;
+    const example = data.example || data.ejemplo;
+    const pageRef = data.page_reference || data.pagina_ref;
 
     els.content.innerHTML = `
         <div class="rule-card">
-            <h1 style="color:var(--accent); margin-top:0;">${s(data.tema)}</h1>
-            <p style="font-size:1.1em; line-height:1.6;">${s(data.explicacion)}</p>
+            <h1 style="color:var(--accent); margin-top:0;">${s(topic)}</h1>
+            <p style="font-size:1.1em; line-height:1.6;">${s(explanation)}</p>
 
-            ${data.cambio_importante && data.cambio_importante !== 'Sin cambios mayores' ? `
+            ${majorChange && majorChange !== 'Sin cambios mayores' ? `
                 <div class="change-box">
-                    <strong>⚠️ Cambio vs 2014:</strong> ${data.cambio_importante}
+                    <strong>⚠️ Cambio vs 2014:</strong> ${majorChange}
                 </div>
             ` : ''}
 
             <h3>Ejemplo Práctico</h3>
             <p style="font-style:italic; color:#555; border-left:3px solid #ccc; padding-left:10px;">
-                "${s(data.ejemplo)}"
+                "${s(example)}"
             </p>
 
             <div style="margin-top:20px; text-align:right; font-size:0.8em; color:#999;">
-                Fuente: ${s(data.pagina_ref)}
+                Fuente: ${s(pageRef)}
             </div>
         </div>
     `;
@@ -77,15 +84,21 @@ function renderRule(data) {
 
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
+    
+    // Support both English and Spanish keys for backward compatibility
+    const topic = currentData.topic || currentData.tema;
+    const explanation = currentData.explanation || currentData.explicacion;
+    const majorChange = currentData.major_change || currentData.cambio_importante;
+    const example = currentData.example || currentData.ejemplo;
 
-    let text = `--- REGLA: ${currentData.tema} (D&D 2024) ---\n\n`;
-    text += `EXPLICACIÓN: ${currentData.explicacion}\n\n`;
-    if (currentData.cambio_importante) text += `CAMBIO 2014: ${currentData.cambio_importante}\n\n`;
-    text += `EJEMPLO: ${currentData.ejemplo}\n`;
+    let text = `--- REGLA: ${topic} (D&D 2024) ---\n\n`;
+    text += `EXPLICACIÓN: ${explanation}\n\n`;
+    if (majorChange) text += `CAMBIO 2014: ${majorChange}\n\n`;
+    text += `EJEMPLO: ${example}\n`;
 
     const blob = new Blob([text], {type : 'text/plain'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Regla_${currentData.tema.replace(/\s+/g, '_')}.txt`;
+    a.download = `Regla_${topic.replace(/\s+/g, '_')}.txt`;
     a.click();
 });

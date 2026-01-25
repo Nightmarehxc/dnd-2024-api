@@ -72,9 +72,10 @@ els.btnGen.addEventListener('click', async () => {
 // --- EDIT ---
 els.btnEdit.addEventListener('click', () => {
     if(!currentData) return;
+    
     els.eName.value = currentData.name || "";
-    els.eKeeper.value = currentData.innkeeper_name || "";
-    els.eKeeperRace.value = currentData.innkeeper_race || "";
+    els.eKeeper.value = currentData.innkeeper_name || currentData.tabernero || "";
+    els.eKeeperRace.value = currentData.innkeeper_race || currentData.raza_tabernero || "";
     els.eRumor.value = currentData.rumor || "";
 
     els.content.style.display = 'none';
@@ -87,6 +88,7 @@ els.btnCancel.addEventListener('click', () => {
 });
 
 els.btnSave.addEventListener('click', () => {
+    // Crear objeto actualizado preservando todos los datos originales
     const newData = {
         ...currentData,
         name: els.eName.value,
@@ -100,9 +102,12 @@ els.btnSave.addEventListener('click', () => {
     els.editorContainer.style.display = 'none';
     els.content.style.display = 'block';
 
+    // IMPORTANTE: Solo UNO de los dos, nunca ambos
     if (currentData._db_id && typeof updateHistoryItem === 'function') {
+        // Edición de existente
         updateHistoryItem(currentData._db_id, currentData);
     } else if (typeof addToHistory === 'function') {
+        // Nuevo registro
         addToHistory(currentData, 'inns');
     }
 });
@@ -111,18 +116,34 @@ els.btnSave.addEventListener('click', () => {
 window.renderInn = function(data) {
     currentData = data;  // Sync with local
     const s = (val) => val || '---';
-    const menuHtml = (data.menu || []).map(m => `<li><b>${m.name}</b> (${m.price})</li>`).join('');
+    
+    // Support both English and Spanish keys for backward compatibility
+    const name = data.name || data.nombre;
+    const comfortLevel = data.comfort_level || data.confort;
+    const description = data.description || data.descripcion;
+    const location = data.location || data.ubicacion;
+    const innkeeperName = data.innkeeper_name || data.tabernero;
+    const innkeeperRace = data.innkeeper_race || data.raza_tabernero;
+    const innkeeperPersonality = data.innkeeper_personality || data.personalidad_tabernero;
+    const rumor = data.rumor;
+    const menu = data.menu;
+    
+    const menuHtml = (menu || []).map(m => `<li><b>${(m.name || m.nombre)}</b> (${(m.price || m.precio)})</li>`).join('');
 
     els.content.innerHTML = `
-        <h2 style="color:#d35400;">${s(data.name)}</h2>
-        <p><em>${s(data.comfort_level)}</em> - ${s(data.description)}</p>
+        <h2 style="color:#d35400;">${s(name)}</h2>
+        ${location ? `<p style="color:#888; font-style:italic;">📍 ${s(location)}</p>` : ''}
+        <p><em>${s(comfortLevel)}</em></p>
+        ${description ? `<p style="background:#f5f5f5; padding:10px; border-radius:5px; font-style:italic;">${s(description)}</p>` : ''}
+        
         <div style="background:#fbeee6; padding:15px; border-radius:5px;">
-            <h3>🧑‍🍳 ${s(data.innkeeper_name)}</h3>
-            <p>${s(data.innkeeper_race)} - "${s(data.innkeeper_personality)}"</p>
+            <h3>🧑‍🍳 ${s(innkeeperName)}</h3>
+            <p>${s(innkeeperRace)} ${innkeeperPersonality ? `- "${s(innkeeperPersonality)}"` : ''}</p>
         </div>
-        <p><strong>🗣️ Rumor:</strong> ${s(data.rumor)}</p>
+        
+        <p><strong>🗣️ Rumor:</strong> ${s(rumor)}</p>
         <hr>
-        <h4>Menu</h4><ul>${menuHtml}</ul>
+        <h4>📋 Menú</h4><ul>${menuHtml || '<li><em>Sin información de menú</em></li>'}</ul>
     `;
     if(els.btnEdit) els.btnEdit.style.display = 'block';
     if(els.btnExp) els.btnExp.style.display = 'block';

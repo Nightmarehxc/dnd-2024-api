@@ -151,7 +151,21 @@ window.renderMonster = function(data) {
     });
 
     const traitsHtml = (data.traits||[]).map(t => `<p><strong>${t.name}.</strong> ${t.desc}</p>`).join('');
-    const actionsHtml = (data.actions||[]).map(a => `<p class="stat-line"><span class="action-name">${a.name}.</span> ${a.desc}</p>`).join('');
+    const actionsHtml = (data.actions||[]).map(a => {
+        // Handle both formats: {name, desc} and {name, attack_bonus, damage, damage_type}
+        if (a.desc) {
+            return `<p class="stat-line"><span class="action-name">${a.name}.</span> ${a.desc}</p>`;
+        } else if (a.attack_bonus || a.damage || a.damage_type) {
+            // Build description from attack components
+            let actionDesc = '';
+            if (a.attack_bonus) actionDesc += `+${a.attack_bonus} al golpe. `;
+            if (a.damage) actionDesc += `${a.damage} de daño`;
+            if (a.damage_type) actionDesc += ` (${a.damage_type})`;
+            return `<p class="stat-line"><span class="action-name">${a.name}.</span> ${actionDesc}</p>`;
+        } else {
+            return `<p class="stat-line"><span class="action-name">${a.name}.</span> ---</p>`;
+        }
+    }).join('');
 
     els.content.innerHTML = `
         <div class="stat-block">

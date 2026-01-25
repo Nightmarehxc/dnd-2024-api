@@ -4,31 +4,36 @@ from app.services.gemini_service import BaseService
 class RiddleService(BaseService):
     def generate_riddle(self, theme, difficulty):
         system_instruction = """
-        Eres un diseñador de trampas y acertijos para D&D 5e (2024).
-        Genera un desafío (Puzzle o Trampa con Acertijo).
-        Devuelve JSON válido con esta estructura EXACTA:
+        You are an expert trap and riddle designer for D&D 5e (2024).
+        Generate a challenge (Puzzle or Trap with Riddle).
+        Return valid JSON with this EXACT structure (English snake_case) English keys and Spanish values:
         {
-            "titulo": "Nombre del Desafío",
-            "tipo": "Acertijo Verbal / Mecanismo / Trampa Mágica",
-            "descripcion_jugadores": "Lo que ven y oyen los jugadores al entrar. EL ACERTIJO EN SÍ.",
-            "solucion": "La respuesta exacta o la acción requerida.",
-            "pistas": ["Pista 1 (DC 10)", "Pista 2 (DC 15)"],
-            "consecuencia_fallo": {
-                "descripcion": "Qué pasa si fallan o se equivocan (La Trampa).",
-                "dano": "Ej: 4d6 fuego",
-                "salvacion": "DC 15 Destreza"
+            "title": "Challenge Name",
+            "type": "Verbal Riddle / Mechanism / Magical Trap",
+            "player_description": "What players see and hear when entering. THE RIDDLE ITSELF.",
+            "solution": "The exact answer or required action.",
+            "hints": ["Hint 1 (DC 10)", "Hint 2 (DC 15)"],
+            "failure_consequence": {
+                "description": "What happens if they fail or guess wrong (The Trap).",
+                "damage": "E.g: 4d6 fire",
+                "save": "DC 15 Dexterity"
             },
-            "recompensa": "Qué obtienen al resolverlo (opcional)"
+            "reward": "What they get for solving it (optional)"
         }
         """
 
         prompt = f"""
-        Diseña un acertijo o trampa basado en esta temática: '{theme}'.
-        Dificultad: {difficulty}.
-        Asegúrate de que el acertijo tenga rima o sea ingenioso si es verbal.
+        Design a riddle or trap based on this theme: '{theme}'.
+        Difficulty: {difficulty}.
+        Make sure the riddle rhymes or is clever if it's verbal.
+        
+        CRITICAL: Use English keys (snake_case) English keys and Spanish values:
+        "title", "type", "player_description", "solution", "hints", "failure_consequence", "reward"
+        Do NOT use Spanish keys like "titulo", "descripcion_jugadores".
         """
 
         return self._generate_content(system_instruction, prompt)
 
 
+riddle_service = RiddleService()
 riddle_service = RiddleService()

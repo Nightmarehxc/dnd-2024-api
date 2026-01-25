@@ -53,20 +53,23 @@ window.renderQuest = function(data) {
 function renderQuests(data) {
     const s = (val) => val || '---';
 
-    const cardsHtml = data.misiones.map(q => `
+    // Support both English and Spanish keys for backward compatibility
+    const quests = data.quests || data.misiones;
+
+    const cardsHtml = (quests || []).map(q => `
         <div class="quest-card">
             <div class="pin"></div>
-            <h3 style="margin-top:15px; margin-bottom:5px; color:#8e44ad;">${q.titulo}</h3>
+            <h3 style="margin-top:15px; margin-bottom:5px; color:#8e44ad;">${(q.title || q.titulo)}</h3>
             <p style="font-size:0.9em; color:#555; margin-bottom:10px;">
-                <strong>Cliente:</strong> ${q.cliente}
+                <strong>Cliente:</strong> ${(q.client || q.cliente)}
             </p>
             <p style="font-style:italic; font-family:serif; border-bottom:1px dashed #ccc; padding-bottom:10px;">
-                "${q.descripcion}"
+                "${(q.description || q.descripcion)}"
             </p>
-            <p><strong>💰 Recompensa:</strong> ${q.recompensa}</p>
+            <p><strong>💰 Recompensa:</strong> ${(q.reward || q.recompensa)}</p>
 
             <div class="twist-box">
-                <strong>👁️ SECRETO (DM):</strong> ${q.giro}
+                <strong>👁️ SECRETO (DM):</strong> ${(q.twist || q.giro)}
             </div>
         </div>
     `).join('');

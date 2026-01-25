@@ -26,9 +26,21 @@ els.btnGen.addEventListener('click', async () => {
         if (data.error) throw new Error(data.error);
 
         currentData = data;
-        renderAlchemy(data);
+        displayAlchemyResult(data);
         els.btnExp.style.display = 'block';
-        if (typeof addToHistory === 'function') addToHistory({...data, nombre: data.nombre}, 'alchemy');
+        
+        // Preparar datos para historial con ambos nombres (inglés y español)
+        const historyData = {
+            ...data,
+            name: data.name || data.nombre,
+            nombre: data.nombre || data.name
+        };
+        console.log('🔬 Preparando para historial:', historyData);
+        if (typeof addToHistory === 'function') {
+            addToHistory(historyData, 'alchemy');
+        } else {
+            console.error('❌ addToHistory no está disponible');
+        }
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -38,55 +50,74 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-// Global renderer para el historial
+// Global renderer para el historial - Punto de entrada
 window.renderAlchemy = function(data) {
-    currentData = data;  // Sincronizar con local
-    renderAlchemy(data);
+    console.log('📡 window.renderAlchemy llamado con:', data);
+    currentData = data;
+    displayAlchemyResult(data);
 };
 
-function renderAlchemy(data) {
+// Función interna para mostrar el resultado
+function displayAlchemyResult(data) {
     const s = (val) => val || '---';
+
+    const name = data.name || data.nombre;
+    const type = data.type || data.tipo;
+    const rarity = data.rarity || data.rareza;
+    const appearance = data.appearance || data.apariencia;
+    const tasteSmell = data.taste_smell || data.sabor_olor;
+    const mechanicEffect = data.mechanic_effect || data.efecto_mecanico;
+    const secondaryEffect = data.secondary_effect || data.efecto_secundario;
+    const ingredients = data.ingredients || data.ingredientes;
+
+    const ingredientsList = Array.isArray(ingredients) 
+        ? ingredients.map(ing => `<li>${ing}</li>`).join('') 
+        : '<li>No especificados</li>';
 
     els.content.innerHTML = `
         <div style="border: 2px solid #8e44ad; border-radius:8px; padding:20px; background:#fff;">
-            <h1 style="color:#8e44ad; margin-top:0; text-align:center;">${s(data.nombre)}</h1>
+            <h1 style="color:#8e44ad; margin-top:0; text-align:center;">${s(name)}</h1>
             <div style="text-align:center; color:#666; font-style:italic; margin-bottom:15px;">
-                ${s(data.tipo)} - ${s(data.rareza)}
+                ${s(type)} - ${s(rarity)}
             </div>
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9em; background:#f4e7fb; padding:10px; border-radius:5px;">
-                <div><strong>👁️ Apariencia:</strong> ${s(data.apariencia)}</div>
-                <div><strong>👅 Sabor/Olor:</strong> ${s(data.sabor_olor)}</div>
+                <div><strong>👁️ Apariencia:</strong> ${s(appearance)}</div>
+                <div><strong>👅 Sabor/Olor:</strong> ${s(tasteSmell)}</div>
             </div>
 
             <h3 style="border-bottom:2px solid #8e44ad; color:#8e44ad;">🧪 Efecto Mecánico</h3>
-            <p style="font-size:1.1em; line-height:1.6;">${s(data.efecto_mecanico)}</p>
+            <p style="font-size:1.1em; line-height:1.6;">${s(mechanicEffect)}</p>
 
-            ${data.efecto_secundario ? `<p style="font-size:0.9em; color:#d35400;"><strong>⚠️ Efecto Secundario:</strong> ${data.efecto_secundario}</p>` : ''}
+            ${secondaryEffect ? `<p style="font-size:0.9em; color:#d35400;"><strong>⚠️ Efecto Secundario:</strong> ${secondaryEffect}</p>` : ''}
 
             <h4 style="margin-bottom:5px;">🌿 Ingredientes Clave</h4>
-            <ul style="margin-top:0;">
-                ${(data.ingredientes || []).map(i => `<li>${i}</li>`).join('')}
-            </ul>
+            <ul style="background:#f9f1fd; padding:10px 20px; border-radius:5px;">${ingredientsList}</ul>
         </div>
     `;
 }
 
 els.btnExp.addEventListener('click', () => {
-    if(!currentData) return;
-    // Formato Item de Foundry (Simplificado como Consumible)
+    if (!currentData) return;
+    
+    const name = currentData.name || currentData.nombre;
+    const mechanicEffect = currentData.mechanic_effect || currentData.efecto_mecanico;
+    const tasteSmell = currentData.taste_smell || currentData.sabor_olor;
+    const rarity = currentData.rarity || currentData.rareza;
+    
     const json = {
-        name: currentData.nombre,
+        name: name,
         type: "consumable",
         system: {
-            description: { value: `<p>${currentData.efecto_mecanico}</p><p><em>${currentData.sabor_olor}</em></p>` },
-            rarity: currentData.rareza.toLowerCase(),
+            description: { value: `<p>${mechanicEffect}</p><p><em>${tasteSmell}</em></p>` },
+            rarity: rarity.toLowerCase(),
             consumableType: "potion"
         }
     };
-    const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
+    
+    const blob = new Blob([JSON.stringify(json, null, 2)], {type: 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `${currentData.nombre.replace(/\s+/g, '_')}.json`;
+    a.download = `${name.replace(/\s+/g, '_')}.json`;
     a.click();
 });

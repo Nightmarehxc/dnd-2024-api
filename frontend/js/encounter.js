@@ -58,25 +58,33 @@ window.renderEncounter = function(data) {
 function renderEncounter(data) {
     const s = (val) => val || '---';
 
-    let monstersHtml = data.monstruos.map(m => `
+    // Support both English and Spanish keys for backward compatibility
+    const title = data.title || data.titulo;
+    const summary = data.summary || data.resumen;
+    const monsters = data.monsters || data.monstruos;
+    const tactics = data.tactics || data.tacticas;
+    const terrain = data.terrain || data.terreno;
+    const loot = data.loot || data.tesoro_botin;
+
+    let monstersHtml = (monsters || []).map(m => `
         <div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee;">
-            <span><strong>${m.cantidad}x ${m.nombre}</strong> (${m.rol})</span>
-            <span style="background:#eee; padding:0 5px; border-radius:4px; font-size:0.9em;">CR ${m.cr} | HP ${m.hp}</span>
+            <span><strong>${(m.quantity || m.cantidad)}x ${(m.name || m.nombre)}</strong> (${(m.role || m.rol)})</span>
+            <span style="background:#eee; padding:0 5px; border-radius:4px; font-size:0.9em;">CR ${(m.cr)} | HP ${(m.hp)}</span>
         </div>
     `).join('');
 
-    let tacticsHtml = data.tacticas.map(t => `<li style="margin-bottom:5px;">${t}</li>`).join('');
+    let tacticsHtml = (tactics || []).map(t => `<li style="margin-bottom:5px;">${t}</li>`).join('');
 
-    let terrainHtml = data.terreno.map(t => `
+    let terrainHtml = (terrain || []).map(t => `
         <div style="background:#fff3e0; border-left:4px solid #e67e22; padding:10px; margin-bottom:10px;">
-            <strong>${t.elemento}</strong>
-            <p style="margin:5px 0 0 0; font-size:0.9em;">${t.regla}</p>
+            <strong>${(t.element || t.elemento)}</strong>
+            <p style="margin:5px 0 0 0; font-size:0.9em;">${(t.rule || t.regla)}</p>
         </div>
     `).join('');
 
     els.content.innerHTML = `
-        <h1 style="color:var(--accent); text-align:center; margin-bottom:5px;">${s(data.titulo)}</h1>
-        <p style="text-align:center; font-style:italic; color:#666;">${s(data.resumen)}</p>
+        <h1 style="color:var(--accent); text-align:center; margin-bottom:5px;">${s(title)}</h1>
+        <p style="text-align:center; font-style:italic; color:#666;">${s(summary)}</p>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">
             <div>
@@ -86,7 +94,7 @@ function renderEncounter(data) {
                 </div>
 
                 <h3 style="margin-top:20px;">💰 Botín</h3>
-                <p>${s(data.tesoro_botin)}</p>
+                <p>${s(loot)}</p>
             </div>
 
             <div>
@@ -103,9 +111,10 @@ function renderEncounter(data) {
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
     const contentHTML = els.content.innerHTML;
+    const title = currentData.title || currentData.titulo;
 
     const json = {
-        name: currentData.titulo,
+        name: title,
         type: "journal",
         pages: [
             {
@@ -119,6 +128,6 @@ els.btnExp.addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Encounter_${currentData.titulo.replace(/\s+/g, '_')}.json`;
+    a.download = `Encounter_${title.replace(/\s+/g, '_')}.json`;
     a.click();
 });

@@ -1,7 +1,7 @@
 from app.services.gemini_service import BaseService
 
 class LibrarianService(BaseService):
-    def generate_book(self, topic, book_type):
+    def generate_book(self, topic, book_type, tone, author_style=""):
         system = """
         Eres un bibliotecario arcano. Genera un documento interesante para D&D.
         Devuelve JSON: {
@@ -12,7 +12,8 @@ class LibrarianService(BaseService):
             "valor": "Valor estimado en gp"
         }
         """
-        prompt = f"Genera un {book_type} sobre el tema: {topic}."
+        style_hint = f" Estilo del autor: {author_style}." if author_style else ""
+        prompt = f"Genera un {book_type} sobre el tema: {topic}. Tono: {tone}.{style_hint}"
         return self._generate_content(system, prompt)
 
 librarian_service = LibrarianService()

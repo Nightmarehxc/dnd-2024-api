@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+import json
 
 
 # ============================================
@@ -19,15 +20,72 @@ class BaseGenerated(db.Model):
         """Obtiene el tipo dinámicamente de __tablename__"""
         return self.__tablename__.replace('_', '')
 
+    def _sanitize_data(self, data, max_depth=10, current_depth=0):
+        """
+        Sanitiza datos para evitar recursión infinita y referencias circulares.
+        Limita profundidad de anidamiento.
+        """
+        if current_depth >= max_depth:
+            return None
+        
+        if isinstance(data, dict):
+            return {
+                k: self._sanitize_data(v, max_depth, current_depth + 1)
+                for k, v in data.items()
+            }
+        elif isinstance(data, (list, tuple)):
+            return [self._sanitize_data(item, max_depth, current_depth + 1) for item in data]
+        elif isinstance(data, (str, int, float, bool, type(None))):
+            return data
+        else:
+            # Para tipos complejos, intentamos convertir a string
+            try:
+                return str(data)
+            except:
+                return None
+
     def to_dict(self):
-        """Convierte el modelo a diccionario"""
-        return {
-            'id': self.id,
-            'type': self.type,
-            'name': self.name,
-            'timestamp': self.timestamp.isoformat(),
-            'data': self.get_data()
-        }
+        """Convierte el modelo a diccionario con protección contra recursión"""
+        # Asegurar que timestamp tiene un valor válido
+        timestamp_str = None
+        if self.timestamp:
+            try:
+                timestamp_str = self.timestamp.isoformat()
+            except:
+                timestamp_str = datetime.utcnow().isoformat()
+        else:
+            timestamp_str = datetime.utcnow().isoformat()
+        
+        try:
+            data = self.get_data()
+            # Sanitizar datos para evitar recursión
+            data = self._sanitize_data(data)
+            return {
+                'id': self.id,
+                'type': self.type,
+                'name': self.name,
+                'timestamp': timestamp_str,
+                'data': data
+            }
+        except RecursionError:
+            # Fallback en caso de recursión
+            return {
+                'id': self.id,
+                'type': self.type,
+                'name': self.name,
+                'timestamp': timestamp_str,
+                'data': {}
+            }
+        except Exception as e:
+            # Log del error para debugging
+            print(f"[ERROR] to_dict para {self.type}: {str(e)}")
+            return {
+                'id': self.id,
+                'type': self.type,
+                'name': self.name,
+                'timestamp': timestamp_str,
+                'data': {}
+            }
 
     def get_data(self):
         """Obtiene los datos específicos del modelo. Sobrescribir en subclases."""
@@ -112,12 +170,12 @@ class Adventure(BaseGenerated):
 
     def get_data(self):
         return {
-            'titulo': self.name,
-            'sinopsis': self.sinopsis,
-            'gancho': self.gancho,
-            'capitulos': self.capitulos,
-            'npcs_notables': self.npcs_notables,
-            'lugares': self.lugares
+            'title': self.name,
+            'synopsis': self.sinopsis,
+            'hook': self.gancho,
+            'chapters': self.capitulos,
+            'notable_npcs': self.npcs_notables,
+            'locations': self.lugares
         }
 
 
@@ -131,16 +189,38 @@ class City(BaseGenerated):
     puntos_interes = db.Column(db.JSON)
     conflicto_local = db.Column(db.Text)
     secreto = db.Column(db.Text)
+    
+    # Nuevos campos para soportar todos los datos de Gemini
+    subtitulo = db.Column(db.String(200))
+    atmosfera = db.Column(db.Text)
+    distritos = db.Column(db.JSON)
+    linked_data = db.Column(db.JSON)  # Para posadas y tiendas vinculadas
 
     def get_data(self):
         return {
+            'name': self.name,
             'nombre': self.name,
+            'subtitle': self.subtitulo,
+            'titulo': self.subtitulo,
+            'population': self.poblacion,
             'poblacion': self.poblacion,
+            'government': self.gobierno,
             'gobierno': self.gobierno,
+            'climate': self.clima,
             'clima': self.clima,
+            'atmosphere': self.atmosfera,
+            'clima_atmosfera': self.atmosfera,
+            'districts': self.distritos,
+            'distritos': self.distritos,
+            'landmarks': self.puntos_interes,
+            'lugares_destacados': self.puntos_interes,
             'puntos_interes': self.puntos_interes,
+            'current_conflict': self.conflicto_local,
+            'conflicto_actual': self.conflicto_local,
             'conflicto_local': self.conflicto_local,
-            'secreto': self.secreto
+            'secret': self.secreto,
+            'secreto': self.secreto,
+            'linked_data': self.linked_data
         }
 
 
@@ -158,14 +238,14 @@ class Dungeon(BaseGenerated):
 
     def get_data(self):
         return {
-            'nombre': self.name,
-            'descripcion': self.descripcion,
-            'profundidad': self.profundidad,
-            'arquitecto': self.arquitecto,
-            'salas': self.salas,
-            'trampas': self.trampas,
-            'tesoro': self.tesoro,
-            'secreto_central': self.secreto_central
+            'name': self.name,
+            'description': self.descripcion,
+            'depth': self.profundidad,
+            'architect': self.arquitecto,
+            'rooms': self.salas,
+            'traps': self.trampas,
+            'treasure': self.tesoro,
+            'central_secret': self.secreto_central
         }
 
 
@@ -173,6 +253,8 @@ class Shop(BaseGenerated):
     __tablename__ = 'shops'
     
     propietario = db.Column(db.String(100))
+    raza_propietario = db.Column(db.String(50))
+    personalidad_propietario = db.Column(db.Text)
     especialidad = db.Column(db.String(100))
     ubicacion = db.Column(db.String(100))
     
@@ -184,11 +266,13 @@ class Shop(BaseGenerated):
         return {
             'name': self.name,
             'shopkeeper_name': self.propietario,
+            'shopkeeper_race': self.raza_propietario,
+            'shopkeeper_personality': self.personalidad_propietario,
             'specialty': self.especialidad,
             'location': self.ubicacion,
             'inventory': self.inventario,
             'atmosphere': self.ambiente,
-            'secret': self.secreto
+            'special_feature': self.secreto
         }
 
 
@@ -202,16 +286,35 @@ class Inn(BaseGenerated):
     rumor = db.Column(db.Text)
     ambiente = db.Column(db.Text)
     ofertas_especiales = db.Column(db.JSON)
+    
+    # 🆕 Campos para guardar datos completos de Gemini
+    ubicacion = db.Column(db.String(150))
+    descripcion = db.Column(db.Text)
+    personalidad_tabernero = db.Column(db.Text)
+    menu = db.Column(db.JSON)
+    habitaciones = db.Column(db.JSON)
+    patrones_notables = db.Column(db.JSON)
+    datos_completos = db.Column(db.JSON)  # Fallback para datos no mapeados
 
     def get_data(self):
+        # Devolver todos los datos disponibles, priorizando datos completos
+        if self.datos_completos:
+            return self.datos_completos
+        
         return {
             'name': self.name,
+            'location': self.ubicacion,
+            'description': self.descripcion,
             'innkeeper_name': self.tabernero,
             'innkeeper_race': self.raza_tabernero,
+            'innkeeper_personality': self.personalidad_tabernero,
             'comfort_level': self.confort,
             'rumor': self.rumor,
             'atmosphere': self.ambiente,
-            'special_offers': self.ofertas_especiales
+            'special_offers': self.ofertas_especiales,
+            'menu': self.menu,
+            'rooms': self.habitaciones,
+            'notable_patrons': self.patrones_notables
         }
 
 
@@ -231,13 +334,13 @@ class Riddle(BaseGenerated):
 
     def get_data(self):
         return {
-            'titulo': self.name,
-            'tipo': self.tipo,
-            'descripcion_jugadores': self.descripcion_jugadores,
-            'solucion': self.solucion,
-            'pistas': self.pistas,
-            'consecuencia_fallo': self.consecuencia_fallo,
-            'recompensa': self.recompensa
+            'title': self.name,
+            'type': self.tipo,
+            'player_description': self.descripcion_jugadores,
+            'solution': self.solucion,
+            'hints': self.pistas,
+            'failure_consequence': self.consecuencia_fallo,
+            'reward': self.recompensa
         }
 
 
@@ -249,9 +352,9 @@ class Quest(BaseGenerated):
 
     def get_data(self):
         return {
-            'nombre': self.name,
+            'name': self.name,
             'flavor_text': self.flavor_text,
-            'misiones': self.misiones
+            'quests': self.misiones
         }
 
 
@@ -322,6 +425,7 @@ class Item(BaseGenerated):
     descripcion = db.Column(db.Text)
     mechanics = db.Column(db.Text)
     propiedades = db.Column(db.JSON)
+    class_requirement = db.Column(db.String(100))
 
     def get_data(self):
         return {
@@ -331,7 +435,8 @@ class Item(BaseGenerated):
             'value': self.valor,
             'description': self.descripcion,
             'mechanics': self.mechanics,
-            'properties': self.propiedades
+            'properties': self.propiedades,
+            'class_requirement': self.class_requirement
         }
 
 
@@ -356,6 +461,32 @@ class Journal(BaseGenerated):
         }
 
 
+class Travel(BaseGenerated):
+    __tablename__ = 'travels'
+    
+    ambiente_general = db.Column(db.Text)
+    general_environment = db.Column(db.Text)
+    clima_dominante = db.Column(db.String(200))
+    dominant_climate = db.Column(db.String(200))
+    eventos = db.Column(db.JSON)
+    events = db.Column(db.JSON)
+
+    def get_data(self):
+        # Devolver con ambos idiomas para compatibilidad
+        events_data = self.events or self.eventos or []
+        env_data = self.general_environment or self.ambiente_general or ''
+        climate_data = self.dominant_climate or self.clima_dominante or ''
+        
+        return {
+            'ambiente_general': env_data,
+            'general_environment': env_data,
+            'clima_dominante': climate_data,
+            'dominant_climate': climate_data,
+            'eventos': events_data,
+            'events': events_data
+        }
+
+
 # ============================================
 # MISCELÁNEA
 # ============================================
@@ -370,12 +501,12 @@ class Faction(BaseGenerated):
 
     def get_data(self):
         return {
-            'nombre': self.name,
-            'descripcion': self.descripcion,
-            'objetivos': self.objetivos,
-            'miembros_notables': self.miembros_notables,
-            'enemigos': self.enemigos,
-            'secreto': self.secreto
+            'name': self.name,
+            'description': self.descripcion,
+            'goals': self.objetivos,
+            'notable_members': self.miembros_notables,
+            'enemies': self.enemigos,
+            'secret': self.secreto
         }
 
 
@@ -384,16 +515,24 @@ class Mystery(BaseGenerated):
     
     descripcion = db.Column(db.Text)
     pistas = db.Column(db.JSON)
+    sospechosos = db.Column(db.JSON)  # Array de objetos {name, motive}
     solucion = db.Column(db.Text)
     consecuencias = db.Column(db.Text)
 
     def get_data(self):
         return {
+            'title': self.name,
+            'crime_event': self.descripcion,
+            'clues': self.pistas,
+            'suspects': self.sospechosos,
+            'truth': self.solucion,
+            'consequences': self.consecuencias,
+            # Compatibilidad español
             'titulo': self.name,
-            'descripcion': self.descripcion,
+            'crimen_evento': self.descripcion,
             'pistas': self.pistas,
-            'solucion': self.solucion,
-            'consecuencias': self.consecuencias
+            'sospechosos': self.sospechosos,
+            'verdad': self.solucion
         }
 
 
@@ -410,15 +549,145 @@ class Villain(BaseGenerated):
 
     def get_data(self):
         return {
-            'nombre': self.name,
-            'tipo': self.tipo,
-            'objetivo': self.objetivo,
-            'estadisticas': self.estadisticas,
-            'habilidades': self.habilidades,
-            'planes': self.planes,
-            'debilidades': self.debilidades
+            'name': self.name,
+            'type': self.tipo,
+            'objective': self.objetivo,
+            'stats': self.estadisticas,
+            'abilities': self.habilidades,
+            'plans': self.planes,
+            'weaknesses': self.debilidades
         }
 
+# ============================================
+# RUINAS
+# ============================================
+class Ruins(BaseGenerated):
+    __tablename__ = 'ruins'
+    
+    ruin_type = db.Column(db.String(100))  # Tipo original (templo, castillo, etc)
+    original_use = db.Column(db.Text)  # Uso original
+    cataclysm = db.Column(db.Text)  # Evento que causó la ruina
+    current_state = db.Column(db.Text)  # Estado actual
+    inhabitants = db.Column(db.Text)  # Quién vive ahí ahora
+    secret = db.Column(db.Text)  # Secreto oculto
+    
+    def get_data(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'ruin_type': self.ruin_type,
+            'original_use': self.original_use,
+            'cataclysm': self.cataclysm,
+            'current_state': self.current_state,
+            'inhabitants': self.inhabitants,
+            'secret': self.secret,
+            'created_at': self.timestamp.isoformat() if self.timestamp else None
+        }
+
+# ============================================
+# CONTRATOS
+# ============================================
+class Contract(BaseGenerated):
+    __tablename__ = 'contracts'
+    
+    patron = db.Column(db.String(200))  # Entidad que ofrece el contrato
+    desire = db.Column(db.String(200))  # Deseo del mortal
+    offer = db.Column(db.Text)  # Qué recibe el mortal
+    price = db.Column(db.Text)  # Qué debe pagar
+    small_print = db.Column(db.Text)  # Letra pequeña/trampa
+    escape_clause = db.Column(db.Text)  # Forma de romper el contrato
+    
+    def get_data(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'patron': self.patron,
+            'desire': self.desire,
+            'offer': self.offer,
+            'price': self.price,
+            'small_print': self.small_print,
+            'escape_clause': self.escape_clause,
+            'created_at': self.timestamp.isoformat() if self.timestamp else None
+        }
+
+# ============================================
+# ALQUIMIA
+# ============================================
+class Alchemy(BaseGenerated):
+    __tablename__ = 'alchemy'
+    
+    tipo = db.Column(db.String(50))  # Poción, Veneno, Aceite, etc.
+    rareza = db.Column(db.String(50))
+    apariencia = db.Column(db.Text)
+    sabor_olor = db.Column(db.Text)
+    efecto_mecanico = db.Column(db.Text)
+    efecto_secundario = db.Column(db.Text)
+    ingredientes = db.Column(db.JSON)  # Array de ingredientes
+    
+    def get_data(self):
+        return {
+            'nombre': self.name,
+            'tipo': self.tipo,
+            'rareza': self.rareza,
+            'apariencia': self.apariencia,
+            'sabor_olor': self.sabor_olor,
+            'efecto_mecanico': self.efecto_mecanico,
+            'efecto_secundario': self.efecto_secundario,
+            'ingredientes': self.ingredientes
+        }
+
+# ============================================
+# BIBLIOTECARIO
+# ============================================
+class Librarian(BaseGenerated):
+    """Libros, pergaminos y documentos mágicos"""
+    __tablename__ = 'librarians'
+    
+    topic = db.Column(db.String(200))  # Tema del libro
+    book_type = db.Column(db.String(100))  # Grimorio, Diario, Tratado, etc.
+    tone = db.Column(db.String(100))  # Académico, Místico, Poético, etc.
+    author = db.Column(db.String(100))  # Nombre del autor
+    descripcion_fisica = db.Column(db.Text)  # Estado del libro (quemado, encuadernado...)
+    contenido = db.Column(db.Text)  # Contenido principal del texto
+    secret = db.Column(db.Text)  # Secreto oculto
+    valor = db.Column(db.String(50))  # Valor en gp
+
+    def get_data(self):
+        return {
+            'topic': self.topic,
+            'book_type': self.book_type,
+            'tone': self.tone,
+            'title': self.name,
+            'author': self.author,
+            'description': self.descripcion_fisica,
+            'content': self.contenido,
+            'secret': self.secret,
+            'value': self.valor
+        }
+
+# ============================================
+# SUEÑOS (DREAM WEAVER)
+# ============================================
+class Dream(BaseGenerated):
+    """Sueños oníricos para personajes"""
+    __tablename__ = 'dreams'
+    
+    contexto = db.Column(db.Text)  # Contexto del personaje
+    tono = db.Column(db.String(50))  # Tono del sueño
+    imagenes = db.Column(db.Text)  # Descripción visual
+    sensaciones = db.Column(db.Text)  # Sensaciones físicas y emocionales
+    significado = db.Column(db.Text)  # Significado para el DM
+
+    def get_data(self):
+        return {
+            'visions': self.imagenes,
+            'sensations': self.sensaciones,
+            'meaning': self.significado,
+            # Compatibilidad español
+            'imagenes': self.imagenes,
+            'sensaciones': self.sensaciones,
+            'significado': self.significado
+        }
 
 # ============================================
 # TABLA GENÉRICA PARA TIPOS NO MAPEADOS

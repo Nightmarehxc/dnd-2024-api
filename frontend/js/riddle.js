@@ -32,7 +32,7 @@ els.btnGen.addEventListener('click', async () => {
         if (data.error) throw new Error(data.error);
 
         currentData = data;
-        renderRiddle(data);
+        renderRiddleContent(data);
         els.btnExp.style.display = 'block';
 
         if (typeof addToHistory === 'function') addToHistory(data, 'riddles');
@@ -45,37 +45,43 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-// Global renderer para el historial
-window.renderRiddle = function(data) {
-    currentData = data;  // Sincronizar con local
-    renderRiddle(data);
-};
-
 function renderRiddle(data) {
     const s = (val) => val || '---';
 
-    let hintsHtml = data.pistas ? data.pistas.map(p => `<li>${p}</li>`).join('') : '<li>Sin pistas</li>';
+    // Support both English and Spanish keys for backward compatibility
+    const title = data.title || data.titulo;
+    const type = data.type || data.tipo;
+    const playerDesc = data.player_description || data.descripcion_jugadores;
+    const solution = data.solution || data.solucion;
+    const hints = data.hints || data.pistas;
+    const failureCons = data.failure_consequence || data.consecuencia_fallo;
+
+    let hintsHtml = hints ? hints.map(p => `<li>${p}</li>`).join('') : '<li>Sin pistas</li>';
+    
+    const failureEffect = failureCons?.description || failureCons?.descripcion || '---';
+    const failureDamage = failureCons?.damage || failureCons?.dano || '---';
+    const failureSave = failureCons?.save || failureCons?.salvacion || '---';
 
     els.content.innerHTML = `
-        <h1 style="color:var(--accent); text-align:center;">${s(data.titulo)}</h1>
-        <p style="text-align:center; font-weight:bold;">${s(data.tipo)}</p>
+        <h1 style="color:var(--accent); text-align:center;">${s(title)}</h1>
+        <p style="text-align:center; font-weight:bold;">${s(type)}</p>
 
         <div style="background:#fff3cd; color:#856404; padding:15px; border:1px solid #ffeeba; border-radius:5px; margin-bottom:20px;">
             <h3>👁️ Para los Jugadores:</h3>
-            <p style="font-style:italic; font-size:1.1rem;">"${s(data.descripcion_jugadores)}"</p>
+            <p style="font-style:italic; font-size:1.1rem;">"${s(playerDesc)}"</p>
         </div>
 
         <div style="background:#d4edda; color:#155724; padding:15px; border:1px solid #c3e6cb; border-radius:5px; margin-bottom:20px;">
             <h3>💡 Solución:</h3>
-            <p><strong>${s(data.solucion)}</strong></p>
+            <p><strong>${s(solution)}</strong></p>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
             <div style="background:#f8d7da; color:#721c24; padding:10px; border-radius:5px;">
                 <h4>⚠️ Consecuencia de Fallo</h4>
-                <p><strong>Efecto:</strong> ${s(data.consecuencia_fallo.descripcion)}</p>
-                <p><strong>Daño:</strong> ${s(data.consecuencia_fallo.dano)}</p>
-                <p><strong>Salvación:</strong> ${s(data.consecuencia_fallo.salvacion)}</p>
+                <p><strong>Efecto:</strong> ${s(failureEffect)}</p>
+                <p><strong>Daño:</strong> ${s(failureDamage)}</p>
+                <p><strong>Salvación:</strong> ${s(failureSave)}</p>
             </div>
             <div style="background:#e2e3e5; padding:10px; border-radius:5px;">
                 <h4>🔍 Pistas (DC Check)</h4>
@@ -88,9 +94,10 @@ function renderRiddle(data) {
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
     const contentHTML = els.content.innerHTML;
+    const title = currentData.title || currentData.titulo;
 
     const json = {
-        name: currentData.titulo,
+        name: title,
         type: "journal",
         pages: [
             {
@@ -104,6 +111,58 @@ els.btnExp.addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Puzzle_${currentData.titulo.replace(/\s+/g, '_')}.json`;
+    a.download = `Puzzle_${title.replace(/\s+/g, '_')}.json`;
     a.click();
 });
+
+// Global renderer para el historial
+window.renderRiddle = function(data) {
+    currentData = data;
+    renderRiddleContent(data);
+};
+
+function renderRiddleContent(data) {
+    const s = (val) => val || '---';
+
+    // Support both English and Spanish keys for backward compatibility
+    const title = data.title || data.titulo;
+    const type = data.type || data.tipo;
+    const playerDesc = data.player_description || data.descripcion_jugadores;
+    const solution = data.solution || data.solucion;
+    const hints = data.hints || data.pistas;
+    const failureCons = data.failure_consequence || data.consecuencia_fallo;
+
+    let hintsHtml = hints ? hints.map(p => `<li>${p}</li>`).join('') : '<li>Sin pistas</li>';
+    
+    const failureEffect = failureCons?.description || failureCons?.descripcion || '---';
+    const failureDamage = failureCons?.damage || failureCons?.dano || '---';
+    const failureSave = failureCons?.save || failureCons?.salvacion || '---';
+
+    els.content.innerHTML = `
+        <h1 style="color:var(--accent); text-align:center;">${s(title)}</h1>
+        <p style="text-align:center; font-weight:bold;">${s(type)}</p>
+
+        <div style="background:#fff3cd; color:#856404; padding:15px; border:1px solid #ffeeba; border-radius:5px; margin-bottom:20px;">
+            <h3>👁️ Para los Jugadores:</h3>
+            <p style="font-style:italic; font-size:1.1rem;">"${s(playerDesc)}"</p>
+        </div>
+
+        <div style="background:#d4edda; color:#155724; padding:15px; border:1px solid #c3e6cb; border-radius:5px; margin-bottom:20px;">
+            <h3>💡 Solución:</h3>
+            <p><strong>${s(solution)}</strong></p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+            <div style="background:#f8d7da; color:#721c24; padding:10px; border-radius:5px;">
+                <h4>⚠️ Consecuencia de Fallo</h4>
+                <p><strong>Efecto:</strong> ${s(failureEffect)}</p>
+                <p><strong>Daño:</strong> ${s(failureDamage)}</p>
+                <p><strong>Salvación:</strong> ${s(failureSave)}</p>
+            </div>
+            <div style="background:#e2e3e5; padding:10px; border-radius:5px;">
+                <h4>🔍 Pistas (DC Check)</h4>
+                <ul>${hintsHtml}</ul>
+            </div>
+        </div>
+    `;
+}

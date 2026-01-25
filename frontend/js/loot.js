@@ -54,42 +54,49 @@ window.renderLoot = function(data) {
 function renderLoot(data) {
     const s = (val) => val || '---';
 
+    // Support both English and Spanish keys for backward compatibility
+    const summary = data.summary || data.resumen;
+    const coins = data.coins || data.monedas;
+    const artObjects = data.art_objects || data.objetos_arte;
+    const magicItems = data.magic_items || data.objetos_magicos;
+    const curiosities = data.curiosities || data.curiosidades;
+
     // Función auxiliar para renderizar items
     const renderList = (items, icon) => {
         if (!items || items.length === 0) return '<p style="color:#888; font-style:italic;">Nada de valor.</p>';
         return items.map(i => `
             <div style="margin-bottom:8px; padding-bottom:5px; border-bottom:1px dashed #ddd;">
-                <strong>${icon} ${i.nombre}</strong> <span style="font-size:0.9em; color:#666;">(${i.valor || i.rareza || '-'})</span><br>
-                <span style="font-size:0.9em;">${i.descripcion || i.efecto || i}</span>
+                <strong>${icon} ${(i.name || i.nombre)}</strong> <span style="font-size:0.9em; color:#666;">(${(i.value || i.rarity || i.valor || i.rareza || '-')})</span><br>
+                <span style="font-size:0.9em;">${(i.description || i.effect || i.descripcion || i.efecto || i)}</span>
             </div>
         `).join('');
     };
 
     els.content.innerHTML = `
         <h2 style="color:var(--accent); text-align:center; margin-top:0;">💎 Tesoro Encontrado</h2>
-        <p style="text-align:center; font-style:italic;">${s(data.resumen)}</p>
+        <p style="text-align:center; font-style:italic;">${s(summary)}</p>
 
         <div style="display:flex; justify-content:space-around; background:#f9f9f9; padding:15px; border-radius:8px; border:1px solid #ddd; margin-bottom:20px;">
-            <div style="text-align:center;"><span style="font-size:1.5em; display:block;">🟤</span>${data.monedas?.cp || 0} CP</div>
-            <div style="text-align:center;"><span style="font-size:1.5em; display:block;">⚪</span>${data.monedas?.sp || 0} SP</div>
-            <div style="text-align:center;"><span style="font-size:1.5em; display:block;">🟡</span>${data.monedas?.gp || 0} GP</div>
-            <div style="text-align:center;"><span style="font-size:1.5em; display:block;">🟣</span>${data.monedas?.pp || 0} PP</div>
+            <div style="text-align:center;"><span style="font-size:1.5em; display:block;">🟤</span>${(coins || {}).cp || 0} CP</div>
+            <div style="text-align:center;"><span style="font-size:1.5em; display:block;">⚪</span>${(coins || {}).sp || 0} SP</div>
+            <div style="text-align:center;"><span style="font-size:1.5em; display:block;">🟡</span>${(coins || {}).gp || 0} GP</div>
+            <div style="text-align:center;"><span style="font-size:1.5em; display:block;">🟣</span>${(coins || {}).pp || 0} PP</div>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
             <div>
                 <h3 style="border-bottom:2px solid #e67e22;">🎨 Arte y Joyas</h3>
-                ${renderList(data.objetos_arte, '🏺')}
+                ${renderList(artObjects, '🏺')}
             </div>
             <div>
                 <h3 style="border-bottom:2px solid #9b59b6;">✨ Objetos Mágicos</h3>
-                ${renderList(data.objetos_magicos, '🔮')}
+                ${renderList(magicItems, '🔮')}
             </div>
         </div>
 
         <h3 style="border-bottom:2px solid #34495e; margin-top:20px;">❓ Curiosidades y Baratijas</h3>
         <ul style="color:#555;">
-            ${(data.curiosidades || []).map(c => `<li>${c}</li>`).join('')}
+            ${(curiosities || []).map(c => `<li>${c}</li>`).join('')}
         </ul>
     `;
 }
@@ -98,12 +105,16 @@ els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
 
     // Crear texto plano para exportar
+    const summary = currentData.summary || currentData.resumen;
+    const coins = currentData.coins || currentData.monedas;
+    const magicItems = currentData.magic_items || currentData.objetos_magicos;
+    
     let text = `--- BOTÍN: ${els.enemy.value} (CR ${els.cr.value}) ---\n\n`;
-    text += `RESUMEN: ${currentData.resumen}\n\n`;
-    text += `MONEDAS: ${currentData.monedas.gp} gp, ${currentData.monedas.sp} sp...\n\n`;
+    text += `RESUMEN: ${summary}\n\n`;
+    text += `MONEDAS: ${(coins || {}).gp} gp, ${(coins || {}).sp} sp...\n\n`;
 
     text += "OBJETOS MÁGICOS:\n";
-    currentData.objetos_magicos?.forEach(i => text += `- ${i.nombre} (${i.rareza}): ${i.efecto}\n`);
+    (magicItems || []).forEach(i => text += `- ${(i.name || i.nombre)} (${(i.rarity || i.rareza)}): ${(i.effect || i.efecto)}\n`);
 
     const blob = new Blob([text], {type : 'text/plain'});
     const a = document.createElement('a');

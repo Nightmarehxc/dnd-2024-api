@@ -23,6 +23,7 @@ window.HISTORY_CONFIG = {
     'dungeons':   { icon: '🗝️', renderer: 'renderDungeon' },
     'encounters': { icon: '⚔️', renderer: 'renderEncounter' },
     'travel':     { icon: '🛤️', renderer: 'renderTravel' },
+    'travels':    { icon: '🛤️', renderer: 'renderTravel' },
     'ruins':      { icon: '🏚️', renderer: 'renderRuins' },
 
     // --- CONTENIDO Y DESAFÍOS ---
@@ -40,12 +41,13 @@ window.HISTORY_CONFIG = {
     // --- DOCUMENTOS Y REFERENCIAS ---
     'journals':   { icon: '📖', renderer: 'renderJournal' },
     'librarian':  { icon: '📚', renderer: 'renderBook' },
+    'librarians': { icon: '📚', renderer: 'renderBook' },
 
     // --- MISCELÁNEA (tipos no mapeados a modelos específicos) ---
     'alchemy':    { icon: '🧪', renderer: 'renderAlchemy' },
-    'contract':  { icon: '📋', renderer: 'renderContract' },
-    'dream':     { icon: '💭', renderer: 'renderDream' },
-    'rules':     { icon: '⚖️', renderer: 'renderRules' }
+    'contract':   { icon: '📋', renderer: 'renderContract' },
+    'dreams':     { icon: '💭', renderer: 'renderDream' },
+    'rules':      { icon: '⚖️', renderer: 'renderRules' }
 };
 
 // Función auxiliar global - Mapea nombres de archivos a tipos de config
@@ -76,7 +78,7 @@ window.detectPageType = function() {
         'librarian': 'librarian',
         'alchemy': 'alchemy',
         'contract': 'contract',
-        'dream': 'dream',
+        'dream': 'dreams',
         'rules': 'rules'
     };
     

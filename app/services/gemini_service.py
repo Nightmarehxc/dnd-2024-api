@@ -19,25 +19,59 @@ class BaseService:
     def _clean_response(self, response):
         """Busca y extrae el JSON válido de la respuesta usando Regex"""
         text = response.text.strip()
+        print(f"[GEMINI] Respuesta bruta (primeros 500 chars): {text[:500]}")
+        
         try:
             # 1. Intento directo
             result = json.loads(text)
-            print(f"✅ JSON parseado de Gemini: {result}")  # DEBUG
+            print(f"✅ JSON parseado de Gemini: {result}")
             return result
-        except json.JSONDecodeError:
-            # 2. Búsqueda de patrón { ... }
+        except json.JSONDecodeError as e:
+            print(f"[GEMINI] Error al parsear directo: {e}")
+            
+            # 2. Búsqueda de patrón { ... } (greedy)
             match = re.search(r'\{.*\}', text, re.DOTALL)
             if match:
                 clean_json = match.group(0)
                 try:
                     result = json.loads(clean_json)
-                    print(f"✅ JSON limpiado: {result}")  # DEBUG
+                    print(f"✅ JSON limpiado (método greedy): claves = {list(result.keys())}")
                     return result
-                except json.JSONDecodeError:
-                    pass
+                except json.JSONDecodeError as e:
+                    print(f"[GEMINI] Error al parsear con greedy: {e}")
+            
+            # 3. Intento con búsqueda no-greedy y validación
+            match = re.search(r'\{[\s\S]*\}', text)
+            if match:
+                clean_json = match.group(0)
+                try:
+                    result = json.loads(clean_json)
+                    print(f"✅ JSON limpiado (método no-greedy): claves = {list(result.keys())}")
+                    return result
+                except json.JSONDecodeError as e:
+                    print(f"[GEMINI] Error al parsear con no-greedy: {e}")
+            
+            # 4. Última opción: procurar arreglar formato
+            cleaned = text
+            try:
+                # Remover prefijos comunes
+                for prefix in ['```json', '```', '```python']:
+                    if cleaned.startswith(prefix):
+                        cleaned = cleaned[len(prefix):].strip()
+                
+                # Remover sufijos comunes
+                for suffix in ['```']:
+                    if cleaned.endswith(suffix):
+                        cleaned = cleaned[:-len(suffix)].strip()
+                
+                result = json.loads(cleaned)
+                print(f"✅ JSON limpiado (removiendo bloques): claves = {list(result.keys())}")
+                return result
+            except json.JSONDecodeError as e:
+                print(f"[GEMINI] Error en último intento: {e}")
 
-            print(f"❌ ERROR JSON: {text}")
-            return {"error": "La IA no generó un JSON válido", "raw": text}
+            print(f"❌ ERROR JSON: No se pudo parsear. Respuesta completa:\n{text}")
+            return {"error": "La IA no generó un JSON válido", "raw": text[:500]}
 
     def _generate_text(self, system_instruction, user_input, audio_bytes=None):
         """Genera respuesta de texto, aceptando texto O audio input"""
