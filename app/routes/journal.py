@@ -29,7 +29,7 @@ def generate():
             result = {"session_title": "Nota sin formato", "epic_recap": result}
 
         new_item = GeneratedItem(
-            type='journal',
+            item_type='journal',
             name=result.get('session_title', 'Crónica sin título'),
             data=result,
             user_id='demo_user'

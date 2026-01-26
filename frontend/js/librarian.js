@@ -53,7 +53,7 @@ els.btnGen.addEventListener('click', async () => {
         currentData = data;
         window.renderBook(data);
         // Guardar como 'librarian' o 'library' según tu config.js (asumo 'librarian')
-        if (typeof addToHistory === 'function') addToHistory(currentData, 'librarian');
+        if (typeof addToHistory === 'function') addToHistory(currentData, 'librarians');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -82,32 +82,63 @@ els.btnCancel.addEventListener('click', () => {
     els.content.style.display = 'block';
 });
 
-els.btnSave.addEventListener('click', () => {
-    const newData = {
-        ...currentData,
-        title: els.eTitle.value,
-        author: els.eAuthor.value,
-        type: els.eType.value,
-        description: els.eDesc.value,
-        content: els.eContent.value,
-        secret: els.eSecret.value
-    };
+els.btnSave.addEventListener('click', async () => {
+    if (!currentData || !currentData._db_id) {
+        alert("Error: No hay libro cargado para guardar.");
+        return;
+    }
 
-    currentData = newData;
-    window.renderBook(currentData);
-    els.editorContainer.style.display = 'none';
-    els.content.style.display = 'block';
+    try {
+        els.btnSave.disabled = true;
+        els.btnSave.textContent = '💾 Guardando...';
 
-    if (currentData._db_id && typeof updateHistoryItem === 'function') {
-        updateHistoryItem(currentData._db_id, currentData);
-    } else if (typeof addToHistory === 'function') {
-        addToHistory(currentData, 'librarian');
+        const updatePayload = {
+            title: els.eTitle.value,
+            author: els.eAuthor.value,
+            book_type: els.eType.value,
+            description: els.eDesc.value,
+            content: els.eContent.value,
+            secret: els.eSecret.value
+        };
+
+        const res = await fetch(`http://localhost:5001/api/librarian/${currentData._db_id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(updatePayload)
+        });
+
+        const data = await res.json();
+        
+        if (!res.ok) {
+            throw new Error(data.error || 'Error al guardar los cambios');
+        }
+
+        // Actualizar datos locales
+        currentData = data;
+        window.renderBook(currentData);
+        els.editorContainer.style.display = 'none';
+        els.content.style.display = 'block';
+
+        // Notificar éxito
+        alert('📖 Libro guardado correctamente en la biblioteca');
+
+        // Actualizar historial si está disponible
+        if (typeof updateHistoryItem === 'function') {
+            updateHistoryItem(currentData._db_id, currentData);
+        }
+
+    } catch (err) {
+        alert(`Error al guardar: ${err.message}`);
+    } finally {
+        els.btnSave.disabled = false;
+        els.btnSave.textContent = '💾 Guardar Cambios';
     }
 });
 
 // --- RENDERIZADO GLOBAL ---
 // Nota: en config.js debes tener 'librarian': { renderer: 'renderBook' }
 window.renderBook = function(data) {
+    currentData = data;  // Sincronizar con local
     const s = (val) => val || '';
 
     els.content.innerHTML = `

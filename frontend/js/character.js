@@ -49,7 +49,7 @@ els.btnGen.addEventListener('click', async () => {
         currentData = data;
         renderCharacterSheet(data);
         els.btnExp.style.display = 'block';
-        if (typeof addToHistory === 'function') addToHistory(data);
+        if (typeof addToHistory === 'function') addToHistory(currentData, 'characters');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">${err.message}</p>`;
@@ -80,7 +80,7 @@ if (els.btnImport) {
                 currentData = data.character;
                 renderCharacterSheet(currentData);
                 els.btnExp.style.display = 'block';
-                if (typeof addToHistory === 'function') addToHistory({...currentData, nombre: currentData.nombre || "Importado"});
+                if (typeof addToHistory === 'function') addToHistory({...currentData, nombre: currentData.nombre || "Importado"}, 'characters');
             }
         } catch (err) {
             console.error(err);
@@ -99,60 +99,66 @@ if (els.btnImport) {
 function getMod(score) { return Math.floor((score - 10) / 2); }
 function fmtMod(mod) { return mod >= 0 ? `+${mod}` : mod; }
 
+// Renderer global para el historial
+window.renderCharacter = function(data) {
+    currentData = data;  // Sincronizar con local
+    renderCharacterSheet(data);
+};
+
 function renderCharacterSheet(data) {
     const s = (val) => val || '---';
 
-    // 1. Datos básicos
-    const raza = data.especie || data.raza || 'Desconocido';
-    const clase = data.clase || 'Aventurero';
-    // Nivel seguro
-    let nivel = data.nivel || 1;
-    if (typeof data.clase === 'string') {
-        const match = data.clase.match(/(\d+)/);
-        if (match) nivel = parseInt(match[0]);
+    // 1. Basic info
+    const race = data.race || data.especie || 'Unknown';
+    const charClass = data.class || data.clase || 'Adventurer';
+    // Safe level extraction
+    let level = data.level || data.nivel || 1;
+    if (typeof data.class === 'string') {
+        const match = data.class.match(/(\d+)/);
+        if (match) level = parseInt(match[0]);
     }
-    const prof = Math.ceil(nivel / 4) + 1;
+    const prof = Math.ceil(level / 4) + 1;
 
     // 2. Stats
     const statsMap = {
-        'Fuerza': 10, 'Destreza': 10, 'Constitución': 10,
-        'Inteligencia': 10, 'Sabiduría': 10, 'Carisma': 10
+        'Strength': 10, 'Dexterity': 10, 'Constitution': 10,
+        'Intelligence': 10, 'Wisdom': 10, 'Charisma': 10
     };
-    const rawStats = data.estadisticas || data.stats || {};
+    const rawStats = data.stats || data.estadisticas || {};
     for (let [k, v] of Object.entries(rawStats)) {
-        let key = k.toLowerCase();
-        if (key.includes('fuer') || key.includes('str')) statsMap['Fuerza'] = v;
-        else if (key.includes('dest') || key.includes('dex')) statsMap['Destreza'] = v;
-        else if (key.includes('cons') || key.includes('con')) statsMap['Constitución'] = v;
-        else if (key.includes('inte') || key.includes('int')) statsMap['Inteligencia'] = v;
-        else if (key.includes('sab') || key.includes('wis')) statsMap['Sabiduría'] = v;
-        else if (key.includes('car') || key.includes('cha')) statsMap['Carisma'] = v;
+        let key = k.toUpperCase();
+        if (key === 'STR' || key === 'FUE') statsMap['Strength'] = v;
+        else if (key === 'DEX' || key === 'DES') statsMap['Dexterity'] = v;
+        else if (key === 'CON') statsMap['Constitution'] = v;
+        else if (key === 'INT' || key === 'INT') statsMap['Intelligence'] = v;
+        else if (key === 'WIS' || key === 'SAB') statsMap['Wisdom'] = v;
+        else if (key === 'CHA' || key === 'CAR') statsMap['Charisma'] = v;
     }
 
     const mods = {};
     for (let [k, v] of Object.entries(statsMap)) mods[k] = getMod(v);
 
-    const hp = (8 + mods['Constitución']) + ((5 + mods['Constitución']) * (nivel - 1));
-    const ac = 10 + mods['Destreza'];
+    const hp = (8 + mods['Constitution']) + ((5 + mods['Constitution']) * (level - 1));
+    const ac = 10 + mods['Dexterity'];
 
-    // 3. Habilidades (Lógica V4: Búsqueda flexible)
-    const knownSkills = data.habilidades || {};
+    // 3. Skills
+    const knownSkills = data.skills || {};
     const skillList = [
-        ['Acrobacias', 'Destreza'], ['Trato Animales', 'Sabiduría'], ['Arcanos', 'Inteligencia'],
-        ['Atletismo', 'Fuerza'], ['Engaño', 'Carisma'], ['Historia', 'Inteligencia'],
-        ['Perspicacia', 'Sabiduría'], ['Intimidación', 'Carisma'], ['Investigación', 'Inteligencia'],
-        ['Medicina', 'Sabiduría'], ['Naturaleza', 'Inteligencia'], ['Percepción', 'Sabiduría'],
-        ['Interpretación', 'Carisma'], ['Persuasión', 'Carisma'], ['Religión', 'Inteligencia'],
-        ['Juego de Manos', 'Destreza'], ['Sigilo', 'Destreza'], ['Supervivencia', 'Sabiduría']
+        ['Acrobatics', 'Dexterity'], ['Animal Handling', 'Wisdom'], ['Arcana', 'Intelligence'],
+        ['Athletics', 'Strength'], ['Deception', 'Charisma'], ['History', 'Intelligence'],
+        ['Insight', 'Wisdom'], ['Intimidation', 'Charisma'], ['Investigation', 'Intelligence'],
+        ['Medicine', 'Wisdom'], ['Nature', 'Intelligence'], ['Perception', 'Wisdom'],
+        ['Performance', 'Charisma'], ['Persuasion', 'Charisma'], ['Religion', 'Intelligence'],
+        ['Sleight of Hand', 'Dexterity'], ['Stealth', 'Dexterity'], ['Survival', 'Wisdom']
     ];
 
     const skillsHtml = skillList.map(([label, statKey]) => {
         let profLevel = 0;
 
-        // Intentamos encontrar la habilidad por nombre exacto ("Sigilo")
+        // Try finding exact key
         if (knownSkills[label]) profLevel = parseFloat(knownSkills[label]);
 
-        // Si no, buscamos si hay alguna clave que contenga el nombre (para compatibilidad inversa)
+        // Fallback for backward compatibility
         else if (typeof knownSkills === 'object') {
             for(let k in knownSkills) {
                 if (k.includes(label)) {
@@ -170,7 +176,7 @@ function renderCharacterSheet(data) {
             icon = '<span style="color:#333;">●</span>';
         }
         if (profLevel >= 2) {
-            total += prof; // Expertise (suma proficiencia 2 veces)
+            total += prof;
             icon = '<span style="color:#f39c12;">🌟</span>';
         }
 
@@ -187,17 +193,17 @@ function renderCharacterSheet(data) {
     els.content.innerHTML = `
         <div class="char-sheet">
             <div class="char-header">
-                <div class="char-name">${s(data.nombre)}</div>
+                <div class="char-name">${s(data.name)}</div>
                 <div style="text-align:right; font-size:0.9em;">
-                    Nivel ${nivel} | Bono Prof: <strong>+${prof}</strong>
+                    Level ${level} | Prof Bonus: <strong>+${prof}</strong>
                 </div>
             </div>
 
             <div class="char-details">
-                <div><strong>Raza:</strong> ${s(raza)}</div>
-                <div><strong>Clase:</strong> ${s(clase)}</div>
-                <div><strong>Fondo:</strong> ${s(data.trasfondo?.nombre || data.trasfondo)}</div>
-                <div><strong>Alineamiento:</strong> ${s(data.alineamiento)}</div>
+                <div><strong>Race:</strong> ${s(race)}</div>
+                <div><strong>Class:</strong> ${s(charClass)}</div>
+                <div><strong>Background:</strong> ${s(data.background_details?.name || data.background_details)}</div>
+                <div><strong>Alignment:</strong> ${s(data.alignment)}</div>
             </div>
             <hr>
 
@@ -215,37 +221,37 @@ function renderCharacterSheet(data) {
                 <div>
                     <div class="combat-stats">
                         <div class="combat-box"><div class="combat-lbl">AC</div><div class="combat-val">🛡️ ${ac}</div></div>
-                        <div class="combat-box"><div class="combat-lbl">INIT</div><div class="combat-val">⚡ ${fmtMod(mods['Destreza'])}</div></div>
+                        <div class="combat-box"><div class="combat-lbl">INIT</div><div class="combat-val">⚡ ${fmtMod(mods['Dexterity'])}</div></div>
                         <div class="combat-box"><div class="combat-lbl">HP</div><div class="combat-val">❤️ ${hp}</div></div>
                     </div>
                     <div class="sheet-section skills-list">${skillsHtml}</div>
                 </div>
 
                 <div class="sheet-section">
-                    <h3>Rasgos y Dotes</h3>
+                    <h3>Traits and Feats</h3>
                     <div style="font-size:0.85em; max-height:300px; overflow-y:auto;">
-                        ${(data.rasgos || []).map(r => `
+                        ${(data.traits || []).map(r => `
                             <div style="margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:5px;">
-                                <strong>${r.nombre}</strong>
-                                <div style="color:#555; font-size:0.9em;">${r.descripcion || 'Sin descripción'}</div>
+                                <strong>${r.name}</strong>
+                                <div style="color:#555; font-size:0.9em;">${r.description || 'No description'}</div>
                             </div>
-                        `).join('') || '<p>Sin rasgos especiales.</p>'}
+                        `).join('') || '<p>No special traits.</p>'}
                     </div>
 
-                    <h3 style="margin-top:20px;">Inventario</h3>
+                    <h3 style="margin-top:20px;">Equipment</h3>
                     <ul style="padding-left:20px; font-size:0.9em;">
-                        ${(data.equipo || data.equipo_destacado || []).map(item => {
+                        ${(data.equipment || []).map(item => {
                             const name = item.name || item;
                             const qty = item.quantity > 1 ? `x${item.quantity}` : '';
                             const detail = item.detail ? `<span style="color:#888; font-size:0.85em;">(${item.detail})</span>` : '';
                             return `<li>${name} ${qty} ${detail}</li>`;
-                        }).join('') || '<li>Mochila vacía</li>'}
+                        }).join('') || '<li>Empty backpack</li>'}
                     </ul>
                 </div>
             </div>
 
             <div style="margin-top:20px; font-size:0.9em; border-top:1px solid #eee; padding-top:10px;">
-                <strong>Historia:</strong> ${s(data.resumen_historia || data.historia).substring(0, 400)}...
+                <strong>Story:</strong> ${s(data.summary || data.resumen_historia).substring(0, 400)}...
             </div>
         </div>
     `;
@@ -254,10 +260,10 @@ function renderCharacterSheet(data) {
 // --- EXPORT ---
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
-    const json = { name: currentData.nombre, type: "character", img: "icons/svg/mystery-man.svg", system: { details: { biography: { value: currentData.historia } } } };
+    const json = { name: currentData.name, type: "character", img: "icons/svg/mystery-man.svg", system: { details: { biography: { value: currentData.summary } } } };
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `${currentData.nombre.replace(/\s+/g, '_')}_Foundry.json`;
+    a.download = `${currentData.name.replace(/\s+/g, '_')}_Foundry.json`;
     a.click();
 });

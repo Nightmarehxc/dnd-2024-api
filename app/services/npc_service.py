@@ -3,46 +3,54 @@ from app.services.gemini_service import BaseService
 class NPCService(BaseService):
     def generate(self, description):
         system_instruction = """
-        Eres un experto diseñador de monstruos para D&D 5e (2024).
-        Genera un JSON válido con estas claves EXACTAS:
-
+        Eres un diseñador experto de PNJ de D&D 5e (2024).
+        Generate a valid JSON with these EXACT English keys:
+        Pero los valores han de ser en ESPAÑOL.
         {
-            "nombre": "Nombre",
-            "rol": "Ocupación",
-            "raza": "Especie",
-            "alineamiento": "Ej: Neutral Evil",
-            "ca": 15 (Entero),
-            "hp": 45 (Entero),
-            "velocidad": 30 (Entero),
-            "estadisticas": { "FUE": 10, "DES": 10, "CON": 10, "INT": 10, "SAB": 10, "CAR": 10 },
-            "ataques": [
+            "name": "NPC Name",
+            "role": "Occupation",
+            "race": "Species",
+            "alignment": "e.g: Neutral Evil",
+            "ca": 15,
+            "hp": 45,
+            "speed": 30,
+            "stats": { "STR": 10, "DEX": 10, "CON": 10, "INT": 10, "WIS": 10, "CHA": 10 },
+            "attacks": [
                 {
-                    "nombre": "Ataque principal",
-                    "tipo": "melee" o "ranged",
-                    "bonificador_ataque": 5 (Entero),
-                    "formula_dano": "1d6 + 3",
-                    "tipo_dano": "slashing"
+                    "name": "Main Attack",
+                    "type": "melee" or "ranged",
+                    "bonus": 5,
+                    "damage": "1d6 + 3",
+                    "damage_type": "slashing"
                 }
             ],
-            "habilidad_especial": "Rasgo único o reacción",
-            "personalidad": { "rasgo": "...", "ideal": "...", "vinculo": "...", "defecto": "..." },
-            "gancho_trama": "..."
+            "special_ability": "Unique trait or reaction",
+            "personality": { "trait": "...", "ideal": "...", "bond": "...", "flaw": "..." },
+            "plot_hook": "..."
         }
         """
 
-        prompt = f"Genera un NPC completo con stats de combate (HP, CA, Ataques) basado en: {description}."
-        return self._generate_content(system_instruction, prompt)
+        prompt = f"Generate a complete NPC with combat stats (HP, CA, Attacks) based on: {description}. Use English keys. and Spanish values."
+        result = self._generate_content(system_instruction, prompt)
+        print(f"[LOG] NPC generado por Gemini: {result}")  # DEBUG
+        return result
 
 
 
     def chat(self, npc_data, history, user_message=None, audio_bytes=None):
         """Maneja chat de texto O voz"""
 
+        # Soportar tanto claves inglesas (del API) como españolas (legacy)
+        name = npc_data.get('name') or npc_data.get('nombre', 'Desconocido')
+        role = npc_data.get('role') or npc_data.get('rol', 'Misterioso')
+        personality = npc_data.get('personality') or npc_data.get('personalidad', 'Neutral')
+        appearance = npc_data.get('appearance') or npc_data.get('apariencia', 'Desconocida')
+
         system_instruction = f"""
-        Eres {npc_data['nombre']}, un NPC en un juego de D&D 5e.
-        Tu rol/ocupación es: {npc_data['rol']}.
-        Tu personalidad es: {npc_data.get('personalidad', 'Neutral')}.
-        Tu apariencia es: {npc_data.get('apariencia', 'Desconocida')}.
+        Eres {name}, un NPC en un juego de D&D 5e.
+        Tu rol/ocupación es: {role}.
+        Tu personalidad es: {personality}.
+        Tu apariencia es: {appearance}.
 
         INSTRUCCIONES DE ACTUACIÓN:
         - Responde SIEMPRE en primera persona ("Yo...").

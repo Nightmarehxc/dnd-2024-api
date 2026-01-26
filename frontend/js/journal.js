@@ -60,7 +60,7 @@ els.btnGen.addEventListener('click', async () => {
         if (typeof addToHistory === 'function') {
             // Añadimos el name aquí también por seguridad para el historial
             data.name = data.session_title;
-            addToHistory(data, 'journal');
+            addToHistory(data, 'journals');
         }
 
     } catch (err) {
@@ -75,6 +75,7 @@ els.btnGen.addEventListener('click', async () => {
 
 // --- RENDERIZAR ---
 window.renderJournal = function(data) {
+    currentData = data;  // Sincronizar con local
     const s = (val) => val || '';
     const ensureArray = (val) => Array.isArray(val) ? val : (val ? [val] : []);
 
@@ -143,7 +144,7 @@ els.btnSave.addEventListener('click', () => {
     if (window.currentData._db_id && typeof updateHistoryItem === 'function') {
         updateHistoryItem(window.currentData._db_id, window.currentData);
     } else if (typeof addToHistory === 'function') {
-        addToHistory(window.currentData, 'journal');
+        addToHistory(window.currentData, 'journals');
     }
 });
 

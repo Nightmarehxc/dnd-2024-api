@@ -4,9 +4,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    DEBUG = False
-    TESTING = False
+    DEBUG = True
+    TESTING = True
     GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+    MODEL_AI = os.getenv('MODEL_AI', 'gemini-3-flash-preview')  # Default if not set
 
 class DevelopmentConfig(Config):
     DEBUG = True

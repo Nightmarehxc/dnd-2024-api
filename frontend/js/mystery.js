@@ -35,8 +35,10 @@ els.btnGen.addEventListener('click', async () => {
         renderMystery(data);
         els.btnExp.style.display = 'block';
 
-        if (typeof addToHistory === 'function') {
-            addToHistory({ ...data, nombre: data.titulo });
+        // NO llamar addToHistory() - el endpoint ya guarda en BD
+        // Recargar historial para mostrar el nuevo item
+        if (typeof loadHistory === 'function') {
+            loadHistory();
         }
 
     } catch (err) {
@@ -49,18 +51,26 @@ els.btnGen.addEventListener('click', async () => {
 
 function renderMystery(data) {
     const s = (val) => val || '---';
-    const suspHtml = (data.sospechosos || []).map(sus =>
-        `<li style="margin-bottom:5px;"><strong>${sus.nombre}:</strong> ${sus.motivo}</li>`
+    
+    // Support both English and Spanish keys for backward compatibility
+    const title = data.title || data.titulo;
+    const crimeEvent = data.crime_event || data.crimen_evento;
+    const suspects = data.suspects || data.sospechosos;
+    const clues = data.clues || data.pistas;
+    const truth = data.truth || data.verdad;
+
+    const suspHtml = (suspects || []).map(sus =>
+        `<li style="margin-bottom:5px;"><strong>${(sus.name || sus.nombre)}:</strong> ${(sus.motive || sus.motivo)}</li>`
     ).join('');
 
-    const pistasHtml = (data.pistas || []).map(p =>
+    const pistasHtml = (clues || []).map(p =>
         `<li style="margin-bottom:5px;">🔎 ${p}</li>`
     ).join('');
 
     els.content.innerHTML = `
         <div style="border-bottom:2px solid #34495e; padding-bottom:10px; margin-bottom:15px;">
-            <h2 style="color:#2c3e50; margin:0;">${s(data.titulo)}</h2>
-            <p style="color:#7f8c8d; margin:5px 0;">El Caso: ${s(data.crimen_evento)}</p>
+            <h2 style="color:#2c3e50; margin:0;">${s(title)}</h2>
+            <p style="color:#7f8c8d; margin:5px 0;">El Caso: ${s(crimeEvent)}</p>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
@@ -76,17 +86,21 @@ function renderMystery(data) {
 
         <div style="border:2px dashed #c0392b; padding:15px; background:#fff; color:#c0392b;">
             <strong style="text-transform:uppercase;">🤫 La Verdad (Solo DM):</strong>
-            <p style="margin:5px 0 0 0;">${s(data.verdad)}</p>
+            <p style="margin:10px 0; font-style:italic;">${s(truth)}</p>
         </div>
     `;
 }
 
+// Exponer función al window para el historial (sin recursión)
+window.renderMystery = renderMystery;
+
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
     // Exportar como objeto JSON para notas del DM
+    const title = currentData.title || currentData.titulo;
     const blob = new Blob([JSON.stringify(currentData, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Caso_${currentData.titulo.replace(/\s+/g, '_')}.json`;
+    a.download = `Caso_${title.replace(/\s+/g, '_')}.json`;
     a.click();
 });

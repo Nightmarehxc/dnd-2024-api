@@ -14,4 +14,15 @@ def generate_adventure():
         return jsonify({"error": "Datos inválidos", "detalles": err.messages}), 400
 
     result = adventure_service.generate_adventure(data['theme'], data['players'], data['level'])
+    
+    # DEBUG: Mostrar qué recibimos
+    print(f"[DEBUG] Resultado del servicio: {result}")
+    print(f"[DEBUG] Tipo: {type(result)}")
+    
+    # Si hay error en la respuesta, devolverlo
+    if isinstance(result, dict) and 'error' in result:
+        return jsonify(result), 400
+    
+    # La respuesta debe ser un dict con los datos de la aventura
+    # Si result es válido, devolverlo directamente
     return jsonify(result)

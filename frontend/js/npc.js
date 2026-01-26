@@ -46,11 +46,19 @@ els.btnGen.addEventListener('click', async () => {
         });
 
         const data = await res.json();
+        console.log('🔴 RESPUESTA CRUDA DEL API:', data);  // DEBUG CRÍTICO
+        console.log('¿Contiene rol?', 'rol' in data);  // DEBUG
+        console.log('¿Contiene nombre?', 'nombre' in data);  // DEBUG
+        
         if (data.error) throw new Error(data.error);
 
+        console.log('🎭 NPC generado:', data);  // DEBUG
         currentData = data;
         window.renderNPC(data);
-        if (typeof addToHistory === 'function') addToHistory(currentData, 'npc');
+        if (typeof addToHistory === 'function') {
+            console.log('📝 Guardando en historial...', data);  // DEBUG
+            addToHistory(currentData, 'npcs');
+        }
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -65,23 +73,23 @@ els.btnGen.addEventListener('click', async () => {
 els.btnEdit.addEventListener('click', () => {
     if(!currentData) return;
 
-    // Mapeo de datos para el formulario de edición
-    els.eName.value = currentData.nombre || "";
-    els.eRace.value = currentData.raza || "";
-    els.eJob.value = currentData.rol || "";
+    // Map English keys to edit form
+    els.eName.value = currentData.name || "";
+    els.eRace.value = currentData.race || "";
+    els.eJob.value = currentData.role || "";
 
-    // "Apariencia" no viene en el JSON, lo dejamos vacío o usamos la habilidad especial como placeholder
-    els.eApp.value = currentData.habilidad_especial || "";
+    // Special ability field
+    els.eApp.value = currentData.special_ability || "";
 
-    // Convertimos el objeto personalidad a texto plano para editarlo fácilmente
-    if (currentData.personalidad && typeof currentData.personalidad === 'object') {
-        const p = currentData.personalidad;
-        els.ePers.value = `Rasgo: ${p.rasgo || ''}\nIdeal: ${p.ideal || ''}\nVínculo: ${p.vinculo || ''}\nDefecto: ${p.defecto || ''}`;
+    // Convert personality object to plain text for editing
+    if (currentData.personality && typeof currentData.personality === 'object') {
+        const p = currentData.personality;
+        els.ePers.value = `Trait: ${p.trait || ''}\nIdeal: ${p.ideal || ''}\nBond: ${p.bond || ''}\nFlaw: ${p.flaw || ''}`;
     } else {
-        els.ePers.value = currentData.personalidad || "";
+        els.ePers.value = currentData.personality || "";
     }
 
-    els.eSecret.value = currentData.gancho_trama || "";
+    els.eSecret.value = currentData.plot_hook || "";
 
     els.content.style.display = 'none';
     els.editorContainer.style.display = 'block';
@@ -93,15 +101,15 @@ els.btnCancel.addEventListener('click', () => {
 });
 
 els.btnSave.addEventListener('click', () => {
-    // Al guardar, actualizamos el objeto localmente
+    // Update object locally with English keys
     const newData = {
         ...currentData,
-        nombre: els.eName.value,
-        raza: els.eRace.value,
-        rol: els.eJob.value,
-        habilidad_especial: els.eApp.value, // Guardamos aquí por falta de campo apariencia
-        personalidad: els.ePers.value, // Ahora será un string plano tras editar
-        gancho_trama: els.eSecret.value
+        name: els.eName.value,
+        race: els.eRace.value,
+        role: els.eJob.value,
+        special_ability: els.eApp.value,
+        personality: els.ePers.value,
+        plot_hook: els.eSecret.value
     };
 
     currentData = newData;
@@ -112,72 +120,75 @@ els.btnSave.addEventListener('click', () => {
     if (currentData._db_id && typeof updateHistoryItem === 'function') {
         updateHistoryItem(currentData._db_id, currentData);
     } else if (typeof addToHistory === 'function') {
-        addToHistory(currentData, 'npc');
+        addToHistory(currentData, 'npcs');
     }
 });
 
 // --- RENDERIZAR ---
 window.renderNPC = function(data) {
+    // 🔑 IMPORTANTE: Actualizar currentData local para que funcione editar/exportar
+    currentData = data;
+    
     const s = (val) => val || '---';
 
-    // Función auxiliar para renderizar la personalidad (que puede ser objeto o string)
+    // Render personality (can be object or string)
     let personalityHtml = '';
-    if (data.personalidad && typeof data.personalidad === 'object') {
+    if (data.personality && typeof data.personality === 'object') {
         personalityHtml = `
             <ul style="margin:0; padding-left:20px;">
-                <li><strong>Rasgo:</strong> ${data.personalidad.rasgo || '---'}</li>
-                <li><strong>Ideal:</strong> ${data.personalidad.ideal || '---'}</li>
-                <li><strong>Vínculo:</strong> ${data.personalidad.vinculo || '---'}</li>
-                <li><strong>Defecto:</strong> ${data.personalidad.defecto || '---'}</li>
+                <li><strong>Trait:</strong> ${data.personality.trait || '---'}</li>
+                <li><strong>Ideal:</strong> ${data.personality.ideal || '---'}</li>
+                <li><strong>Bond:</strong> ${data.personality.bond || '---'}</li>
+                <li><strong>Flaw:</strong> ${data.personality.flaw || '---'}</li>
             </ul>
         `;
     } else {
-        personalityHtml = s(data.personalidad);
+        personalityHtml = s(data.personality);
     }
 
-    // Renderizar Estadísticas si existen
+    // Render Stats if they exist
     let statsHtml = '';
-    if (data.estadisticas) {
-        const st = data.estadisticas;
+    if (data.stats) {
+        const st = data.stats;
         statsHtml = `
             <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:5px; text-align:center; background:#fff; padding:5px; border-radius:4px; margin: 10px 0; font-size:0.8em;">
-                <div><strong>FUE</strong><br>${st.FUE}</div>
-                <div><strong>DES</strong><br>${st.DES}</div>
+                <div><strong>STR</strong><br>${st.STR}</div>
+                <div><strong>DEX</strong><br>${st.DEX}</div>
                 <div><strong>CON</strong><br>${st.CON}</div>
                 <div><strong>INT</strong><br>${st.INT}</div>
-                <div><strong>SAB</strong><br>${st.SAB}</div>
-                <div><strong>CAR</strong><br>${st.CAR}</div>
+                <div><strong>WIS</strong><br>${st.WIS}</div>
+                <div><strong>CHA</strong><br>${st.CHA}</div>
             </div>
         `;
     }
 
     els.content.innerHTML = `
         <div class="npc-card">
-            <h2 style="color:#2c3e50; border-bottom:2px solid #3498db; margin-bottom:5px;">${s(data.nombre)}</h2>
+            <h2 style="color:#2c3e50; border-bottom:2px solid #3498db; margin-bottom:5px;">${s(data.name)}</h2>
 
             <div style="display:flex; justify-content:space-between; align-items:center; color:#555;">
-                <span><strong>${s(data.raza)}</strong> - <em>${s(data.rol)}</em></span>
-                <span style="font-size:0.9em;">Alineamiento: ${s(data.alineamiento)}</span>
+                <span><strong>${s(data.race)}</strong> - <em>${s(data.role)}</em></span>
+                <span style="font-size:0.9em;">Alignment: ${s(data.alignment)}</span>
             </div>
 
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <span style="background:#e74c3c; color:white; padding:3px 8px; border-radius:4px; font-weight:bold;">HP: ${data.hp || '?'}</span>
                 <span style="background:#3498db; color:white; padding:3px 8px; border-radius:4px; font-weight:bold;">CA: ${data.ca || '?'}</span>
-                <span style="background:#f39c12; color:white; padding:3px 8px; border-radius:4px; font-weight:bold;">Vel: ${data.velocidad || '?'} ft</span>
+                <span style="background:#f39c12; color:white; padding:3px 8px; border-radius:4px; font-weight:bold;">Speed: ${data.speed || '?'} ft</span>
             </div>
 
             ${statsHtml}
 
             <div style="background:#ecf0f1; padding:10px; border-radius:5px; margin:10px 0;">
-                <p style="margin-bottom:5px;"><strong>Habilidad Especial:</strong> ${s(data.habilidad_especial)}</p>
+                <p style="margin-bottom:5px;"><strong>Special Ability:</strong> ${s(data.special_ability)}</p>
                 <div style="border-top:1px solid #ccc; padding-top:5px; margin-top:5px;">
-                    <strong>Personalidad:</strong>
+                    <strong>Personality:</strong>
                     ${personalityHtml}
                 </div>
             </div>
 
             <p style="color:#c0392b; background:#fadbd8; padding:8px; border-radius:4px;">
-                <strong>Gancho de Trama:</strong> ${s(data.gancho_trama)}
+                <strong>Plot Hook:</strong> ${s(data.plot_hook)}
             </p>
         </div>
     `;
@@ -189,14 +200,14 @@ window.renderNPC = function(data) {
 // --- EXPORTAR ---
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
-    // Adaptamos el formato de exportación al estándar Foundry VTT o genérico
+    // Export in Foundry VTT standard or generic format
     const json = {
-        name: currentData.nombre,
+        name: currentData.name,
         type: "npc",
         system: {
             details: {
-                biography: { value: JSON.stringify(currentData.personalidad) },
-                race: currentData.raza
+                biography: { value: JSON.stringify(currentData.personality) },
+                race: currentData.race
             },
             attributes: {
                 hp: { value: currentData.hp, max: currentData.hp },
@@ -207,6 +218,6 @@ els.btnExp.addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `${currentData.nombre.replace(/\s+/g, '_')}.json`;
+    a.download = `${currentData.name.replace(/\s+/g, '_')}.json`;
     a.click();
 });

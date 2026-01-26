@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from flask import current_app
 from google import genai
@@ -6,6 +7,7 @@ from google.genai import types
 
 
 class BaseService:
+
     def __init__(self):
         self.client = None
 
@@ -17,24 +19,63 @@ class BaseService:
     def _clean_response(self, response):
         """Busca y extrae el JSON válido de la respuesta usando Regex"""
         text = response.text.strip()
+        print(f"[GEMINI] Respuesta bruta (primeros 500 chars): {text[:500]}")
+        
         try:
             # 1. Intento directo
-            return json.loads(text)
-        except json.JSONDecodeError:
-            # 2. Búsqueda de patrón { ... }
+            result = json.loads(text)
+            print(f"✅ JSON parseado de Gemini: {result}")
+            return result
+        except json.JSONDecodeError as e:
+            print(f"[GEMINI] Error al parsear directo: {e}")
+            
+            # 2. Búsqueda de patrón { ... } (greedy)
             match = re.search(r'\{.*\}', text, re.DOTALL)
             if match:
                 clean_json = match.group(0)
                 try:
-                    return json.loads(clean_json)
-                except json.JSONDecodeError:
-                    pass
+                    result = json.loads(clean_json)
+                    print(f"✅ JSON limpiado (método greedy): claves = {list(result.keys())}")
+                    return result
+                except json.JSONDecodeError as e:
+                    print(f"[GEMINI] Error al parsear con greedy: {e}")
+            
+            # 3. Intento con búsqueda no-greedy y validación
+            match = re.search(r'\{[\s\S]*\}', text)
+            if match:
+                clean_json = match.group(0)
+                try:
+                    result = json.loads(clean_json)
+                    print(f"✅ JSON limpiado (método no-greedy): claves = {list(result.keys())}")
+                    return result
+                except json.JSONDecodeError as e:
+                    print(f"[GEMINI] Error al parsear con no-greedy: {e}")
+            
+            # 4. Última opción: procurar arreglar formato
+            cleaned = text
+            try:
+                # Remover prefijos comunes
+                for prefix in ['```json', '```', '```python']:
+                    if cleaned.startswith(prefix):
+                        cleaned = cleaned[len(prefix):].strip()
+                
+                # Remover sufijos comunes
+                for suffix in ['```']:
+                    if cleaned.endswith(suffix):
+                        cleaned = cleaned[:-len(suffix)].strip()
+                
+                result = json.loads(cleaned)
+                print(f"✅ JSON limpiado (removiendo bloques): claves = {list(result.keys())}")
+                return result
+            except json.JSONDecodeError as e:
+                print(f"[GEMINI] Error en último intento: {e}")
 
-            print(f"ERROR JSON: {text}")
-            return {"error": "La IA no generó un JSON válido", "raw": text}
+            print(f"❌ ERROR JSON: No se pudo parsear. Respuesta completa:\n{text}")
+            return {"error": "La IA no generó un JSON válido", "raw": text[:500]}
 
     def _generate_text(self, system_instruction, user_input, audio_bytes=None):
         """Genera respuesta de texto, aceptando texto O audio input"""
+        print(current_app.config['MODEL_AI'])
         client = self._get_client()
         try:
             contents = [system_instruction]
@@ -51,7 +92,7 @@ class BaseService:
                 contents.append(user_input)
 
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model=current_app.config['MODEL_AI'],
                 contents=contents,
                 config=types.GenerateContentConfig(
                     temperature=0.8
@@ -63,9 +104,10 @@ class BaseService:
 
     def _generate_content(self, system_instruction, user_prompt):
         client = self._get_client()
+        print(current_app.config['MODEL_AI'])
         try:
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model=current_app.config['MODEL_AI'],
                 contents=f"{system_instruction}\n\nTarea: {user_prompt}",
                 config=types.GenerateContentConfig(
                     response_mime_type='application/json',

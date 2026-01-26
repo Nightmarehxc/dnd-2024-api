@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=MedievalSharp&display=swap" rel="stylesheet">
+    <title>GM Screen - D&D 2024</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .gm-screen-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .sidebar {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h3 {
+            margin-top: 0;
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+        }
+
+        .nav-section {
+            margin-bottom: 25px;
+        }
+
+        .nav-section h4 {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .nav-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .nav-button:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        .nav-button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .main-content {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 30px;
+            min-height: 600px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            color: var(--primary);
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reference-item {
+            background: white;
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .reference-item h4 {
+            margin: 0 0 10px 0;
+            color: var(--primary);
+        }
+
+        .reference-item .mecanica {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .reference-item .ejemplo {
+            font-style: italic;
+            color: #666;
+            margin-top: 10px;
+            padding: 8px;
+            background: #fff9e6;
+            border-radius: 3px;
+        }
+
+        .notes-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .changes-2024 {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .encounter-card {
+            background: white;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .enemy-list {
+            display: grid;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .enemy-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quick-npc-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .npc-stat {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+
+        .improv-list {
+            display: grid;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .improv-item {
+            background: white;
+            border-left: 4px solid var(--primary);
+            padding: 12px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-generate:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .loader {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader::before {
+            content: "⚙️";
+            display: inline-block;
+            animation: spin 2s linear infinite;
+            margin-right: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .gm-screen-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="brand">🎲 GM Screen - D&D 2024</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
+
+<div class="gm-screen-container">
+    <!-- Sidebar de navegación -->
+    <div class="sidebar">
+        <h3>📚 Herramientas GM</h3>
+        
+        <div class="nav-section">
+            <h4>Referencias Rápidas</h4>
+            <button class="nav-button" data-section="reference" data-category="conditions">Condiciones</button>
+            <button class="nav-button" data-section="reference" data-category="actions">Acciones de Combate</button>
+            <button class="nav-button" data-section="reference" data-category="difficulty">DCs de Dificultad</button>
+            <button class="nav-button" data-section="reference" data-category="skills">Habilidades</button>
+            <button class="nav-button" data-section="reference" data-category="combat">Reglas de Combate</button>
+            <button class="nav-button" data-section="reference" data-category="travel">Viaje y Exploración</button>
+            <button class="nav-button" data-section="reference" data-category="rests">Descansos</button>
+            <button class="nav-button" data-section="reference" data-category="death">Muerte y Salvaciones</button>
+            <button class="nav-button" data-section="reference" data-category="cover">Cobertura</button>
+            <button class="nav-button" data-section="reference" data-category="advantage">Ventaja/Desventaja</button>
+            <button class="nav-button" data-section="reference" data-category="inspiration">Inspiración (2024)</button>
+            <button class="nav-button" data-section="reference" data-category="exhaustion">Exhaustion (2024)</button>
+        </div>
+
+        <div class="nav-section">
+            <h4>Generadores</h4>
+            <button class="nav-button" data-section="encounter">⚔️ Encuentro Aleatorio</button>
+            <button class="nav-button" data-section="quick-npc">🎭 NPC Rápido</button>
+        </div>
+
+        <div class="nav-section">
+            <h4>Improvisación</h4>
+            <button class="nav-button" data-section="improvisation" data-type="complications">Complicaciones</button>
+            <button class="nav-button" data-section="improvisation" data-type="secrets">Secretos</button>
+            <button class="nav-button" data-section="improvisation" data-type="twists">Giros Argumentales</button>
+            <button class="nav-button" data-section="improvisation" data-type="treasures">Tesoros Inusuales</button>
+            <button class="nav-button" data-section="improvisation" data-type="names">Nombres Rápidos</button>
+            <button class="nav-button" data-section="improvisation" data-type="rumors">Rumores</button>
+            <button class="nav-button" data-section="improvisation" data-type="hooks">Ganchos de Misión</button>
+            <button class="nav-button" data-section="improvisation" data-type="locations">Localizaciones</button>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <!-- Sección de bienvenida -->
+        <div id="welcome-section">
+            <h1 class="section-title">🎲 Bienvenido a la GM Screen</h1>
+            <p style="font-size: 1.1rem; line-height: 1.6; color: #555;">
+                Esta es tu pantalla de Game Master para D&D 2024. Aquí encontrarás:
+            </p>
+            <ul style="font-size: 1rem; line-height: 1.8; color: #666;">
+                <li><strong>Referencias Rápidas:</strong> Todas las tablas y reglas que necesitas al alcance de un clic</li>
+                <li><strong>Generadores:</strong> Crea encuentros balanceados y NPCs al instante</li>
+                <li><strong>Herramientas de Improvisación:</strong> Ideas y prompts para mantener la partida fluida</li>
+            </ul>
+            <p style="font-size: 1rem; color: #888; margin-top: 20px;">
+                👈 Usa el menú lateral para navegar por las diferentes herramientas
+            </p>
+        </div>
+
+        <!-- Sección de referencias -->
+        <div id="reference-section" class="hidden">
+            <div class="loader">Cargando información...</div>
+            <div id="reference-content"></div>
+        </div>
+
+        <!-- Sección de encuentros -->
+        <div id="encounter-section" class="hidden">
+            <h1 class="section-title">⚔️ Generador de Encuentros</h1>
+            <div class="form-group">
+                <label>Nivel del Grupo:</label>
+                <input type="number" id="party-level" min="1" max="20" value="3" placeholder="1-20">
+            </div>
+            <div class="form-group">
+                <label>Terreno:</label>
+                <select id="terrain">
+                    <option value="bosque">Bosque</option>
+                    <option value="montaña">Montaña</option>
+                    <option value="desierto">Desierto</option>
+                    <option value="pantano">Pantano</option>
+                    <option value="urbano">Urbano</option>
+                    <option value="subterraneo">Subterráneo</option>
+                    <option value="plano">Plano</option>
+                    <option value="costa">Costa</option>
+                    <option value="tundra">Tundra</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Dificultad:</label>
+                <select id="difficulty">
+                    <option value="easy">Fácil</option>
+                    <option value="medium">Media</option>
+                    <option value="hard">Difícil</option>
+                    <option value="deadly">Mortal</option>
+                </select>
+            </div>
+            <button class="btn-generate" id="btn-generate-encounter">Generar Encuentro</button>
+            <div id="encounter-loader" class="loader hidden">Generando encuentro...</div>
+            <div id="encounter-content"></div>
+        </div>
+
+        <!-- Sección de NPC rápido -->
+        <div id="quick-npc-section" class="hidden">
+            <h1 class="section-title">🎭 Generador de NPC Rápido</h1>
+            <div class="form-group">
+                <label>Contexto (opcional):</label>
+                <textarea id="npc-context" rows="3" placeholder="Ej: Un tabernero en una ciudad portuaria, un guardia corrupto, un mercader misterioso..."></textarea>
+            </div>
+            <button class="btn-generate" id="btn-generate-npc">Generar NPC</button>
+            <div id="npc-loader" class="loader hidden">Creando personaje...</div>
+            <div id="npc-content"></div>
+        </div>
+
+        <!-- Sección de improvisación -->
+        <div id="improvisation-section" class="hidden">
+            <div class="loader">Generando ideas...</div>
+            <div id="improvisation-content"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_BASE = 'http://localhost:5001/api/gm-screen';
+
+// Navegación
+document.querySelectorAll('.nav-button').forEach(button => {
+    button.addEventListener('click', async () => {
+        // Actualizar botones activos
+        document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+
+        // Ocultar todas las secciones
+        hideAllSections();
+
+        const section = button.dataset.section;
+
+        if (section === 'reference') {
+            const category = button.dataset.category;
+            await loadReference(category);
+        } else if (section === 'encounter') {
+            showSection('encounter-section');
+        } else if (section === 'quick-npc') {
+            showSection('quick-npc-section');
+        } else if (section === 'improvisation') {
+            const type = button.dataset.type;
+            await loadImprovisation(type);
+        }
+    });
+});
+
+function hideAllSections() {
+    document.getElementById('welcome-section').classList.add('hidden');
+    document.getElementById('reference-section').classList.add('hidden');
+    document.getElementById('encounter-section').classList.add('hidden');
+    document.getElementById('quick-npc-section').classList.add('hidden');
+    document.getElementById('improvisation-section').classList.add('hidden');
+}
+
+function showSection(sectionId) {
+    document.getElementById(sectionId).classList.remove('hidden');
+}
+
+// Referencias
+async function loadReference(category) {
+    const section = document.getElementById('reference-section');
+    const content = document.getElementById('reference-content');
+    
+    section.classList.remove('hidden');
+    section.querySelector('.loader').classList.remove('hidden');
+    content.innerHTML = '';
+
+    try {
+        const response = await fetch(`${API_BASE}/reference`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ category })
+        });
+
+        const data = await response.json();
+        
+        section.querySelector('.loader').classList.add('hidden');
+
+        if (data.error) {
+            content.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+            return;
+        }
+
+        displayReference(data, content);
+    } catch (error) {
+        section.querySelector('.loader').classList.add('hidden');
+        content.innerHTML = `<p style="color: red;">Error al cargar la información: ${error.message}</p>`;
+    }
+}
+
+function displayReference(data, container) {
+    let html = `<h1 class="section-title">📖 ${data.titulo}</h1>`;
+    
+    if (data.descripcion) {
+        html += `<p style="font-size: 1.1rem; color: #555; margin-bottom: 25px;">${data.descripcion}</p>`;
+    }
+
+    if (data.items && data.items.length > 0) {
+        data.items.forEach(item => {
+            html += `
+                <div class="reference-item">
+                    <h4>${item.nombre}</h4>
+                    <p>${item.descripcion}</p>
+                    ${item.mecanica ? `<div class="mecanica"><strong>Mecánica:</strong> ${item.mecanica}</div>` : ''}
+                    ${item.ejemplo ? `<div class="ejemplo"><strong>Ejemplo:</strong> ${item.ejemplo}</div>` : ''}
+                </div>
+            `;
+        });
+    }
+
+    if (data.notas_importantes && data.notas_importantes.length > 0) {
+        html += `<div class="notes-box">
+            <h4>📌 Notas Importantes</h4>
+            <ul>
+                ${data.notas_importantes.map(nota => `<li>${nota}</li>`).join('')}
+            </ul>
+        </div>`;
+    }
+
+    if (data.cambios_2024) {
+        html += `<div class="changes-2024">
+            <h4>🆕 Cambios en D&D 2024</h4>
+            <p>${data.cambios_2024}</p>
+        </div>`;
+    }
+
+    container.innerHTML = html;
+}
+
+// Encuentros
+document.getElementById('btn-generate-encounter')?.addEventListener('click', async () => {
+    const partyLevel = parseInt(document.getElementById('party-level').value);
+    const terrain = document.getElementById('terrain').value;
+    const difficulty = document.getElementById('difficulty').value;
+
+    const loader = document.getElementById('encounter-loader');
+    const content = document.getElementById('encounter-content');
+
+    loader.classList.remove('hidden');
+    content.innerHTML = '';
+
+    try {
+        const response = await fetch(`${API_BASE}/encounter`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ party_level: partyLevel, terrain, difficulty })
+        });
+
+        const data = await response.json();
+        loader.classList.add('hidden');
+
+        if (data.error) {
+            content.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+            return;
+        }
+
+        displayEncounter(data, content);
+    } catch (error) {
+        loader.classList.add('hidden');
+        content.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+    }
+});
+
+function displayEncounter(data, container) {
+    let html = `
+        <div class="encounter-card">
+            <h2 style="margin-top: 0; color: var(--primary);">${data.titulo}</h2>
+            <p style="font-size: 1.1rem; margin: 15px 0;">${data.descripcion}</p>
+            
+            <h3>👹 Enemigos</h3>
+            <div class="enemy-list">
+    `;
+
+    data.enemigos.forEach(enemy => {
+        html += `
+            <div class="enemy-item">
+                <div>
+                    <strong>${enemy.cantidad}x ${enemy.nombre}</strong> (CR ${enemy.cr})
+                    ${enemy.nota ? `<br><small style="color: #666;">${enemy.nota}</small>` : ''}
+                </div>
+            </div>
+        `;
+    });
+
+    html += `
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px;">
+                    <strong>XP Total:</strong> ${data.xp_total}
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px;">
+                    <strong>Dificultad Real:</strong> ${data.dificultad_real}
+                </div>
+            </div>
+
+            ${data.terreno_ventajas ? `
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <strong>🌲 Ventajas del Terreno:</strong>
+                    <p style="margin: 5px 0 0 0;">${data.terreno_ventajas}</p>
+                </div>
+            ` : ''}
+
+            ${data.objetivo_encuentro ? `
+                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <strong>🎯 Objetivo:</strong>
+                    <p style="margin: 5px 0 0 0;">${data.objetivo_encuentro}</p>
+                </div>
+            ` : ''}
+
+            ${data.recompensas_sugeridas ? `
+                <div style="background: #f3e5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <strong>💰 Recompensas Sugeridas:</strong>
+                    <p style="margin: 5px 0 0 0;">${data.recompensas_sugeridas}</p>
+                </div>
+            ` : ''}
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+// NPCs rápidos
+document.getElementById('btn-generate-npc')?.addEventListener('click', async () => {
+    const context = document.getElementById('npc-context').value;
+
+    const loader = document.getElementById('npc-loader');
+    const content = document.getElementById('npc-content');
+
+    loader.classList.remove('hidden');
+    content.innerHTML = '';
+
+    try {
+        const response = await fetch(`${API_BASE}/quick-npc`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ context })
+        });
+
+        const data = await response.json();
+        loader.classList.add('hidden');
+
+        if (data.error) {
+            content.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+            return;
+        }
+
+        displayNPC(data, content);
+    } catch (error) {
+        loader.classList.add('hidden');
+        content.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+    }
+});
+
+function displayNPC(data, container) {
+    let html = `
+        <div class="quick-npc-card">
+            <h2 style="margin-top: 0;">${data.nombre}</h2>
+            <p style="font-size: 1.1rem; margin: 10px 0;"><strong>👤 Aspecto:</strong> ${data.aspecto}</p>
+            <p><strong>🧠 Personalidad:</strong> ${data.personalidad}</p>
+            <p><strong>🎯 Motivación:</strong> ${data.motivacion}</p>
+            <p><strong>🤫 Secreto:</strong> ${data.secreto}</p>
+            <p><strong>🗣️ Voz:</strong> ${data.voz}</p>
+            
+            ${data.stats_rapidas ? `
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid rgba(255,255,255,0.3);">
+                    <h4>Stats Rápidas</h4>
+                    <span class="npc-stat">CA: ${data.stats_rapidas.ca}</span>
+                    <span class="npc-stat">HP: ${data.stats_rapidas.hp}</span>
+                    ${data.stats_rapidas.modificadores_clave ? 
+                        `<span class="npc-stat">${data.stats_rapidas.modificadores_clave}</span>` : ''}
+                </div>
+            ` : ''}
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+// Improvisación
+async function loadImprovisation(type) {
+    const section = document.getElementById('improvisation-section');
+    const content = document.getElementById('improvisation-content');
+    
+    section.classList.remove('hidden');
+    section.querySelector('.loader').classList.remove('hidden');
+    content.innerHTML = '';
+
+    try {
+        const response = await fetch(`${API_BASE}/improvisation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt_type: type })
+        });
+
+        const data = await response.json();
+        
+        section.querySelector('.loader').classList.add('hidden');
+
+        if (data.error) {
+            content.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+            return;
+        }
+
+        displayImprovisation(data, content);
+    } catch (error) {
+        section.querySelector('.loader').classList.add('hidden');
+        content.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+    }
+}
+
+function displayImprovisation(data, container) {
+    let html = `<h1 class="section-title">💡 ${data.tipo}</h1>`;
+
+    if (data.opciones && data.opciones.length > 0) {
+        html += `<div class="improv-list">`;
+        data.opciones.forEach((opcion, index) => {
+            html += `
+                <div class="improv-item">
+                    <strong>${index + 1}.</strong> ${opcion}
+                </div>
+            `;
+        });
+        html += `</div>`;
+    }
+
+    if (data.consejos && data.consejos.length > 0) {
+        html += `
+            <div class="notes-box" style="margin-top: 25px;">
+                <h4>💡 Consejos</h4>
+                <ul>
+                    ${data.consejos.map(consejo => `<li>${consejo}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+
+    if (data.ejemplo) {
+        html += `
+            <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin-top: 20px; border-left: 4px solid #2196f3;">
+                <h4 style="margin-top: 0; color: #1976d2;">📝 Ejemplo de Uso</h4>
+                <p style="margin: 0;">${data.ejemplo}</p>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+}
+</script>
+</body>
+</html>

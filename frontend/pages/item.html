@@ -2,6 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=MedievalSharp&display=swap" rel="stylesheet">
     <title>Generador de Objetos</title>
     <link rel="stylesheet" href="../css/styles.css">
     <style>
@@ -20,7 +23,7 @@
 </head>
 <body>
     <header>
-        <div class="brand">⚔️ Forja Arcana</div>
+        <div class="brand">⚔️ Herreria de Fingolin</div>
         <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
     </header>
 
@@ -38,6 +41,22 @@
                 <option value="Raro">Raro</option>
                 <option value="Muy Raro">Muy Raro</option>
                 <option value="Legendario">Legendario</option>
+            </select>
+            <label>Clase Sugerida</label>
+            <select id="itemClass">
+                <option value="">Cualquier clase</option>
+                <option value="Bárbaro">Bárbaro</option>
+                <option value="Bardo">Bardo</option>
+                <option value="Clérigo">Clérigo</option>
+                <option value="Druida">Druida</option>
+                <option value="Guerrero">Guerrero</option>
+                <option value="Monje">Monje</option>
+                <option value="Paladín">Paladín</option>
+                <option value="Ranger">Ranger</option>
+                <option value="Pícaro">Pícaro</option>
+                <option value="Hechicero">Hechicero</option>
+                <option value="Brujo">Brujo</option>
+                <option value="Mago">Mago</option>
             </select>
             <div style="margin-top:10px;">
                 <label><input type="checkbox" id="itemAttunement" style="width:auto;"> Requiere Sintonización</label>
@@ -69,6 +88,9 @@
 
                 <label>Mecánicas / Efectos</label>
                 <textarea id="editMech" rows="3" style="background:#f4ecf7; color:#333;"></textarea>
+
+                <label>Clase Sugerida</label>
+                <input type="text" id="editClass" style="background:#f4ecf7; color:#333;">
 
                 <div class="editor-actions">
                     <button id="btnSaveChanges" style="background:#27ae60; color:white; border:none; padding:10px; flex:1; cursor:pointer;">💾 Guardar</button>

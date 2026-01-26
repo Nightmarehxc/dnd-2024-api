@@ -32,11 +32,11 @@ els.btnGen.addEventListener('click', async () => {
         if (data.error) throw new Error(data.error);
 
         currentData = data;
-        renderDream(data);
+        renderDreamContent(data);
         els.btnExp.style.display = 'block';
 
         if (typeof addToHistory === 'function') {
-            addToHistory({ ...data, nombre: `Sueño (${els.tone.value})` });
+            addToHistory({ ...data, nombre: `Sueño (${els.tone.value})` }, 'dreams');
         }
 
     } catch (err) {
@@ -47,8 +47,14 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-function renderDream(data) {
+// Función interna para renderizar
+function renderDreamContent(data) {
     const s = (val) => val || '---';
+
+    // Support both English and Spanish keys for backward compatibility
+    const visions = data.visions || data.imagenes;
+    const sensations = data.sensations || data.sensaciones;
+    const meaning = data.meaning || data.significado;
 
     els.content.innerHTML = `
         <div style="background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); padding:25px; border-radius:8px; border:1px solid #d1c4e9; box-shadow:0 4px 10px rgba(103, 58, 183, 0.1);">
@@ -56,17 +62,17 @@ function renderDream(data) {
 
             <div style="background:rgba(255,255,255,0.7); padding:15px; border-radius:5px; margin-bottom:15px;">
                 <h4 style="margin:0 0 5px 0; color:#512da8;">👁️ Visiones</h4>
-                <p style="margin:0; font-style:italic;">${s(data.imagenes)}</p>
+                <p style="margin:0; font-style:italic;">${s(visions)}</p>
             </div>
 
             <div style="background:rgba(255,255,255,0.7); padding:15px; border-radius:5px; margin-bottom:20px;">
                 <h4 style="margin:0 0 5px 0; color:#512da8;">🧠 Sensaciones</h4>
-                <p style="margin:0;">${s(data.sensaciones)}</p>
+                <p style="margin:0;">${s(sensations)}</p>
             </div>
 
             <div style="border-left:4px solid #673ab7; padding:10px 15px; background:#ede7f6; color:#4527a0;">
                 <strong>🔮 Significado Oculto (DM):</strong><br>
-                ${s(data.significado)}
+                ${s(meaning)}
             </div>
         </div>
     `;
@@ -74,10 +80,20 @@ function renderDream(data) {
 
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
-    let text = `--- SUEÑO ---\n VISUAL: ${currentData.imagenes}\n SENSACIÓN: ${currentData.sensaciones}\n\n SIGNIFICADO: ${currentData.significado}`;
+    const visions = currentData.visions || currentData.imagenes;
+    const sensations = currentData.sensations || currentData.sensaciones;
+    const meaning = currentData.meaning || currentData.significado;
+    
+    let text = `--- SUEÑO ---\n VISUAL: ${visions}\n SENSACIÓN: ${sensations}\n\n SIGNIFICADO: ${meaning}`;
     const blob = new Blob([text], {type : 'text/plain'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `Sueño_${Date.now()}.txt`;
     a.click();
 });
+
+// Global renderer para el historial - SIN recursión
+window.renderDream = function(data) {
+    currentData = data;
+    renderDreamContent(data);
+};

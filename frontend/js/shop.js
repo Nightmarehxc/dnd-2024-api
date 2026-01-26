@@ -63,7 +63,7 @@ els.btnGen.addEventListener('click', async () => {
         els.btnExp.style.display = 'block';
 
         if (typeof addToHistory === 'function') {
-            addToHistory({ ...data, nombre: data.shop_name, tipo_item: "Tienda" }, 'shop');
+            addToHistory({ ...data, nombre: data.shop_name, tipo_item: "Tienda" }, 'shops');
         }
 
     } catch (err) {
@@ -107,7 +107,7 @@ els.btnSave.addEventListener('click', () => {
         if (currentData._db_id && typeof updateHistoryItem === 'function') {
             updateHistoryItem(currentData._db_id, currentData);
         } else if (typeof addToHistory === 'function') {
-            addToHistory(currentData, 'shop');
+            addToHistory(currentData, 'shops');
         }
 
         alert("✅ Inventario actualizado.");
@@ -115,8 +115,20 @@ els.btnSave.addEventListener('click', () => {
 });
 
 // --- RENDERIZADO ---
-function renderShop(data) {
+window.renderShop = function(data) {
+    currentData = data;  // Sincronizar con local
     const s = (val) => val || '---';
+
+    // Support both English and Spanish keys for backward compatibility
+    const shopName = data.shop_name || data.nombre || data.name;
+    const shopType = data.shop_type || data.tipo || data.type;
+    const location = data.location || data.location;
+    const description = data.description || data.descripcion;
+    const inventory = data.inventory || data.inventory;
+    const shopkeeperName = data.shopkeeper_name || data.shopkeeper?.name || data.tendero_nombre || '---';
+    const shopkeeperRace = data.shopkeeper_race || data.shopkeeper?.race || data.raza_tendero || '---';
+    const shopkeeperPersonality = data.shopkeeper_personality || data.shopkeeper?.personality || data.personalidad_tendero || '---';
+    const specialFeature = data.special_feature || data.special_feature;
 
     // Encabezado Inventario
     const inventoryHeader = `
@@ -128,30 +140,30 @@ function renderShop(data) {
     `;
 
     // Lista Items
-    const inventoryHtml = (data.inventory || []).map(i => `
+    const inventoryHtml = (inventory || []).map(i => `
         <div class="item-row">
             <div>
-                <span class="item-name">${i.item}</span>
-                <span class="item-desc">${i.desc}</span>
+                <span class="item-name">${(i.name || i.item)}</span>
+                <span class="item-desc">${(i.description || i.desc)}</span>
             </div>
-            <div class="item-price">${i.price}</div>
-            <div class="item-stock">${i.stock}</div>
+            <div class="item-price">${(i.price || i.precio)}</div>
+            <div class="item-stock">${(i.stock || i.stock)}</div>
         </div>
     `).join('');
 
-    const locationInfo = data.location ? `<br><small>📍 ${data.location}</small>` : '';
+    const locationInfo = location ? `<br><small>📍 ${location}</small>` : '';
 
     els.content.innerHTML = `
         <div style="text-align:center; border-bottom:2px solid #f39c12; padding-bottom:15px; margin-bottom:20px;">
-            <h1 style="color:#e67e22; margin:0;">${s(data.shop_name)}</h1>
-            <p style="font-style:italic; color:#7f8c8d;">${s(data.shop_type)} ${locationInfo}</p>
-            <p>${s(data.description)}</p>
+            <h1 style="color:#e67e22; margin:0;">${s(shopName)}</h1>
+            <p style="font-style:italic; color:#7f8c8d;">${s(shopType)} ${locationInfo}</p>
+            <p>${s(description)}</p>
         </div>
 
         <div style="background:#fdf2e9; padding:15px; border-radius:5px; margin-bottom:20px;">
-            <h3 style="color:#d35400; margin-top:0;">🧑‍💼 ${s(data.shopkeeper?.name)}</h3>
-            <p><strong>Raza:</strong> ${s(data.shopkeeper?.race)} | <strong>Rasgos:</strong> ${s(data.shopkeeper?.traits)}</p>
-            <p style="font-size:0.9em; color:#c0392b;"><strong>✨ Especialidad:</strong> ${s(data.special_feature)}</p>
+            <h3 style="color:#d35400; margin-top:0;">🧑‍💼 ${s(shopkeeperName)}</h3>
+            <p><strong>Raza:</strong> ${s(shopkeeperRace)} | <strong>Personalidad:</strong> ${s(shopkeeperPersonality)}</p>
+            <p style="font-size:0.9em; color:#c0392b;"><strong>✨ Especialidad:</strong> ${s(specialFeature)}</p>
         </div>
 
         <div>
@@ -166,20 +178,31 @@ function renderShop(data) {
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
     
-    let content = `<h2>${currentData.shop_name}</h2>`;
-    content += `<p><i>${currentData.shop_type} - ${currentData.location || ''}</i></p>`;
-    content += `<p>${currentData.description}</p><hr>`;
-    content += `<p><b>Tendero:</b> ${currentData.shopkeeper.name} (${currentData.shopkeeper.race})</p>`;
-    content += `<p><b>Especial:</b> ${currentData.special_feature}</p>`;
+    const shopName = currentData.shop_name || currentData.nombre || currentData.name;
+    const shopType = currentData.shop_type || currentData.tipo || currentData.type;
+    const location = currentData.location || currentData.location;
+    const description = currentData.description || currentData.descripcion;
+    const inventory = currentData.inventory || currentData.inventory;
+    const shopkeeperName = currentData.shopkeeper_name || currentData.shopkeeper?.name || currentData.tendero_nombre || '---';
+    const shopkeeperRace = currentData.shopkeeper_race || currentData.shopkeeper?.race || currentData.raza_tendero || '---';
+    const shopkeeperPersonality = currentData.shopkeeper_personality || currentData.shopkeeper?.personality || currentData.personalidad_tendero || '---';
+    const specialFeature = currentData.special_feature || currentData.special_feature;
+    
+    let content = `<h2>${shopName}</h2>`;
+    content += `<p><i>${shopType} - ${location || ''}</i></p>`;
+    content += `<p>${description}</p><hr>`;
+    content += `<p><b>Tendero:</b> ${shopkeeperName} (${shopkeeperRace})</p>`;
+    content += `<p><b>Personalidad:</b> ${shopkeeperPersonality}</p>`;
+    content += `<p><b>Especial:</b> ${specialFeature}</p>`;
     
     content += `<h3>Inventario</h3><table><tr><th>Objeto</th><th>Precio</th><th>Stock</th></tr>`;
-    (currentData.inventory || []).forEach(i => {
-        content += `<tr><td><b>${i.item}</b><br><i>${i.desc}</i></td><td>${i.price}</td><td>${i.stock}</td></tr>`;
+    (inventory || []).forEach(i => {
+        content += `<tr><td><b>${(i.name || i.item)}</b><br><i>${(i.description || i.desc)}</i></td><td>${(i.price || i.precio)}</td><td>${(i.stock || i.stock)}</td></tr>`;
     });
     content += `</table>`;
 
     const json = {
-        name: currentData.shop_name,
+        name: shopName,
         type: "journal",
         pages: [{ name: "Libro de Cuentas", type: "text", text: { content: content, format: 1 } }]
     };
@@ -187,6 +210,6 @@ els.btnExp.addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Tienda_${currentData.shop_name.replace(/\s+/g, '_')}.json`;
+    a.download = `Tienda_${shopName.replace(/\s+/g, '_')}.json`;
     a.click();
 });

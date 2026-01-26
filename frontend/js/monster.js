@@ -67,7 +67,7 @@ els.btnGen.addEventListener('click', async () => {
         window.renderMonster(data);
 
         // Guardar Nuevo
-        if (typeof addToHistory === 'function') addToHistory(currentData, 'monster');
+        if (typeof addToHistory === 'function') addToHistory(currentData, 'monsters');
 
     } catch (err) {
         els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
@@ -84,7 +84,7 @@ els.btnEdit.addEventListener('click', () => {
     // Rellenar datos
     els.eName.value = currentData.name || "";
     els.eType.value = (currentData.type || "") + (currentData.alignment ? `, ${currentData.alignment}` : "");
-    els.eAC.value = parseInt(currentData.ac) || 10;
+    els.eAC.value = parseInt(currentData.ca) || 10;
     els.eHP.value = currentData.hp || "";
     els.eSpeed.value = currentData.speed || "";
     els.eCR.value = currentData.cr || "";
@@ -112,7 +112,7 @@ els.btnSave.addEventListener('click', () => {
         name: els.eName.value,
         type: typeParts[0]?.trim() || "Monstruo",
         alignment: typeParts[1]?.trim() || "Neutral",
-        ac: els.eAC.value,
+        ca: els.eAC.value,
         hp: els.eHP.value,
         speed: els.eSpeed.value,
         cr: els.eCR.value,
@@ -133,12 +133,13 @@ els.btnSave.addEventListener('click', () => {
     if (currentData._db_id && typeof updateHistoryItem === 'function') {
         updateHistoryItem(currentData._db_id, currentData);
     } else if (typeof addToHistory === 'function') {
-        addToHistory(currentData, 'monster');
+        addToHistory(currentData, 'monsters');
     }
 });
 
 // --- RENDERIZADO GLOBAL ---
 window.renderMonster = function(data) {
+    currentData = data;  // Sincronizar con local
     const s = (val) => val || '---';
     const stats = data.stats || {};
     const getMod = (sc) => { const m = Math.floor((sc-10)/2); return m>=0?`+${m}`:m; };
@@ -150,14 +151,28 @@ window.renderMonster = function(data) {
     });
 
     const traitsHtml = (data.traits||[]).map(t => `<p><strong>${t.name}.</strong> ${t.desc}</p>`).join('');
-    const actionsHtml = (data.actions||[]).map(a => `<p class="stat-line"><span class="action-name">${a.name}.</span> ${a.desc}</p>`).join('');
+    const actionsHtml = (data.actions||[]).map(a => {
+        // Handle both formats: {name, desc} and {name, attack_bonus, damage, damage_type}
+        if (a.desc) {
+            return `<p class="stat-line"><span class="action-name">${a.name}.</span> ${a.desc}</p>`;
+        } else if (a.attack_bonus || a.damage || a.damage_type) {
+            // Build description from attack components
+            let actionDesc = '';
+            if (a.attack_bonus) actionDesc += `+${a.attack_bonus} al golpe. `;
+            if (a.damage) actionDesc += `${a.damage} de daño`;
+            if (a.damage_type) actionDesc += ` (${a.damage_type})`;
+            return `<p class="stat-line"><span class="action-name">${a.name}.</span> ${actionDesc}</p>`;
+        } else {
+            return `<p class="stat-line"><span class="action-name">${a.name}.</span> ---</p>`;
+        }
+    }).join('');
 
     els.content.innerHTML = `
         <div class="stat-block">
             <h2>${s(data.name)}</h2>
             <div style="font-style:italic;">${s(data.type)}, ${s(data.alignment)}</div>
             <div class="red-line"></div>
-            <p class="stat-line"><strong>AC</strong> ${s(data.ac)}</p>
+            <p class="stat-line"><strong>AC</strong> ${s(data.ca)}</p>
             <p class="stat-line"><strong>HP</strong> ${s(data.hp)}</p>
             <p class="stat-line"><strong>Velocidad</strong> ${s(data.speed)}</p>
             <div class="red-line"></div>

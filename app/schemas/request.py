@@ -112,7 +112,9 @@ class DungeonRequestSchema(Schema):
 
 class LibrarianRequestSchema(Schema):
     topic = fields.String(required=True, validate=validate.Length(min=3))  # Tema del libro
-    type = fields.String(required=False, load_default="Libro Antiguo")     # Libro, Pergamino, Carta...
+    book_type = fields.String(required=False, load_default="Libro Antiguo")     # Libro, Pergamino, Carta...
+    tone = fields.String(required=False, load_default="Académico")  # Tono del libro
+    author_style = fields.String(required=False, load_default="")
 
 class DreamRequestSchema(Schema):
     context = fields.String(required=True)  # Contexto del personaje o situación
@@ -144,3 +146,7 @@ class InnRequestSchema(Schema):
     )
     theme = fields.String(required=False, load_default="Fantasía Genérica")
     city = fields.String(required=False, load_default="") # NUEVO: Ciudad vinculada
+
+class AtmosphereRequestSchema(Schema):
+    place = fields.String(required=True, validate=validate.Length(min=3, max=200))
+    context = fields.String(required=False, load_default="")

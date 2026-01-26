@@ -28,7 +28,7 @@ const els = {
     editConflict: document.getElementById('editConflict')
 };
 
-// --- GENERAR CIUDAD ---
+// === GENERAR CIUDAD ===
 els.btnGen.addEventListener('click', async () => {
     if (!els.size.value) return alert("Selecciona un tamaño.");
 
@@ -53,6 +53,8 @@ els.btnGen.addEventListener('click', async () => {
             })
         });
 
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
@@ -64,44 +66,56 @@ els.btnGen.addEventListener('click', async () => {
 
         // GUARDADO AUTOMÁTICO EN HISTORIAL
         if (typeof addToHistory === 'function') {
-            await addToHistory({ ...data, nombre: data.nombre, tipo_item: "Ciudad" });
+            const cityName = data.name || data.nombre;
+            await addToHistory({ 
+                ...data, 
+                name: cityName, 
+                type_item: "City" 
+            }, 'cities');
 
             // Guardar Negocios Vinculados
             if (data.linked_data) {
                 if (data.linked_data.inn && !data.linked_data.inn.error) {
                     const inn = data.linked_data.inn;
-                    await addToHistory({ ...inn, nombre: inn.nombre }, 'inn');
+                    const innName = inn.name || inn.nombre;
+                    await addToHistory({ 
+                        ...inn, 
+                        name: innName 
+                    }, 'inns');
                 }
                 if (data.linked_data.shop && !data.linked_data.shop.error) {
                     const shop = data.linked_data.shop;
-                    await addToHistory({ ...shop, nombre: shop.shop_name }, 'shop');
+                    const shopName = shop.name || shop.shop_name;
+                    await addToHistory({ 
+                        ...shop, 
+                        name: shopName 
+                    }, 'shops');
                 }
             }
         }
 
     } catch (err) {
-        els.content.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
+        els.content.innerHTML = `<p style="color:red; font-weight:bold;">❌ Error: ${err.message}</p>`;
     } finally {
         els.loader.style.display = 'none';
         els.btnGen.disabled = false;
     }
 });
 
-// --- FUNCIONALIDAD DE EDICIÓN (FORMULARIO) ---
+// === FUNCIONALIDAD DE EDICIÓN ===
 
-// 1. Abrir Editor (Poblar Formulario)
+// 1. Abrir Editor
 els.btnEdit.addEventListener('click', () => {
-    if(!currentData) return;
+    if (!currentData) return;
 
-    // Rellenar inputs con datos actuales
-    els.editName.value = currentData.nombre || "";
-    els.editTitle.value = currentData.titulo || "";
-    els.editPop.value = currentData.poblacion || "";
-    els.editGov.value = currentData.gobierno || "";
-    els.editAtmos.value = currentData.clima_atmosfera || "";
-    els.editConflict.value = currentData.conflicto_actual || "";
+    // Rellenar inputs con datos actuales (English keys con fallback a Spanish)
+    els.editName.value = currentData.name || currentData.nombre || "";
+    els.editTitle.value = currentData.subtitle || currentData.titulo || "";
+    els.editPop.value = currentData.population || currentData.poblacion || "";
+    els.editGov.value = currentData.government || currentData.gobierno || "";
+    els.editAtmos.value = currentData.atmosphere || currentData.clima_atmosfera || "";
+    els.editConflict.value = currentData.current_conflict || currentData.conflicto_actual || "";
 
-    // Mostrar formulario, ocultar vista de lectura
     els.content.style.display = 'none';
     els.editorContainer.style.display = 'block';
 });
@@ -115,33 +129,29 @@ els.btnCancel.addEventListener('click', () => {
 // 3. Guardar Cambios
 els.btnSave.addEventListener('click', () => {
     try {
-        // Recogemos datos del formulario
         const newData = {
-            ...currentData, // Mantenemos datos viejos (como _db_id)
-            nombre: els.editName.value,
-            titulo: els.editTitle.value,
-            poblacion: els.editPop.value,
-            gobierno: els.editGov.value,
-            clima_atmosfera: els.editAtmos.value,
-            conflicto_actual: els.editConflict.value
+            ...currentData,
+            name: els.editName.value,
+            subtitle: els.editTitle.value,
+            population: els.editPop.value,
+            government: els.editGov.value,
+            atmosphere: els.editAtmos.value,
+            current_conflict: els.editConflict.value
         };
 
-        if (!newData.nombre) throw new Error("La ciudad debe tener nombre.");
+        if (!newData.name) throw new Error("La ciudad debe tener nombre.");
 
         currentData = newData;
         renderCity(currentData);
 
-        // Ocultar editor
         els.editorContainer.style.display = 'none';
         els.content.style.display = 'block';
 
-        // --- LÓGICA DE ACTUALIZACIÓN INTELIGENTE ---
+        // Actualizar en historial
         if (currentData._db_id && typeof updateHistoryItem === 'function') {
-            // Si tiene ID, actualizamos el registro existente
             updateHistoryItem(currentData._db_id, currentData);
         } else if (typeof addToHistory === 'function') {
-            // Si es nuevo (recién generado y editado antes de guardar), creamos
-            addToHistory(currentData, 'city');
+            addToHistory(currentData, 'cities');
         }
 
         alert("✅ Ciudad actualizada.");
@@ -152,83 +162,133 @@ els.btnSave.addEventListener('click', () => {
     }
 });
 
-// --- RENDERIZADO ---
+// === RENDERIZADO DE CIUDAD ===
 function renderCity(data) {
     const s = (val) => val || '---';
 
-    const distritosHtml = (data.distritos || []).map(d => `
-        <li style="margin-bottom:8px;"><strong>${d.nombre}:</strong> ${d.desc}</li>
-    `).join('');
+    // Soportar ambas claves (English y Spanish)
+    const name = data.name || data.nombre;
+    const subtitle = data.subtitle || data.titulo;
+    const population = data.population || data.poblacion;
+    const government = data.government || data.gobierno;
+    const atmosphere = data.atmosphere || data.clima_atmosfera;
+    const currentConflict = data.current_conflict || data.conflicto_actual;
+    const districts = data.districts || data.distritos || [];
 
+    // Construir HTML de distritos
+    const districtHtml = districts.map(d => {
+        const dName = d.name || d.nombre;
+        const dDesc = d.description || d.desc;
+        return `<li><strong>${s(dName)}:</strong> ${s(dDesc)}</li>`;
+    }).join('');
+
+    // Construir HTML de comercios vinculados
     let linkedHtml = '';
     if (data.linked_data) {
         if (data.linked_data.inn && !data.linked_data.inn.error) {
+            const innName = data.linked_data.inn.name || data.linked_data.inn.nombre;
             linkedHtml += `
                 <div style="background:#fdf2e9; padding:10px; border:1px solid #e67e22; border-radius:5px; margin-top:10px; cursor:pointer;" onclick="window.location.href='inn.html'">
-                    <strong>🍺 Posada:</strong> ${data.linked_data.inn.nombre}<br>
+                    <strong>🍺 Posada:</strong> ${s(innName)}<br>
                     <small>👉 Ir a Posadas para ver detalles</small>
                 </div>`;
         }
         if (data.linked_data.shop && !data.linked_data.shop.error) {
+            const shopName = data.linked_data.shop.name || data.linked_data.shop.shop_name;
             linkedHtml += `
                 <div style="background:#eaf2f8; padding:10px; border:1px solid #3498db; border-radius:5px; margin-top:5px; cursor:pointer;" onclick="window.location.href='shop.html'">
-                    <strong>💰 Tienda:</strong> ${data.linked_data.shop.shop_name}<br>
+                    <strong>💰 Tienda:</strong> ${s(shopName)}<br>
                     <small>👉 Ir a Tiendas para ver inventario</small>
                 </div>`;
         }
     }
 
+    // HTML final de la ciudad
     els.content.innerHTML = `
         <div style="text-align:center; border-bottom:2px solid #2c3e50; margin-bottom:20px; padding-bottom:10px;">
-            <h1 style="color:#2c3e50; margin:0;">${s(data.nombre)}</h1>
-            <h3 style="color:#7f8c8d; margin-top:5px;">${s(data.titulo)}</h3>
-            <p><strong>Población:</strong> ${s(data.poblacion)}</p>
+            <h1 style="color:#2c3e50; margin:0;">${s(name)}</h1>
+            <h3 style="color:#7f8c8d; margin-top:5px;">${s(subtitle)}</h3>
+            <p><strong>Población:</strong> ${s(population)}</p>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
             <div>
-                <h4 style="color:#c0392b; border-bottom:1px solid #ddd;">⚔️ Conflicto</h4>
-                <p>${s(data.conflicto_actual)}</p>
+                <h4 style="color:#c0392b; border-bottom:1px solid #ddd;">⚔️ Conflicto Actual</h4>
+                <p>${s(currentConflict)}</p>
                 <h4 style="color:#27ae60; border-bottom:1px solid #ddd;">🍃 Atmósfera</h4>
-                <p>${s(data.clima_atmosfera)}</p>
+                <p>${s(atmosphere)}</p>
                 <h4 style="color:#8e44ad; border-bottom:1px solid #ddd;">👑 Gobierno</h4>
-                <p>${s(data.gobierno)}</p>
+                <p>${s(government)}</p>
             </div>
             <div>
                 <h4 style="color:#2980b9; border-bottom:1px solid #ddd;">🏙️ Distritos</h4>
-                <ul>${distritosHtml}</ul>
-                <h4 style="color:#d35400; border-bottom:1px solid #ddd;">📍 Negocios Generados</h4>
-                ${linkedHtml || '<p style="color:#999; font-style:italic;">Sin negocios destacados.</p>'}
+                <ul>${districtHtml || '<li>---</li>'}</ul>
             </div>
         </div>
+
+        ${linkedHtml ? `
+        <div style="margin-top:20px; padding-top:20px; border-top:2px solid #ddd;">
+            <h4 style="color:#16a085; border-bottom:1px solid #ddd;">🎪 Comercios Locales</h4>
+            ${linkedHtml}
+        </div>
+        ` : ''}
     `;
 }
 
-// --- EXPORTAR ---
+// === EXPORTAR A JOURNAL ===
 els.btnExp.addEventListener('click', () => {
-    if(!currentData) return;
+    if (!currentData) return alert("No hay ciudad para exportar.");
 
-    let content = `<h1>${currentData.nombre}</h1><p><i>${currentData.titulo}</i></p>`;
-    content += `<h3>Atmósfera</h3><p>${currentData.clima_atmosfera}</p>`;
-    content += `<h3>Gobierno</h3><p>${currentData.gobierno}</p>`;
-    content += `<h3>Distritos</h3><ul>${(currentData.distritos || []).map(d => `<li><b>${d.nombre}:</b> ${d.desc}</li>`).join('')}</ul>`;
-    content += `<h3>Conflicto</h3><p>${currentData.conflicto_actual}</p>`;
+    const name = currentData.name || currentData.nombre;
+    const subtitle = currentData.subtitle || currentData.titulo;
+    const population = currentData.population || currentData.poblacion;
+    const government = currentData.government || currentData.gobierno;
+    const atmosphere = currentData.atmosphere || currentData.clima_atmosfera;
+    const currentConflict = currentData.current_conflict || currentData.conflicto_actual;
+    const districts = currentData.districts || currentData.distritos || [];
+
+    let content = `<h1>${name}</h1>`;
+    if (subtitle) content += `<p><em>${subtitle}</em></p>`;
+    if (population) content += `<h3>Población</h3><p>${population}</p>`;
+    if (government) content += `<h3>Gobierno</h3><p>${government}</p>`;
+    if (atmosphere) content += `<h3>Atmósfera</h3><p>${atmosphere}</p>`;
+    if (currentConflict) content += `<h3>Conflicto Actual</h3><p>${currentConflict}</p>`;
+
+    if (districts.length > 0) {
+        content += `<h3>Distritos</h3><ul>`;
+        districts.forEach(d => {
+            const dName = d.name || d.nombre;
+            const dDesc = d.description || d.desc;
+            content += `<li><b>${dName}:</b> ${dDesc}</li>`;
+        });
+        content += `</ul>`;
+    }
 
     if (currentData.linked_data) {
         content += `<h3>Comercios Locales</h3>`;
-        if (currentData.linked_data.inn) content += `<p><b>Posada:</b> ${currentData.linked_data.inn.nombre} (Ver entrada propia)</p>`;
-        if (currentData.linked_data.shop) content += `<p><b>Tienda:</b> ${currentData.linked_data.shop.shop_name} (Ver entrada propia)</p>`;
+        if (currentData.linked_data.inn && !currentData.linked_data.inn.error) {
+            const innName = currentData.linked_data.inn.name || currentData.linked_data.inn.nombre;
+            content += `<p><b>🍺 Posada:</b> ${innName}</p>`;
+        }
+        if (currentData.linked_data.shop && !currentData.linked_data.shop.error) {
+            const shopName = currentData.linked_data.shop.name || currentData.linked_data.shop.shop_name;
+            content += `<p><b>💰 Tienda:</b> ${shopName}</p>`;
+        }
     }
 
     const json = {
-        name: currentData.nombre,
+        name: name,
         type: "journal",
-        pages: [{ name: "Descripción General", type: "text", text: { content: content, format: 1 } }]
+        pages: [{ 
+            name: "Descripción General", 
+            type: "text", 
+            text: { content: content, format: 1 } 
+        }]
     };
 
-    const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
+    const blob = new Blob([JSON.stringify(json, null, 2)], {type: 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Ciudad_${currentData.nombre.replace(/\s+/g, '_')}.json`;
+    a.download = `Ciudad_${name.replace(/\s+/g, '_')}.json`;
     a.click();
 });
