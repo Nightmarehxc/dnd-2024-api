@@ -689,6 +689,210 @@ class Dream(BaseGenerated):
             'significado': self.significado
         }
 
+class Atmosphere(BaseGenerated):
+    """Descripciones sensoriales de lugares (El Ojo del Director)"""
+    __tablename__ = 'atmospheres'
+    
+    place = db.Column(db.String(200), nullable=False)  # Lugar descrito
+    context = db.Column(db.Text)  # Contexto adicional
+    sight = db.Column(db.Text)  # Descripción visual
+    sound = db.Column(db.Text)  # Descripción sonora
+    smell = db.Column(db.Text)  # Descripción olfativa
+    touch = db.Column(db.Text)  # Descripción táctil
+    atmosphere = db.Column(db.Text)  # Bloque completo para leer en voz alta
+
+    def get_data(self):
+        return {
+            'place': self.place,
+            'context': self.context,
+            'sight': self.sight,
+            'sound': self.sound,
+            'smell': self.smell,
+            'touch': self.touch,
+            'atmosphere': self.atmosphere
+        }
+
+# ============================================
+# BALUARTES (STRONGHOLD BUILDER)
+# ============================================
+
+# Tabla de Instalaciones Predefinidas
+class Facility(db.Model):
+    """Instalaciones disponibles para baluartes según nivel y reglas D&D 2024"""
+    __tablename__ = 'facilities'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    name_es = db.Column(db.String(100), nullable=False)  # Nombre en español
+    size = db.Column(db.String(20), nullable=False)  # Roomy, Vast
+    min_level = db.Column(db.Integer, nullable=False)  # Nivel mínimo requerido
+    order_type = db.Column(db.String(50))  # Empower, Research, Craft, etc
+    description = db.Column(db.Text)
+    description_es = db.Column(db.Text)
+    benefit = db.Column(db.Text)
+    benefit_es = db.Column(db.Text)
+    construction_cost = db.Column(db.Integer, default=1000)  # Coste en GP
+    construction_days = db.Column(db.Integer, default=7)  # Días de construcción
+    bp_generation = db.Column(db.String(20))  # "1d4", "2d6", etc - BP que genera
+    
+    # Relación con baluartes
+    stronghold_facilities = db.relationship('StrongholdFacility', back_populates='facility', cascade='all, delete-orphan')
+
+
+# Tabla Intermedia: Baluartes ↔ Instalaciones
+class StrongholdFacility(db.Model):
+    """Relación entre baluartes e instalaciones construidas"""
+    __tablename__ = 'stronghold_facilities'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    stronghold_id = db.Column(db.Integer, db.ForeignKey('strongholds.id', ondelete='CASCADE'), nullable=False)
+    facility_id = db.Column(db.Integer, db.ForeignKey('facilities.id'), nullable=False)
+    
+    # Estado de la instalación
+    status = db.Column(db.String(20), default='active')  # active, under_construction, damaged
+    construction_started_day = db.Column(db.Integer)  # Día en que empezó la construcción
+    construction_remaining_days = db.Column(db.Integer)  # Días restantes
+    
+    # Staff asignado (JSON)
+    assigned_staff = db.Column(db.JSON)  # Personal asignado a esta instalación
+    
+    # Sistema de órdenes
+    current_order = db.Column(db.String(50))  # Orden actual asignada (Craft, Research, etc.)
+    order_result = db.Column(db.JSON)  # Resultado de la última orden ejecutada
+    
+    # Relaciones
+    stronghold = db.relationship('Stronghold', back_populates='facilities')
+    facility = db.relationship('Facility', back_populates='stronghold_facilities')
+
+class Stronghold(BaseGenerated):
+    """Baluartes, castillos, torres y bases de operaciones"""
+    __tablename__ = 'strongholds'
+    
+    stronghold_type = db.Column(db.String(100), nullable=False)  # Castle, Wizard Tower, etc
+    level_requirement = db.Column(db.Integer)  # Nivel mínimo del personaje
+    location = db.Column(db.Text)  # Ubicación y descripción del terreno
+    
+    # Sistema de Puntos de Bastión (BP)
+    bastion_points = db.Column(db.Integer, default=0)  # BP acumulados
+    
+    # Costes y Mantenimiento
+    total_gold_cost = db.Column(db.Integer, default=0)
+    monthly_maintenance = db.Column(db.Integer, default=0)
+    
+    # Gestión temporal
+    current_day = db.Column(db.Integer, default=0)
+    last_bastion_turn_day = db.Column(db.Integer, default=0)  # Último día que se calcularon BP
+    
+    # Defensas
+    defense_score = db.Column(db.Integer, default=0)  # Puntuación de defensa
+    
+    # Datos complejos en JSON
+    staff = db.Column(db.JSON)  # Personal general del baluarte
+    events_history = db.Column(db.JSON)  # Historial de eventos
+    reputation = db.Column(db.JSON)  # Reputación y posición local
+    special_features = db.Column(db.JSON)  # Características especiales del baluarte
+    
+    # Relación con instalaciones
+    facilities = db.relationship('StrongholdFacility', back_populates='stronghold', cascade='all, delete-orphan')
+
+    def get_data(self):
+        # Obtener instalaciones activas
+        active_facilities = []
+        under_construction = []
+        
+        for sf in self.facilities:
+            facility_data = {
+                'id': sf.facility_id,
+                'sf_id': sf.id,  # ID de StrongholdFacility para asignar órdenes
+                'name': sf.facility.name,
+                'nombre': sf.facility.name_es,
+                'size': sf.facility.size,
+                'tamaño': sf.facility.size,
+                'order_type': sf.facility.order_type,
+                'tipo_orden': sf.facility.order_type,
+                'description': sf.facility.description,
+                'descripcion': sf.facility.description_es,
+                'benefit': sf.facility.benefit,
+                'beneficio': sf.facility.benefit_es,
+                'bp_generation': sf.facility.bp_generation,
+                'generacion_bp': sf.facility.bp_generation,
+                'status': sf.status,
+                'estado': sf.status,
+                'current_order': sf.current_order,
+                'orden_actual': sf.current_order,
+                'order_result': sf.order_result,
+                'resultado_orden': sf.order_result
+            }
+            
+            if sf.status == 'under_construction':
+                facility_data['construction_remaining_days'] = sf.construction_remaining_days
+                facility_data['dias_restantes'] = sf.construction_remaining_days
+                under_construction.append(facility_data)
+            else:
+                active_facilities.append(facility_data)
+        
+        return {
+            'name': self.name,
+            'nombre': self.name,
+            'type': self.stronghold_type,
+            'tipo': self.stronghold_type,
+            'level_requirement': self.level_requirement,
+            'nivel_requerido': self.level_requirement,
+            'location': self.location,
+            'ubicacion': self.location,
+            'ubicación': self.location,
+            'current_day': self.current_day or 0,
+            'dia_actual': self.current_day or 0,
+            'bastion_points': self.bastion_points or 0,
+            'puntos_bastion': self.bastion_points or 0,
+            'defense_score': self.defense_score or 0,
+            'puntuacion_defensa': self.defense_score or 0,
+            'total_cost': {
+                'gold': self.total_gold_cost,
+                'oro': self.total_gold_cost,
+                'monthly_maintenance': self.monthly_maintenance,
+                'mantenimiento_mensual': self.monthly_maintenance
+            },
+            'active_facilities': active_facilities,
+            'instalaciones_activas': active_facilities,
+            'under_construction': under_construction,
+            'en_construccion': under_construction,
+            'staff': self.staff or [],
+            'personal': self.staff or [],
+            'events_history': self.events_history or [],
+            'historial_eventos': self.events_history or [],
+            'reputation': self.reputation or {},
+            'reputacion': self.reputation or {},
+            'reputación': self.reputation or {}
+        }
+
+
+class Rule(BaseGenerated):
+    """Tabla para Reglas de D&D 2024"""
+    __tablename__ = 'rules'
+    
+    tema = db.Column(db.String(200), nullable=False)  # Tema principal
+    explicacion = db.Column(db.Text, nullable=False)  # Explicación de la regla
+    cambio_importante = db.Column(db.Text)  # Cambios respecto a 2014
+    ejemplo = db.Column(db.Text)  # Ejemplo de uso
+    pagina_ref = db.Column(db.String(100))  # Referencia de página
+
+    def get_data(self):
+        return {
+            'tema': self.tema,
+            'explicacion': self.explicacion,
+            'cambio_importante': self.cambio_importante,
+            'ejemplo': self.ejemplo,
+            'pagina_ref': self.pagina_ref,
+            # Compatibilidad con nombres en inglés
+            'topic': self.tema,
+            'explanation': self.explicacion,
+            'important_change': self.cambio_importante,
+            'example': self.ejemplo,
+            'page_reference': self.pagina_ref
+        }
+
+
 # ============================================
 # TABLA GENÉRICA PARA TIPOS NO MAPEADOS
 # ============================================
@@ -701,3 +905,31 @@ class GeneratedItem(BaseGenerated):
 
     def get_data(self):
         return self.data
+
+
+# ============================================
+# GM SCREEN - REFERENCIAS DE D&D 2024
+# ============================================
+class GMReference(db.Model):
+    """Referencias rápidas para la GM Screen"""
+    __tablename__ = 'gm_references'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(50), nullable=False, unique=True, index=True)
+    titulo = db.Column(db.String(200), nullable=False)
+    descripcion = db.Column(db.Text, nullable=True)
+    items = db.Column(db.JSON, nullable=False)  # Lista de items con nombre, descripcion, mecanica, ejemplo
+    notas_importantes = db.Column(db.JSON, nullable=True)  # Lista de notas
+    cambios_2024 = db.Column(db.Text, nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'category': self.category,
+            'titulo': self.titulo,
+            'descripcion': self.descripcion,
+            'items': self.items,
+            'notas_importantes': self.notas_importantes,
+            'cambios_2024': self.cambios_2024
+        }

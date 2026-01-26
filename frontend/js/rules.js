@@ -28,7 +28,7 @@ els.btnAsk.addEventListener('click', async () => {
         if (data.error) throw new Error(data.error);
 
         currentData = data;
-        renderRule(data);
+        renderRuleInternal(data);
         els.btnExp.style.display = 'block';
 
         // Guardamos en historial con un "nombre" generado
@@ -43,19 +43,25 @@ els.btnAsk.addEventListener('click', async () => {
     }
 });
 
-// Global renderer para el historial (nota: la config usa renderRules pero la función es renderRule)
+// Global renderer para el historial (compatible con singular y plural)
 window.renderRules = function(data) {
     currentData = data;  // Sincronizar con local
-    renderRule(data);
+    renderRuleInternal(data);
 };
 
-function renderRule(data) {
+// Alias para compatibilidad
+window.renderRule = function(data) {
+    currentData = data;
+    renderRuleInternal(data);
+};
+
+function renderRuleInternal(data) {
     const s = (val) => val || '---';
     
     // Support both English and Spanish keys for backward compatibility
     const topic = data.topic || data.tema;
     const explanation = data.explanation || data.explicacion;
-    const majorChange = data.major_change || data.cambio_importante;
+    const majorChange = data.important_change || data.cambio_importante || data.major_change;
     const example = data.example || data.ejemplo;
     const pageRef = data.page_reference || data.pagina_ref;
 
@@ -88,7 +94,7 @@ els.btnExp.addEventListener('click', () => {
     // Support both English and Spanish keys for backward compatibility
     const topic = currentData.topic || currentData.tema;
     const explanation = currentData.explanation || currentData.explicacion;
-    const majorChange = currentData.major_change || currentData.cambio_importante;
+    const majorChange = currentData.important_change || currentData.cambio_importante || currentData.major_change;
     const example = currentData.example || currentData.ejemplo;
 
     let text = `--- REGLA: ${topic} (D&D 2024) ---\n\n`;

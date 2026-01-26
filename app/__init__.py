@@ -35,7 +35,7 @@ def create_app(config_name='default'):
         encounters, cities, shops, images, history,
         factions, villains, quests, riddles, rules, travel, alchemy,
         dungeons, librarian, dreams, mysteries, contracts, ruins, monsters,
-        inns,journal
+        inns, journal, atmosphere, strongholds, gm_screen
     )
 
     app.register_blueprint(adventures.bp)
@@ -65,12 +65,17 @@ def create_app(config_name='default'):
     app.register_blueprint(monsters.bp)
     app.register_blueprint(inns.bp)
     app.register_blueprint(journal.bp)
+    app.register_blueprint(atmosphere.bp)
+    app.register_blueprint(strongholds.bp)
+    app.register_blueprint(gm_screen.bp)
 
     # Crear tablas - Importar TODOS los modelos para que se registren
     with app.app_context():
         from app.models import (
             Character, NPC, Adventure, City, Dungeon, Shop, Inn, Riddle, Quest,
-            Monster, Spell, Item, Journal, Faction, Mystery, Villain, GeneratedItem, Alchemy, Librarian, Dream
+            Monster, Spell, Item, Journal, Faction, Mystery, Villain, GeneratedItem, 
+            Alchemy, Librarian, Dream, Atmosphere, Stronghold, Facility, StrongholdFacility,
+            GMReference
         )
         db.create_all()
         print("✅ Base de datos creada/verificada correctamente")

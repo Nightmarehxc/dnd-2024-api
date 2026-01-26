@@ -146,3 +146,7 @@ class InnRequestSchema(Schema):
     )
     theme = fields.String(required=False, load_default="Fantasía Genérica")
     city = fields.String(required=False, load_default="") # NUEVO: Ciudad vinculada
+
+class AtmosphereRequestSchema(Schema):
+    place = fields.String(required=True, validate=validate.Length(min=3, max=200))
+    context = fields.String(required=False, load_default="")

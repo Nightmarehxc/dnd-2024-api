@@ -161,24 +161,233 @@ els.btnExp.addEventListener('click', () => {
     if (!currentData) return;
     
     const name = currentData.name || currentData.nombre;
-    const contentHTML = els.content.innerHTML;
-
-    const json = {
+    const archetype = currentData.archetype || currentData.arquetipo || 'Villano';
+    const race = currentData.race || currentData.raza || 'Humanoide';
+    const quote = currentData.famous_quote || currentData.cita_celebre || '';
+    const motivation = currentData.motivation || currentData.motivacion || '';
+    const lair = currentData.lair || currentData.guarida || '';
+    const masterPlan = currentData.master_plan || currentData.plan_maestro || '';
+    const planPhases = currentData.plan_phases || currentData.fases_plan || [];
+    const lieutenants = currentData.lieutenants || currentData.tenientes || [];
+    
+    // Stats
+    const stats = currentData.stats || {};
+    const ca = currentData.ca || 15;
+    const hp = currentData.hp || 100;
+    const speed = currentData.speed || 30;
+    
+    // Combat abilities
+    const attacks = currentData.attacks || [];
+    const specialAbilities = currentData.special_abilities || currentData.habilidades_especiales || [];
+    const legendaryActions = currentData.legendary_actions || currentData.acciones_legendarias || [];
+    
+    // Construir biografía HTML
+    let biographyHTML = `<h2>${name}</h2>`;
+    biographyHTML += `<p><em>"${quote}"</em></p>`;
+    biographyHTML += `<p><strong>Arquetipo:</strong> ${archetype}</p>`;
+    biographyHTML += `<p><strong>Raza:</strong> ${race}</p>`;
+    biographyHTML += `<h3>Motivación</h3><p>${motivation}</p>`;
+    biographyHTML += `<h3>Guarida</h3><p>${lair}</p>`;
+    biographyHTML += `<h3>Plan Maestro</h3><p>${masterPlan}</p>`;
+    if (planPhases.length > 0) {
+        biographyHTML += `<ul>${planPhases.map(p => `<li>${p}</li>`).join('')}</ul>`;
+    }
+    if (lieutenants.length > 0) {
+        biographyHTML += `<h3>Tenientes</h3><ul>`;
+        lieutenants.forEach(t => {
+            const tName = t.name || t.nombre || 'Desconocido';
+            const tRace = t.race || t.raza || '';
+            const tRole = t.role || t.rol || '';
+            const tDesc = t.brief_description || t.breve_desc || '';
+            biographyHTML += `<li><strong>${tName}</strong> (${tRace}) - ${tRole}: ${tDesc}</li>`;
+        });
+        biographyHTML += `</ul>`;
+    }
+    
+    // Mapear stats a formato Foundry
+    const abilities = {
+        str: { value: stats.STR || stats.FUE || 10 },
+        dex: { value: stats.DEX || stats.DES || 10 },
+        con: { value: stats.CON || 10 },
+        int: { value: stats.INT || 10 },
+        wis: { value: stats.WIS || stats.SAB || 10 },
+        cha: { value: stats.CHA || stats.CAR || 10 }
+    };
+    
+    // Crear items para ataques
+    const items = [];
+    attacks.forEach((atk, idx) => {
+        const attackItem = {
+            name: atk.name || `Ataque ${idx + 1}`,
+            type: "weapon",
+            system: {
+                description: { value: `<p>${atk.type || 'Ataque'}</p>` },
+                actionType: atk.type === 'ranged' ? 'rwak' : 'mwak',
+                attackBonus: String(atk.bonus || 0),
+                damage: {
+                    parts: [[atk.damage || '1d6', atk.damage_type || 'bludgeoning']]
+                },
+                equipped: true,
+                activation: { type: 'action', cost: 1 }
+            },
+            img: "icons/svg/sword.svg"
+        };
+        items.push(attackItem);
+    });
+    
+    // Agregar habilidades especiales como features
+    specialAbilities.forEach((ability, idx) => {
+        const featureItem = {
+            name: `Habilidad Especial ${idx + 1}`,
+            type: "feat",
+            system: {
+                description: { value: `<p>${ability}</p>` },
+                activation: { type: 'special' },
+                actionType: 'other'
+            },
+            img: "icons/svg/aura.svg"
+        };
+        items.push(featureItem);
+    });
+    
+    // Agregar acciones legendarias
+    legendaryActions.forEach((action, idx) => {
+        const legendaryItem = {
+            name: `Acción Legendaria ${idx + 1}`,
+            type: "feat",
+            system: {
+                description: { value: `<p>${action}</p>` },
+                activation: { type: 'legendary', cost: 1 },
+                actionType: 'other'
+            },
+            img: "icons/svg/lightning.svg"
+        };
+        items.push(legendaryItem);
+    });
+    
+    // Construir el actor de Foundry VTT v13 para D&D 5e
+    const foundryActor = {
         name: name,
-        type: "journal",
-        pages: [
-            {
-                name: "Dossier del Villano",
-                type: "text",
-                text: { content: contentHTML, format: 1 }
+        type: "npc",
+        system: {
+            abilities: abilities,
+            attributes: {
+                ac: { 
+                    flat: ca,
+                    calc: "flat",
+                    formula: ""
+                },
+                hp: { 
+                    value: hp, 
+                    max: hp,
+                    temp: 0,
+                    tempmax: 0,
+                    formula: ""
+                },
+                movement: { 
+                    walk: speed,
+                    burrow: 0,
+                    climb: 0,
+                    fly: 0,
+                    swim: 0,
+                    units: "ft",
+                    hover: false
+                },
+                senses: {
+                    darkvision: 0,
+                    blindsight: 0,
+                    tremorsense: 0,
+                    truesight: 0,
+                    units: "ft",
+                    special: ""
+                },
+                spellcasting: ""
+            },
+            details: {
+                biography: { 
+                    value: biographyHTML,
+                    public: ""
+                },
+                alignment: "",
+                race: race,
+                type: { 
+                    value: archetype.toLowerCase(),
+                    subtype: "",
+                    swarm: "",
+                    custom: ""
+                },
+                cr: 0,
+                spellLevel: 0,
+                xp: { value: 0 },
+                source: "Generador de Villanos D&D 2024"
+            },
+            traits: {
+                size: "med",
+                di: { value: [], custom: "" },
+                dr: { value: [], custom: "" },
+                dv: { value: [], custom: "" },
+                ci: { value: [], custom: "" },
+                languages: { value: ["common"], custom: "" }
+            },
+            currency: {
+                pp: 0, gp: 0, ep: 0, sp: 0, cp: 0
+            },
+            skills: {},
+            spells: {},
+            bonuses: {},
+            resources: {
+                legact: {
+                    value: legendaryActions.length > 0 ? 3 : 0,
+                    max: legendaryActions.length > 0 ? 3 : 0
+                },
+                legres: { value: 0, max: 0 },
+                lair: { value: false, initiative: 20 }
             }
-        ]
+        },
+        items: items,
+        effects: [],
+        flags: {},
+        img: "icons/svg/mystery-man.svg",
+        token: {
+            name: name,
+            displayName: 20,
+            actorLink: false,
+            width: 1,
+            height: 1,
+            texture: {
+                src: "icons/svg/mystery-man.svg",
+                scaleX: 1,
+                scaleY: 1
+            },
+            sight: {
+                enabled: false,
+                range: 0,
+                angle: 360,
+                visionMode: "basic"
+            },
+            detectionModes: [],
+            bar1: { attribute: "attributes.hp" },
+            bar2: { attribute: null },
+            displayBars: 20
+        },
+        prototypeToken: {
+            name: name,
+            displayName: 20,
+            actorLink: false,
+            width: 1,
+            height: 1,
+            texture: {
+                src: "icons/svg/mystery-man.svg",
+                scaleX: 1,
+                scaleY: 1
+            }
+        }
     };
 
-    const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
+    const blob = new Blob([JSON.stringify(foundryActor, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Villano_${name.replace(/\s+/g, '_')}.json`;
+    a.download = `Villano_${name.replace(/\s+/g, '_')}_Foundry.json`;
     a.click();
 });
 

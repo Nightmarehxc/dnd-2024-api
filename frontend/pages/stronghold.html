@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=MedievalSharp&display=swap" rel="stylesheet">
+    <title>Gestor de Baluartes</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .stronghold-section {
+            background: #f8f9fa;
+            border: 2px solid #2c3e50;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .stronghold-section h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .room-card, .staff-card, .event-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .room-card h4, .staff-card h4, .event-card h4 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+        .cost-badge {
+            display: inline-block;
+            background: #f39c12;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .time-badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .severity-minor { background: #2ecc71; }
+        .severity-moderate { background: #f39c12; }
+        .severity-severe { background: #e74c3c; }
+        .severity-critical { background: #c0392b; }
+        .action-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #2c3e50;
+            background: white;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: #2c3e50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .construction-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border-left: 4px solid #f39c12;
+        }
+        .construction-complete {
+            border-left-color: #27ae60;
+        }
+        .btn-build {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .btn-build:hover {
+            background: #229954;
+        }
+        .btn-build:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">🏰 Gestor de Baluartes</div>
+        <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+    </header>
+
+    <div class="generator-layout">
+        <div class="panel">
+            <h2>Construir Baluarte</h2>
+
+            <!-- NUEVA SECCIÓN: BALUARTES GUARDADOS -->
+            <div style="margin-bottom: 20px;">
+                <button class="btn-generate" id="btnShowList" style="background:#34495e; width:100%;">
+                    📚 Mis Baluartes Guardados
+                </button>
+                <div id="strongholdList" style="display:none; margin-top:10px; max-height:200px; overflow-y:auto; border:1px solid #ddd; padding:10px; border-radius:4px; background:#f8f9fa;">
+                    <!-- Lista dinámica -->
+                </div>
+            </div>
+
+            <div class="action-tabs">
+                <button class="tab-btn active" onclick="switchTab('stronghold')">🏰 Baluarte</button>
+                <button class="tab-btn" onclick="switchTab('hireling')">👤 Empleado</button>
+                <button class="tab-btn" onclick="switchTab('event')">⚠️ Evento</button>
+            </div>
+
+            <!-- TAB: GENERAR BALUARTE -->
+            <div id="tab-stronghold" class="tab-content active">
+                <label>Tipo de Baluarte</label>
+                <select id="strongholdType">
+                    <option value="Castle">🏰 Castillo</option>
+                    <option value="Wizard Tower">🔮 Torre de Mago</option>
+                    <option value="Guild Hall">🛡️ Sede de Gremio</option>
+                    <option value="Temple">⛪ Templo</option>
+                    <option value="Fortress">🗿 Fortaleza</option>
+                    <option value="Manor">🏛️ Mansión</option>
+                    <option value="Keep">🏯 Fortaleza</option>
+                </select>
+
+                <label>Nombre (Opcional)</label>
+                <input type="text" id="strongholdName" placeholder="Ej: La Torre de Obsidiana...">
+
+                <label>Nivel del Personaje (5-20)</label>
+                <input type="number" id="level" min="5" max="20" value="5">
+
+                <label>Descripción de Ubicación (Opcional)</label>
+                <textarea id="locationDescription" placeholder="Ej: En lo alto de una colina rocosa cerca de un bosque encantado..." rows="2"></textarea>
+
+                <button class="btn-generate" id="btnGenStronghold" style="background:#8e44ad;">
+                    🏗️ Fundar Baluarte
+                </button>
+            </div>
+
+            <!-- TAB: GENERAR EMPLEADO -->
+            <div id="tab-hireling" class="tab-content">
+                <label>Puesto de Trabajo</label>
+                <input type="text" id="hirelingRole" placeholder="Ej: Cocinero, Guardia, Bibliotecario...">
+
+                <label>Tipo de Baluarte</label>
+                <select id="hirelingStrongholdType">
+                    <option value="Castle">🏰 Castillo</option>
+                    <option value="Wizard Tower">🔮 Torre de Mago</option>
+                    <option value="Guild Hall">🛡️ Sede de Gremio</option>
+                    <option value="Temple">⛪ Templo</option>
+                    <option value="Fortress">🗿 Fortaleza</option>
+                </select>
+
+                <button class="btn-generate" id="btnGenHireling" style="background:#16a085;">
+                    👤 Generar Empleado
+                </button>
+            </div>
+
+            <!-- TAB: GENERAR EVENTO -->
+            <div id="tab-event" class="tab-content">
+                <label>Tipo de Baluarte</label>
+                <select id="eventStrongholdType">
+                    <option value="Castle">🏰 Castillo</option>
+                    <option value="Wizard Tower">🔮 Torre de Mago</option>
+                    <option value="Guild Hall">🛡️ Sede de Gremio</option>
+                    <option value="Temple">⛪ Templo</option>
+                    <option value="Fortress">🗿 Fortaleza</option>
+                </select>
+
+                <label>Severidad</label>
+                <select id="eventSeverity">
+                    <option value="Minor">🟢 Menor</option>
+                    <option value="Moderate">🟡 Moderado</option>
+                    <option value="Severe">🟠 Severo</option>
+                    <option value="Critical">🔴 Crítico</option>
+                </select>
+
+                <button class="btn-generate" id="btnGenEvent" style="background:#e74c3c;">
+                    ⚠️ Generar Evento
+                </button>
+            </div>
+
+            <hr>
+            <button class="btn-generate" id="btnSave" style="display:none; background:#27ae60;">💾 Guardar Cambios</button>
+            <button class="btn-export" id="btnExp" style="display:none;">Exportar a Journal</button>
+            <button class="btn-generate" id="btnDelete" style="display:none; background:#c0392b;">🗑️ Eliminar Baluarte</button>
+        </div>
+
+        <div class="panel result-panel">
+            <!-- PANEL DE GESTIÓN TEMPORAL Y BP -->
+            <div id="timeManagement" style="display:none; background:#2c3e50; color:white; padding:15px; border-radius:8px; margin-bottom:20px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:15px;">
+                    <!-- Columna Izquierda: Tiempo -->
+                    <div>
+                        <h3 style="margin:0; font-size:1.5em;">📅 Día <span id="currentDay">0</span></h3>
+                        <p style="margin:5px 0 0 0; font-size:0.9em; opacity:0.8;">Gestión Temporal</p>
+                        <div style="display:flex; gap:8px; margin-top:10px;">
+                            <button onclick="advanceDay(1)" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold; flex:1;">+1</button>
+                            <button onclick="advanceDay(7)" style="background:#2980b9; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold; flex:1;">+7</button>
+                            <button onclick="advanceDay(30)" style="background:#8e44ad; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold; flex:1;">+30</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Columna Derecha: Puntos de Bastión -->
+                    <div>
+                        <h3 style="margin:0; font-size:1.5em;">⭐ <span id="bastionPoints">0</span> BP</h3>
+                        <p style="margin:5px 0 0 0; font-size:0.9em; opacity:0.8;">Puntos de Bastión</p>
+                        <button onclick="executeBastionTurn()" id="btnBastionTurn" style="background:#f39c12; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; font-weight:bold; width:100%; margin-top:10px;">
+                            🎲 Turno de Bastión (cada 7 días)
+                        </button>
+                        <p id="bastionTurnInfo" style="margin:5px 0 0 0; font-size:0.8em; opacity:0.7; text-align:center;">Último: Día <span id="lastBastionTurn">0</span></p>
+                    </div>
+                </div>
+                
+                <!-- Panel de Construcciones -->
+                <div id="constructionProgress" style="padding-top:15px; border-top:1px solid rgba(255,255,255,0.2);">
+                    <!-- Construcciones en progreso -->
+                </div>
+                
+                <!-- Panel de Instalaciones Disponibles -->
+                <div id="facilitiesPanel" style="margin-top:15px; padding-top:15px; border-top:1px solid rgba(255,255,255,0.2); display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h4 style="margin:0;">🏗️ Instalaciones Disponibles</h4>
+                        <button onclick="toggleFacilitiesPanel()" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.3); padding:5px 15px; border-radius:4px; cursor:pointer;">
+                            Cerrar
+                        </button>
+                    </div>
+                    <div id="facilitiesList" style="max-height:400px; overflow-y:auto;">
+                        <!-- Lista de instalaciones -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="loader" class="loader">🏗️ Construyendo...</div>
+            <div id="resultContent">
+                <p style="text-align:center; margin-top:150px; color:#aaa;">Selecciona qué generar...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/stronghold.js"></script>
+</body>
+</html>

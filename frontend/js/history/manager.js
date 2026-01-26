@@ -2,7 +2,7 @@
 // 🏛️ GESTOR DE HISTORIAL (SQLITE VERSION FINAL)
 // ==========================================
 
-const HISTORY_API_BASE = "http://192.168.1.165:5001/api/history";
+const HISTORY_API_BASE = "http://localhost:5001/api/history";
 const historyContainer = document.getElementById('historyList');
 // detectPageType debe estar definido en config.js
 const PAGE_TYPE = (typeof detectPageType === 'function') ? detectPageType() : null;

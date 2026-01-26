@@ -47,6 +47,8 @@ window.HISTORY_CONFIG = {
     'alchemy':    { icon: '🧪', renderer: 'renderAlchemy' },
     'contract':   { icon: '📋', renderer: 'renderContract' },
     'dreams':     { icon: '💭', renderer: 'renderDream' },
+    'atmosphere': { icon: '👁️', renderer: 'renderAtmosphere' },
+    'atmospheres':{ icon: '👁️', renderer: 'renderAtmosphere' },
     'rules':      { icon: '⚖️', renderer: 'renderRules' }
 };
 
@@ -79,6 +81,7 @@ window.detectPageType = function() {
         'alchemy': 'alchemy',
         'contract': 'contract',
         'dream': 'dreams',
+        'atmosphere': 'atmospheres',
         'rules': 'rules'
     };
     

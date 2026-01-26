@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=MedievalSharp&display=swap" rel="stylesheet">
+    <title>El Ojo del Director</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<header>
+    <div class="brand">👁️ El Ojo del Director</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
+
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Describir Atmósfera</h2>
+
+        <label>Lugar a Describir</label>
+        <input type="text" id="place" 
+               placeholder="Ej: Cueva húmeda, Taberna ruidosa, Bosque neblinoso...">
+
+        <label>Contexto Adicional (Opcional)</label>
+        <textarea id="context" rows="3"
+                  placeholder="Ej: Los aventureros acaban de derrotar a un troll, hay sangre fresca en el suelo..."></textarea>
+
+        <button class="btn-generate" id="btnGen" style="background:#ff6f00;">Generar Descripción</button>
+        <button class="btn-export" id="btnExp" style="display:none;">Guardar Texto</button>
+    </div>
+
+    <div class="panel result-panel">
+        <div id="loader" class="loader">👁️ Enfocando la mirada...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">Describe un lugar para revelar su esencia sensorial...</p>
+        </div>
+    </div>
+
+    <div class="history-panel">
+        <div class="history-header">📜 Atmósferas Creadas</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/atmosphere.js"></script>
+</body>
+</html>

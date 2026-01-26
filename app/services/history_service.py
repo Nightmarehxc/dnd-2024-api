@@ -1,7 +1,7 @@
 from app import db
 from app.models import (
     Character, NPC, Adventure, City, Dungeon, Shop, Inn, Riddle, Quest,
-    Monster, Spell, Item, Journal, Faction, Mystery, Villain, GeneratedItem, Alchemy, Librarian, Dream, Travel
+    Monster, Spell, Item, Journal, Faction, Mystery, Villain, GeneratedItem, Alchemy, Librarian, Dream, Travel, Atmosphere, Rule
 )
 from sqlalchemy import desc, or_
 
@@ -66,6 +66,14 @@ MODEL_MAP = {
     # Dreams (modelo específico)
     'dream': Dream,
     'dreams': Dream,
+    
+    # Atmosphere (modelo específico)
+    'atmosphere': Atmosphere,
+    'atmospheres': Atmosphere,
+    
+    # Rules (modelo específico)
+    'rules': Rule,
+    'rule': Rule,
 }
 
 
@@ -370,6 +378,14 @@ class HistoryService:
             model_instance.dominant_climate = climate
             model_instance.eventos = events
             model_instance.events = events
+
+        elif isinstance(model_instance, Rule):
+            # Soportar ambos idiomas
+            model_instance.tema = data.get('tema') or data.get('topic') or ''
+            model_instance.explicacion = data.get('explicacion') or data.get('explanation') or ''
+            model_instance.cambio_importante = data.get('cambio_importante') or data.get('important_change') or data.get('major_change') or ''
+            model_instance.ejemplo = data.get('ejemplo') or data.get('example') or ''
+            model_instance.pagina_ref = data.get('pagina_ref') or data.get('page_reference') or ''
 
     def delete_item(self, item_id):
         """Borra un item por ID (búsqueda en todos los modelos)"""
