@@ -1,3 +1,4 @@
 .env.py
 .venv
 /.env.example
+.idea
