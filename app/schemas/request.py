@@ -150,3 +150,18 @@ class InnRequestSchema(Schema):
 class AtmosphereRequestSchema(Schema):
     place = fields.String(required=True, validate=validate.Length(min=3, max=200))
     context = fields.String(required=False, load_default="")
+
+class HerbalistRequestSchema(Schema):
+    environment = fields.String(
+        required=True,
+        validate=validate.Length(min=3, max=200)
+    )  # Bosque, Pantano, Montaña, etc.
+    skill_roll = fields.Integer(
+        required=True,
+        validate=validate.Range(min=1, max=30, error="La tirada debe estar entre 1 y 30")
+    )  # Resultado de la tirada de Supervivencia/Naturaleza
+    character_level = fields.Integer(
+        required=False,
+        load_default=1,
+        validate=validate.Range(min=1, max=20, error="El nivel debe estar entre 1 y 20")
+    )

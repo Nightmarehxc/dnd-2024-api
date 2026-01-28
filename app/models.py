@@ -691,6 +691,35 @@ class Alchemy(BaseGenerated):
         }
 
 # ============================================
+# BOTÁNICO MÍSTICO / HERBALIST
+# ============================================
+class Herbalist(BaseGenerated):
+    """Plantas mágicas y flora recolectable"""
+    __tablename__ = 'herbalist'
+    
+    descripcion = db.Column(db.Text)
+    ambiente = db.Column(db.String(100))  # Bosque, Pantano, etc.
+    rareza = db.Column(db.String(50))
+    propiedades_ocultas = db.Column(db.JSON)  # {cruda, hervida, aplicada, quemada}
+    desafio_recoleccion = db.Column(db.JSON)  # {descripcion, consecuencias, cd_sugerida}
+    valor_mercado = db.Column(db.String(50))
+    usos_alquimia = db.Column(db.Text)
+    folklore = db.Column(db.Text)
+    
+    def get_data(self):
+        return {
+            'nombre': self.name,
+            'descripcion': self.descripcion,
+            'ambiente': self.ambiente,
+            'rareza': self.rareza,
+            'propiedades_ocultas': self.propiedades_ocultas,
+            'desafio_recoleccion': self.desafio_recoleccion,
+            'valor_mercado': self.valor_mercado,
+            'usos_alquimia': self.usos_alquimia,
+            'folklore': self.folklore
+        }
+
+# ============================================
 # BIBLIOTECARIO
 # ============================================
 class Librarian(BaseGenerated):

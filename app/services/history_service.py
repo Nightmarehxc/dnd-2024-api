@@ -1,7 +1,7 @@
 from app import db
 from app.models import (
     Character, NPC, Adventure, City, Dungeon, Encounter, Shop, Inn, Riddle, Quest,
-    Monster, Spell, Item, Journal, Faction, Mystery, Villain, Alchemy, Librarian, 
+    Monster, Spell, Item, Journal, Faction, Mystery, Villain, Alchemy, Herbalist, Librarian, 
     Dream, Travel, Atmosphere, Rule, Loot, Ruins, Contract, Stronghold
 )
 from sqlalchemy import desc, or_
@@ -48,6 +48,10 @@ MODEL_MAP = {
     
     # Alchemy (modelo específico)
     'alchemy': Alchemy,
+    
+    # Herbalist (modelo específico)
+    'herbalist': Herbalist,
+    'herbalists': Herbalist,
     
     # Travel (modelo específico)
     'travel': Travel,
@@ -365,6 +369,16 @@ class HistoryService:
             model_instance.efecto_mecanico = data.get('mechanic_effect') or data.get('efecto_mecanico')
             model_instance.efecto_secundario = data.get('secondary_effect') or data.get('efecto_secundario')
             model_instance.ingredientes = data.get('ingredients') or data.get('ingredientes')
+
+        elif isinstance(model_instance, Herbalist):
+            model_instance.descripcion = data.get('description') or data.get('descripcion')
+            model_instance.ambiente = data.get('environment') or data.get('ambiente')
+            model_instance.rareza = data.get('rarity') or data.get('rareza')
+            model_instance.propiedades_ocultas = data.get('hidden_properties') or data.get('propiedades_ocultas')
+            model_instance.desafio_recoleccion = data.get('collection_challenge') or data.get('desafio_recoleccion')
+            model_instance.valor_mercado = data.get('market_value') or data.get('valor_mercado')
+            model_instance.usos_alquimia = data.get('alchemy_uses') or data.get('usos_alquimia')
+            model_instance.folklore = data.get('folklore')
 
         elif isinstance(model_instance, Dream):
             model_instance.contexto = data.get('context') or data.get('contexto') or ''

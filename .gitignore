@@ -1,3 +1,6 @@
 .env.py
 .venv
 /.env.example
+.idea
+.__pycache__
+__pycache__

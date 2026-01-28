@@ -46,6 +46,7 @@ window.HISTORY_CONFIG = {
 
     // --- MISCELÁNEA ---
     'alchemy':    { icon: '🧪', renderer: 'renderAlchemy' },
+    'herbalist':  { icon: '🌿', renderer: 'renderHerbalist' },
     'contract':   { icon: '📋', renderer: 'renderContract' },
     'contracts':  { icon: '📋', renderer: 'renderContract' },
     'dreams':     { icon: '💭', renderer: 'renderDream' },
@@ -83,6 +84,7 @@ window.detectPageType = function() {
         'journal': 'journals',
         'librarian': 'librarian',
         'alchemy': 'alchemy',
+        'herbalist': 'herbalist',
         'contract': 'contracts',
         'dream': 'dreams',
         'atmosphere': 'atmospheres',
