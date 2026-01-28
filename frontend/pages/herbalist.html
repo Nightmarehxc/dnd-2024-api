@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=MedievalSharp&display=swap" rel="stylesheet">
+    <title>El Botánico Místico</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<header>
+    <div class="brand">🌿 El Botánico Místico</div>
+    <a href="../index.html" class="back-btn">⬅ Volver al Menú</a>
+</header>
+
+<div class="generator-layout">
+    <div class="panel">
+        <h2>Buscar Flora Mágica</h2>
+        
+        <label>Entorno de Búsqueda</label>
+        <input type="text" id="herbEnvironment" placeholder="Ej: Bosque encantado, Pantano tóxico, Montaña nevada" />
+        
+        <label>Resultado de Tirada (Supervivencia/Naturaleza)</label>
+        <input type="number" id="herbSkillRoll" min="1" max="30" value="10" />
+        <small style="color: #888; display: block; margin-top: 5px;">
+            Tiradas más altas = plantas más raras y potentes
+        </small>
+
+        <label>Nivel del Personaje</label>
+        <input type="number" id="herbLevel" min="1" max="20" value="1" />
+        <small style="color: #888; display: block; margin-top: 5px;">
+            Afecta la potencia de las propiedades de la planta
+        </small>
+
+        <button class="btn-generate" id="btnGen" style="background:#27ae60;">🔍 Buscar Flora</button>
+    </div>
+
+    <div class="panel result-panel">
+        <div id="loader" class="loader">🌱 Explorando la vegetación...</div>
+        <div id="resultContent">
+            <p style="text-align:center; margin-top:150px; color:#aaa;">
+                Los descubrimientos botánicos aparecerán aquí
+            </p>
+        </div>
+    </div>
+
+    <div class="history-panel">
+        <div class="history-header">📖 Herbario</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>
+
+<script src="../js/history/config.js"></script>
+<script src="../js/history/manager.js"></script>
+<script src="../js/herbalist.js"></script>
+</body>
+</html>
