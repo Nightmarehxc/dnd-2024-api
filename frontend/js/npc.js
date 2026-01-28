@@ -162,6 +162,26 @@ window.renderNPC = function(data) {
         `;
     }
 
+    // Render Attacks
+    let attacksHtml = '';
+    if (data.attacks && Array.isArray(data.attacks) && data.attacks.length > 0) {
+        attacksHtml = '<div style="background:#fff3cd; padding:10px; border-radius:5px; margin:10px 0; border-left:4px solid #f39c12;"><h3 style="margin:0 0 8px 0; color:#856404;">⚔️ Attacks</h3>';
+        data.attacks.forEach(atk => {
+            attacksHtml += `
+                <div style="margin-bottom:8px; padding:8px; background:white; border-radius:4px; border:1px solid #ffc107;">
+                    <strong>${atk.name || 'Attack'}</strong> 
+                    <span style="color:#666;">(${atk.type || 'melee'})</span>
+                    <br>
+                    <span style="font-size:0.9em;">
+                        +${atk.bonus || 0} to hit | 
+                        <strong>${atk.damage || '1d6'}</strong> ${atk.damage_type || 'physical'} damage
+                    </span>
+                </div>
+            `;
+        });
+        attacksHtml += '</div>';
+    }
+
     els.content.innerHTML = `
         <div class="npc-card">
             <h2 style="color:#2c3e50; border-bottom:2px solid #3498db; margin-bottom:5px;">${s(data.name)}</h2>
@@ -179,8 +199,10 @@ window.renderNPC = function(data) {
 
             ${statsHtml}
 
+            ${attacksHtml}
+
             <div style="background:#ecf0f1; padding:10px; border-radius:5px; margin:10px 0;">
-                <p style="margin-bottom:5px;"><strong>Special Ability:</strong> ${s(data.special_ability)}</p>
+                <p style="margin-bottom:5px;"><strong>🌟 Special Ability:</strong> ${s(data.special_ability)}</p>
                 <div style="border-top:1px solid #ccc; padding-top:5px; margin-top:5px;">
                     <strong>Personality:</strong>
                     ${personalityHtml}
@@ -200,24 +222,135 @@ window.renderNPC = function(data) {
 // --- EXPORTAR ---
 els.btnExp.addEventListener('click', () => {
     if(!currentData) return;
-    // Export in Foundry VTT standard or generic format
+    
+    // Helper function to calculate modifier from ability score
+    const calcMod = (score) => Math.floor((score - 10) / 2);
+    
+    // Build biography HTML
+    let bioHtml = '<h2>Personality</h2>';
+    if (currentData.personality && typeof currentData.personality === 'object') {
+        const p = currentData.personality;
+        bioHtml += `<p><strong>Trait:</strong> ${p.trait || ''}</p>`;
+        bioHtml += `<p><strong>Ideal:</strong> ${p.ideal || ''}</p>`;
+        bioHtml += `<p><strong>Bond:</strong> ${p.bond || ''}</p>`;
+        bioHtml += `<p><strong>Flaw:</strong> ${p.flaw || ''}</p>`;
+    } else {
+        bioHtml += `<p>${currentData.personality || ''}</p>`;
+    }
+    bioHtml += `<h2>Plot Hook</h2><p>${currentData.plot_hook || ''}</p>`;
+    if (currentData.special_ability) {
+        bioHtml += `<h2>Special Ability</h2><p>${currentData.special_ability}</p>`;
+    }
+    
+    // Build items array for attacks
+    const items = [];
+    if (currentData.attacks && Array.isArray(currentData.attacks)) {
+        currentData.attacks.forEach((atk, idx) => {
+            items.push({
+                name: atk.name || `Attack ${idx + 1}`,
+                type: "weapon",
+                img: "icons/svg/sword.svg",
+                system: {
+                    description: { value: "" },
+                    quantity: 1,
+                    weight: 0,
+                    equipped: true,
+                    identified: true,
+                    activation: { type: "action", cost: 1 },
+                    range: { value: atk.type === "ranged" ? 150 : 5, units: "ft" },
+                    actionType: atk.type === "melee" ? "mwak" : "rwak",
+                    attackBonus: (atk.bonus || 0).toString(),
+                    damage: { 
+                        parts: [[atk.damage || "1d6", atk.damage_type || "bludgeoning"]] 
+                    },
+                    weaponType: atk.type === "melee" ? "simpleM" : "simpleR"
+                }
+            });
+        });
+    }
+
+    // Export in Foundry VTT v13 D&D5e format
+    const stats = currentData.stats || {};
     const json = {
-        name: currentData.name,
+        name: currentData.name || "NPC",
         type: "npc",
+        img: "icons/svg/mystery-man.svg",
         system: {
-            details: {
-                biography: { value: JSON.stringify(currentData.personality) },
-                race: currentData.race
+            abilities: {
+                str: { value: stats.STR || 10, proficient: 0, max: null, mod: calcMod(stats.STR || 10) },
+                dex: { value: stats.DEX || 10, proficient: 0, max: null, mod: calcMod(stats.DEX || 10) },
+                con: { value: stats.CON || 10, proficient: 0, max: null, mod: calcMod(stats.CON || 10) },
+                int: { value: stats.INT || 10, proficient: 0, max: null, mod: calcMod(stats.INT || 10) },
+                wis: { value: stats.WIS || 10, proficient: 0, max: null, mod: calcMod(stats.WIS || 10) },
+                cha: { value: stats.CHA || 10, proficient: 0, max: null, mod: calcMod(stats.CHA || 10) }
             },
             attributes: {
-                hp: { value: currentData.hp, max: currentData.hp },
-                ac: { value: currentData.ca }
-            }
+                ac: { 
+                    flat: currentData.ca || 10,
+                    calc: "flat",
+                    formula: ""
+                },
+                hp: { 
+                    value: currentData.hp || 10, 
+                    max: currentData.hp || 10,
+                    temp: 0,
+                    tempmax: 0,
+                    formula: ""
+                },
+                movement: {
+                    walk: currentData.speed || 30,
+                    burrow: 0,
+                    climb: 0,
+                    fly: 0,
+                    swim: 0,
+                    units: "ft",
+                    hover: false
+                },
+                senses: { darkvision: 0, blindsight: 0, tremorsense: 0, truesight: 0, units: "ft" },
+                spellcasting: ""
+            },
+            details: {
+                biography: { value: bioHtml, public: "" },
+                alignment: currentData.alignment || "Unaligned",
+                race: currentData.race || "",
+                type: { value: "humanoid", subtype: "", swarm: "", custom: "" },
+                cr: 0,
+                spellLevel: 0,
+                source: "D&D NPC Generator",
+                role: currentData.role || ""
+            },
+            traits: {
+                size: "med",
+                di: { value: [], custom: "" },
+                dr: { value: [], custom: "" },
+                dv: { value: [], custom: "" },
+                ci: { value: [], custom: "" },
+                languages: { value: ["common"], custom: "" }
+            },
+            currency: { pp: 0, gp: 0, ep: 0, sp: 0, cp: 0 },
+            skills: {},
+            spells: {},
+            bonuses: {}
+        },
+        items: items,
+        effects: [],
+        flags: {},
+        prototypeToken: {
+            name: currentData.name || "NPC",
+            displayName: 20,
+            actorLink: false,
+            width: 1,
+            height: 1,
+            disposition: 0,
+            displayBars: 20,
+            bar1: { attribute: "attributes.hp" },
+            bar2: { attribute: null }
         }
     };
+    
     const blob = new Blob([JSON.stringify(json, null, 2)], {type : 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `${currentData.name.replace(/\s+/g, '_')}.json`;
+    a.download = `${(currentData.name || 'npc').replace(/\s+/g, '_')}_foundry.json`;
     a.click();
 });
