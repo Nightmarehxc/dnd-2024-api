@@ -49,13 +49,8 @@ els.btnGen.addEventListener('click', async () => {
     }
 });
 
-// Global renderer para el historial
-window.renderEncounter = function(data) {
-    currentData = data;  // Sincronizar con local
-    renderEncounter(data);
-};
-
 function renderEncounter(data) {
+    currentData = data;  // Sincronizar con local
     const s = (val) => val || '---';
 
     // Support both English and Spanish keys for backward compatibility
@@ -131,3 +126,6 @@ els.btnExp.addEventListener('click', () => {
     a.download = `Encounter_${title.replace(/\s+/g, '_')}.json`;
     a.click();
 });
+
+// Exportar renderer al scope global para el historial
+window.renderEncounter = renderEncounter;

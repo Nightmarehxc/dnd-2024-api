@@ -1,7 +1,8 @@
 from app import db
 from app.models import (
-    Character, NPC, Adventure, City, Dungeon, Shop, Inn, Riddle, Quest,
-    Monster, Spell, Item, Journal, Faction, Mystery, Villain, GeneratedItem, Alchemy, Librarian, Dream, Travel, Atmosphere, Rule
+    Character, NPC, Adventure, City, Dungeon, Encounter, Shop, Inn, Riddle, Quest,
+    Monster, Spell, Item, Journal, Faction, Mystery, Villain, Alchemy, Librarian, 
+    Dream, Travel, Atmosphere, Rule, Loot, Ruins, Contract, Stronghold
 )
 from sqlalchemy import desc, or_
 
@@ -52,16 +53,25 @@ MODEL_MAP = {
     'travel': Travel,
     'travels': Travel,
     
-    # Tipos sin modelo específico (caen a GeneratedItem)
-    'rules': GeneratedItem,
-    'loot': GeneratedItem,
-    'encounter': GeneratedItem,
-    'encounters': GeneratedItem,
-    'ruins': GeneratedItem,
-    'image': GeneratedItem,
-    'images': GeneratedItem,
-    'contract': GeneratedItem,
-    'contracts': GeneratedItem,
+    # Loot (modelo específico)
+    'loot': Loot,
+    'loots': Loot,
+    
+    # Stronghold (modelo específico)
+    'stronghold': Stronghold,
+    'strongholds': Stronghold,
+    
+    # Encounter (modelo específico)
+    'encounter': Encounter,
+    'encounters': Encounter,
+    
+    # Ruins (modelo específico)
+    'ruins': Ruins,
+    'ruin': Ruins,
+    
+    # Contract (modelo específico)
+    'contract': Contract,
+    'contracts': Contract,
     
     # Dreams (modelo específico)
     'dream': Dream,
@@ -105,20 +115,18 @@ class HistoryService:
 
     def get_model_for_type(self, item_type):
         """Obtiene el modelo correspondiente al tipo"""
-        return MODEL_MAP.get(item_type, GeneratedItem)
+        model = MODEL_MAP.get(item_type)
+        if not model:
+            print(f"[WARNING] No se encontró modelo para tipo '{item_type}', usando Item como fallback")
+            return Item  # Fallback a Item si no está mapeado
+        return model
 
     def get_all_by_type(self, item_type):
         """Obtiene todos los items de un tipo, ordenados por fecha descendente"""
         model = self.get_model_for_type(item_type)
         
-        if model == GeneratedItem:
-            # Para tipos no mapeados, filtrar por item_type
-            items = GeneratedItem.query.filter_by(item_type=item_type) \
-                .order_by(desc(GeneratedItem.timestamp)) \
-                .all()
-        else:
-            # Para tipos mapeados, consultar el modelo específico
-            items = model.query.order_by(desc(model.timestamp)).all()
+        # Para todos los tipos, consultar el modelo específico
+        items = model.query.order_by(desc(model.timestamp)).all()
         
         return [item.to_dict() for item in items]
 
@@ -138,24 +146,15 @@ class HistoryService:
                 data.get('titulo') or
                 data.get('shop_name') or
                 data.get('title') or
-                "Sin Nombre")
+                f"Item de {item_type}")
         
         print(f"[LOG] Nombre extraído: '{name}'")
 
-        if model == GeneratedItem:
-            # Para tipos no mapeados, usar tabla genérica
-            print(f"[LOG] Usando tabla genérica GeneratedItem")
-            new_item = GeneratedItem(
-                item_type=item_type,
-                name=name,
-                data=data
-            )
-        else:
-            # Instanciar el modelo específico
-            new_item = model(name=name)
-            
-            # Poblarlo con los datos correspondientes (sobrescribir get_data)
-            self._populate_model(new_item, data)
+        # Instanciar el modelo específico
+        new_item = model(name=name)
+        
+        # Poblarlo con los datos correspondientes
+        self._populate_model(new_item, data)
 
         db.session.add(new_item)
         db.session.commit()
@@ -222,6 +221,14 @@ class HistoryService:
             model_instance.trampas = data.get('traps') or data.get('trampas')
             model_instance.tesoro = data.get('treasure') or data.get('tesoro')
             model_instance.secreto_central = data.get('central_secret') or data.get('secreto_central')
+
+        elif isinstance(model_instance, Encounter):
+            model_instance.titulo = data.get('title') or data.get('titulo') or data.get('name')
+            model_instance.resumen = data.get('summary') or data.get('resumen')
+            model_instance.monstruos = data.get('monsters') or data.get('monstruos')
+            model_instance.tacticas = data.get('tactics') or data.get('tacticas')
+            model_instance.terreno = data.get('terrain') or data.get('terreno')
+            model_instance.tesoro_botin = data.get('loot') or data.get('tesoro_botin')
 
         elif isinstance(model_instance, Shop):
             model_instance.propietario = data.get('shopkeeper_name') or data.get('propietario')
@@ -387,22 +394,59 @@ class HistoryService:
             model_instance.ejemplo = data.get('ejemplo') or data.get('example') or ''
             model_instance.pagina_ref = data.get('pagina_ref') or data.get('page_reference') or ''
 
+        elif isinstance(model_instance, Loot):
+            model_instance.cr = data.get('cr', 1)
+            model_instance.enemy_type = data.get('enemy_type') or data.get('tipo_enemigo') or 'Desconocido'
+            model_instance.resumen = data.get('resumen') or data.get('summary') or ''
+            model_instance.monedas = data.get('monedas') or data.get('coins') or {}
+            model_instance.objetos_arte = data.get('objetos_arte') or data.get('art_objects') or []
+            model_instance.objetos_magicos = data.get('objetos_magicos') or data.get('magic_items') or []
+            model_instance.curiosidades = data.get('curiosidades') or data.get('curiosities') or []
+
+        elif isinstance(model_instance, Ruins):
+            model_instance.ruin_type = data.get('ruin_type') or data.get('tipo_ruina') or ''
+            model_instance.original_use = data.get('original_use') or data.get('uso_original') or ''
+            model_instance.cataclysm = data.get('cataclysm') or data.get('cataclismo') or ''
+            model_instance.current_state = data.get('current_state') or data.get('estado_actual') or ''
+            model_instance.inhabitants = data.get('inhabitants') or data.get('habitantes') or ''
+            model_instance.secret = data.get('secret') or data.get('secreto') or ''
+
+        elif isinstance(model_instance, Contract):
+            model_instance.patron = data.get('patron') or ''
+            model_instance.desire = data.get('desire') or data.get('deseo') or ''
+            model_instance.offer = data.get('offer') or data.get('oferta') or ''
+            model_instance.price = data.get('price') or data.get('precio') or ''
+            model_instance.small_print = data.get('small_print') or data.get('letra_pequena') or ''
+            model_instance.escape_clause = data.get('escape_clause') or data.get('clausula_escape') or ''
+
+        elif isinstance(model_instance, Stronghold):
+            model_instance.stronghold_type = data.get('type') or data.get('tipo') or data.get('stronghold_type') or ''
+            model_instance.level_requirement = data.get('level_requirement') or data.get('nivel_requerido') or 1
+            model_instance.location = data.get('location') or data.get('ubicacion') or data.get('ubicación') or ''
+            model_instance.bastion_points = data.get('bastion_points') or data.get('puntos_bastion') or 0
+            model_instance.total_gold_cost = data.get('total_cost', {}).get('gold') or data.get('total_cost', {}).get('oro') or 0
+            model_instance.monthly_maintenance = data.get('total_cost', {}).get('monthly_maintenance') or data.get('total_cost', {}).get('mantenimiento_mensual') or 0
+            model_instance.defense_score = data.get('defense_score') or data.get('puntuacion_defensa') or 0
+            model_instance.current_day = data.get('current_day') or data.get('dia_actual') or 0
+            model_instance.staff = data.get('staff') or data.get('personal') or []
+            model_instance.events_history = data.get('events_history') or data.get('historial_eventos') or []
+            model_instance.reputation = data.get('reputation') or data.get('reputacion') or data.get('reputación') or {}
+            model_instance.special_features = data.get('special_features') or []
+
     def delete_item(self, item_id):
         """Borra un item por ID (búsqueda en todos los modelos)"""
-        # Intentar encontrar en todos los modelos
-        for model in MODEL_MAP.values():
-            item = model.query.get(item_id)
-            if item:
-                db.session.delete(item)
-                db.session.commit()
-                return True
-        
-        # Fallback a tabla genérica
-        item = GeneratedItem.query.get(item_id)
-        if item:
-            db.session.delete(item)
-            db.session.commit()
-            return True
+        # Intentar encontrar en todos los modelos únicos
+        unique_models = set(MODEL_MAP.values())
+        for model in unique_models:
+            try:
+                item = model.query.get(item_id)
+                if item:
+                    db.session.delete(item)
+                    db.session.commit()
+                    return True
+            except Exception as e:
+                print(f"[DEBUG] Error al buscar en modelo {model.__name__}: {e}")
+                continue
         
         return False
 
@@ -421,22 +465,7 @@ class HistoryService:
         # Si se proporciona item_type, buscar primero en ese modelo específico
         if item_type:
             model = self.get_model_for_type(item_type)
-            if model != GeneratedItem:
-                print(f"[LOG UPDATE] Buscando en modelo específico: {model.__name__}")  # DEBUG
-                item = model.query.get(item_id)
-                if item:
-                    print(f"[LOG UPDATE] ✅ Item encontrado en {model.__name__}")  # DEBUG
-                    if new_name:
-                        item.name = new_name
-                    self._populate_model(item, new_data)
-                    db.session.commit()
-                    result = item.to_dict()
-                    print(f"[LOG UPDATE] Item actualizado: {result}")  # DEBUG
-                    return result
-        
-        # Buscar en todos los modelos si no se encontró o no se especificó tipo
-        for model in MODEL_MAP.values():
-            print(f"[LOG UPDATE] Buscando en modelo: {model.__name__}")  # DEBUG
+            print(f"[LOG UPDATE] Buscando en modelo específico: {model.__name__}")  # DEBUG
             item = model.query.get(item_id)
             if item:
                 print(f"[LOG UPDATE] ✅ Item encontrado en {model.__name__}")  # DEBUG
@@ -448,22 +477,26 @@ class HistoryService:
                 print(f"[LOG UPDATE] Item actualizado: {result}")  # DEBUG
                 return result
         
-        print(f"[LOG UPDATE] No encontrado en modelos específicos, buscando en GeneratedItem")  # DEBUG
-        # Fallback a tabla genérica
-        item = GeneratedItem.query.get(item_id)
-        if item:
-            print(f"[LOG UPDATE] ✅ Item encontrado en GeneratedItem")  # DEBUG
-            if new_name:
-                item.name = new_name
-            item.data = new_data
-            from sqlalchemy.orm.attributes import flag_modified
-            flag_modified(item, "data")
-            db.session.commit()
-            result = item.to_dict()
-            print(f"[LOG UPDATE] Item actualizado: {result}")  # DEBUG
-            return result
+        # Buscar en todos los modelos si no se encontró o no se especificó tipo
+        unique_models = set(MODEL_MAP.values())
+        for model in unique_models:
+            print(f"[LOG UPDATE] Buscando en modelo: {model.__name__}")  # DEBUG
+            try:
+                item = model.query.get(item_id)
+                if item:
+                    print(f"[LOG UPDATE] ✅ Item encontrado en {model.__name__}")  # DEBUG
+                    if new_name:
+                        item.name = new_name
+                    self._populate_model(item, new_data)
+                    db.session.commit()
+                    result = item.to_dict()
+                    print(f"[LOG UPDATE] Item actualizado: {result}")  # DEBUG
+                    return result
+            except Exception as e:
+                print(f"[DEBUG] Error al buscar/actualizar en {model.__name__}: {e}")
+                continue
         
-        print(f"[LOG UPDATE] ❌ Item no encontrado")  # DEBUG
+        print(f"[LOG UPDATE] ⚠️ Item no encontrado en ningún modelo")  # DEBUG
         return None
 
 

@@ -249,6 +249,36 @@ class Dungeon(BaseGenerated):
         }
 
 
+class Encounter(BaseGenerated):
+    __tablename__ = 'encounters'
+    
+    resumen = db.Column(db.Text)
+    monstruos = db.Column(db.JSON)
+    tacticas = db.Column(db.JSON)
+    terreno = db.Column(db.JSON)
+    tesoro_botin = db.Column(db.Text)
+    
+    # Campos adicionales para soporte bilingüe
+    titulo = db.Column(db.String(150))
+    
+    def get_data(self):
+        return {
+            'name': self.name,
+            'titulo': self.titulo or self.name,
+            'title': self.titulo or self.name,
+            'resumen': self.resumen,
+            'summary': self.resumen,
+            'monstruos': self.monstruos,
+            'monsters': self.monstruos,
+            'tacticas': self.tacticas,
+            'tactics': self.tacticas,
+            'terreno': self.terreno,
+            'terrain': self.terreno,
+            'tesoro_botin': self.tesoro_botin,
+            'loot': self.tesoro_botin
+        }
+
+
 class Shop(BaseGenerated):
     __tablename__ = 'shops'
     
@@ -437,6 +467,30 @@ class Item(BaseGenerated):
             'mechanics': self.mechanics,
             'properties': self.propiedades,
             'class_requirement': self.class_requirement
+        }
+
+
+class Loot(BaseGenerated):
+    __tablename__ = 'loot'
+    
+    cr = db.Column(db.Integer)
+    enemy_type = db.Column(db.String(150))
+    
+    resumen = db.Column(db.Text)
+    monedas = db.Column(db.JSON)
+    objetos_arte = db.Column(db.JSON)
+    objetos_magicos = db.Column(db.JSON)
+    curiosidades = db.Column(db.JSON)
+
+    def get_data(self):
+        return {
+            'resumen': self.resumen,
+            'monedas': self.monedas,
+            'objetos_arte': self.objetos_arte,
+            'objetos_magicos': self.objetos_magicos,
+            'curiosidades': self.curiosidades,
+            'cr': self.cr,
+            'enemy_type': self.enemy_type
         }
 
 
@@ -891,20 +945,6 @@ class Rule(BaseGenerated):
             'example': self.ejemplo,
             'page_reference': self.pagina_ref
         }
-
-
-# ============================================
-# TABLA GENÉRICA PARA TIPOS NO MAPEADOS
-# ============================================
-class GeneratedItem(BaseGenerated):
-    """Fallback para tipos que aún no tienen modelo específico"""
-    __tablename__ = 'generated_items'
-    
-    item_type = db.Column(db.String(50), nullable=False)
-    data = db.Column(db.JSON, nullable=False)
-
-    def get_data(self):
-        return self.data
 
 
 # ============================================

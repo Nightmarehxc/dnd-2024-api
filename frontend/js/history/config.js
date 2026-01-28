@@ -17,6 +17,7 @@ window.HISTORY_CONFIG = {
     'shops':      { icon: '💰', renderer: 'renderShop' },
     'inns':       { icon: '🍺', renderer: 'renderInn' },
     'cities':     { icon: '🏰', renderer: 'renderCity' },
+    'strongholds': { icon: '🏛️', renderer: 'renderStronghold' },
 
     // --- AVENTURA Y EXPLORACIÓN ---
     'adventures': { icon: '🗺️', renderer: 'renderAdventure' },
@@ -43,9 +44,10 @@ window.HISTORY_CONFIG = {
     'librarian':  { icon: '📚', renderer: 'renderBook' },
     'librarians': { icon: '📚', renderer: 'renderBook' },
 
-    // --- MISCELÁNEA (tipos no mapeados a modelos específicos) ---
+    // --- MISCELÁNEA ---
     'alchemy':    { icon: '🧪', renderer: 'renderAlchemy' },
     'contract':   { icon: '📋', renderer: 'renderContract' },
+    'contracts':  { icon: '📋', renderer: 'renderContract' },
     'dreams':     { icon: '💭', renderer: 'renderDream' },
     'atmosphere': { icon: '👁️', renderer: 'renderAtmosphere' },
     'atmospheres':{ icon: '👁️', renderer: 'renderAtmosphere' },
@@ -61,10 +63,12 @@ window.detectPageType = function() {
         'character': 'characters',
         'npc': 'npcs',
         'item': 'items',
+        'loot': 'loot',
         'spell': 'spells',
         'shop': 'shops',
         'inn': 'inns',
         'city': 'cities',
+        'stronghold': 'strongholds',
         'adventure': 'adventures',
         'dungeon': 'dungeons',
         'encounter': 'encounters',
@@ -79,7 +83,7 @@ window.detectPageType = function() {
         'journal': 'journals',
         'librarian': 'librarian',
         'alchemy': 'alchemy',
-        'contract': 'contract',
+        'contract': 'contracts',
         'dream': 'dreams',
         'atmosphere': 'atmospheres',
         'rules': 'rules'

@@ -29,27 +29,29 @@ class BaseService:
         except json.JSONDecodeError as e:
             print(f"[GEMINI] Error al parsear directo: {e}")
             
-            # 2. Búsqueda de patrón { ... } (greedy)
-            match = re.search(r'\{.*\}', text, re.DOTALL)
-            if match:
-                clean_json = match.group(0)
-                try:
-                    result = json.loads(clean_json)
-                    print(f"✅ JSON limpiado (método greedy): claves = {list(result.keys())}")
-                    return result
-                except json.JSONDecodeError as e:
-                    print(f"[GEMINI] Error al parsear con greedy: {e}")
-            
-            # 3. Intento con búsqueda no-greedy y validación
-            match = re.search(r'\{[\s\S]*\}', text)
-            if match:
-                clean_json = match.group(0)
-                try:
-                    result = json.loads(clean_json)
-                    print(f"✅ JSON limpiado (método no-greedy): claves = {list(result.keys())}")
-                    return result
-                except json.JSONDecodeError as e:
-                    print(f"[GEMINI] Error al parsear con no-greedy: {e}")
+            # 2. Búsqueda de patrón { ... } (usando método manual para evitar recursión)
+            # Buscar el primer { y su } correspondiente usando conteo de llaves
+            start_idx = text.find('{')
+            if start_idx != -1:
+                brace_count = 0
+                end_idx = -1
+                for i in range(start_idx, len(text)):
+                    if text[i] == '{':
+                        brace_count += 1
+                    elif text[i] == '}':
+                        brace_count -= 1
+                        if brace_count == 0:
+                            end_idx = i + 1
+                            break
+                
+                if end_idx != -1:
+                    clean_json = text[start_idx:end_idx]
+                    try:
+                        result = json.loads(clean_json)
+                        print(f"✅ JSON limpiado (método manual): claves = {list(result.keys())}")
+                        return result
+                    except json.JSONDecodeError as e:
+                        print(f"[GEMINI] Error al parsear con método manual: {e}")
             
             # 4. Última opción: procurar arreglar formato
             cleaned = text

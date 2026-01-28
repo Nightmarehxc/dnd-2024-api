@@ -1,4 +1,6 @@
 from app.services.gemini_service import BaseService
+from app.models import Loot
+from app import db
 
 
 class LootService(BaseService):
@@ -34,7 +36,36 @@ class LootService(BaseService):
         3. Dale sabor temático al tesoro según el enemigo (ej: Si son cultistas, objetos oscuros; si son bandidos, joyas robadas).
         """
 
-        return self._generate_content(system_instruction, prompt)
+        result = self._generate_content(system_instruction, prompt)
+        
+        # Si hay error en la generación, retornamos el error
+        if "error" in result:
+            return result
+        
+        # Guardar en base de datos
+        try:
+            loot = Loot(
+                name=f"Tesoro de {enemy_type} (CR {cr})",
+                cr=cr,
+                enemy_type=enemy_type,
+                resumen=result.get('resumen', ''),
+                monedas=result.get('monedas', {}),
+                objetos_arte=result.get('objetos_arte', []),
+                objetos_magicos=result.get('objetos_magicos', []),
+                curiosidades=result.get('curiosidades', [])
+            )
+            db.session.add(loot)
+            db.session.commit()
+            
+            # Agregar ID al resultado
+            result['id'] = loot.id
+            print(f"✅ Loot guardado con ID: {loot.id}")
+        except Exception as e:
+            print(f"❌ Error al guardar Loot en BD: {str(e)}")
+            db.session.rollback()
+            # Continuamos aunque falle el guardado
+        
+        return result
 
 
 loot_service = LootService()

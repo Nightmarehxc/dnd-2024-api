@@ -32,7 +32,7 @@ els.btnGen.addEventListener('click', async () => {
         if (data.error) throw new Error(data.error);
 
         currentData = data;
-        renderLoot(data);
+        renderLootContent(data);
         els.btnExp.style.display = 'block';
 
         if (typeof addToHistory === 'function') addToHistory(data, 'loot');
@@ -47,11 +47,11 @@ els.btnGen.addEventListener('click', async () => {
 
 // Global renderer para el historial
 window.renderLoot = function(data) {
-    currentData = data;  // Sincronizar con local
-    renderLoot(data);
+    currentData = data;
+    renderLootContent(data);
 };
 
-function renderLoot(data) {
+function renderLootContent(data) {
     const s = (val) => val || '---';
 
     // Support both English and Spanish keys for backward compatibility

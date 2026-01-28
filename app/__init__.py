@@ -72,10 +72,10 @@ def create_app(config_name='default'):
     # Crear tablas - Importar TODOS los modelos para que se registren
     with app.app_context():
         from app.models import (
-            Character, NPC, Adventure, City, Dungeon, Shop, Inn, Riddle, Quest,
-            Monster, Spell, Item, Journal, Faction, Mystery, Villain, GeneratedItem, 
+            Character, NPC, Adventure, City, Dungeon, Encounter, Shop, Inn, Riddle, Quest,
+            Monster, Spell, Item, Journal, Faction, Mystery, Villain,
             Alchemy, Librarian, Dream, Atmosphere, Stronghold, Facility, StrongholdFacility,
-            GMReference
+            GMReference, Loot, Travel, Ruins, Contract, Rule
         )
         db.create_all()
         print("✅ Base de datos creada/verificada correctamente")

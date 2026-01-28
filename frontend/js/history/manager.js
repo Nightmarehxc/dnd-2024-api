@@ -51,9 +51,10 @@ async function loadHistory() {
         let res = await fetch(`${HISTORY_API_BASE}/${PAGE_TYPE}`);
         let history = await res.json();
         
-        // Si está vacío, intentar con la versión plural (para tipos como 'librarian')
-        if (!history || history.length === 0) {
+        // Si está vacío Y el tipo no termina en 's', intentar con la versión plural
+        if ((!history || history.length === 0) && !PAGE_TYPE.endsWith('s')) {
             const pluralType = PAGE_TYPE + 's';
+            console.log(`📥 Intentando versión plural: ${pluralType}`);  // DEBUG
             res = await fetch(`${HISTORY_API_BASE}/${pluralType}`);
             history = await res.json();
         }
