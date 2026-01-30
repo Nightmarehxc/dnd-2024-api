@@ -16,14 +16,45 @@ def generate_npc():
 @bp.route('/chat', methods=['POST'])
 def chat_npc():
     data = request.json or {}
+
+    # 1. Extracción de datos agnóstica (Funciona para Web y Foundry)
+    # Si viene 'npc_data' (Web), lo usa. Si no, intenta armarlo con los datos sueltos (Foundry).
     npc_data = data.get('npc_data')
+    if not npc_data:
+        npc_data = {
+            "name": data.get('npc_name', 'Desconocido'),
+            "role": data.get('role', 'Habitante'),
+            "personality": data.get('bio', 'Genérica'),
+            "appearance": "Visible en la escena"
+        }
+
+    # 2. Mapeo de mensaje (Web usa 'message', Foundry usa 'question')
+    user_message = data.get('message') or data.get('question')
+
+    # 3. Historial y Contexto Extra
     history = data.get('history', [])
-    user_message = data.get('message')
+    location = data.get('location', '')  # <--- NUEVO: Saber dónde estamos
 
-    if not npc_data or not user_message:
-        return jsonify({"error": "Faltan datos (npc_data o message)"}), 400
+    # Validación básica
+    if not user_message:
+        return jsonify({"error": "Falta el mensaje del usuario"}), 400
 
+    # 4. Inyectar el lugar en el mensaje si existe (Truco para dar contexto sin tocar el servicio)
+    if location:
+        # Añadimos el contexto de lugar como una "acotación" al sistema
+        # Esto evita tener que modificar npc_service.py
+        user_message = f"[Situación: Estamos en {location}] {user_message}"
+
+    try:
+        response_text = npc_service.chat(npc_data, history, user_message)
+        return jsonify({"response": response_text})
+    except Exception as e:
+        print(f"ERROR CHAT: {e}")
+        return jsonify({"error": "El NPC se ha quedado mudo (Error interno)"}), 500
+
+    # Llamamos a tu servicio existente (que ya funciona perfecto)
     response_text = npc_service.chat(npc_data, history, user_message)
+
     return jsonify({"response": response_text})
 
 

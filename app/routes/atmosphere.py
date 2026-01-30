@@ -17,6 +17,15 @@ def generate():
             data.get('context', '')
         )
         
+        # Validar que el resultado contiene datos válidos
+        if not result or not isinstance(result, dict):
+            return jsonify({'error': 'No se pudo generar la atmósfera. Intenta de nuevo.'}), 500
+        
+        # Validar que al menos uno de los campos principales esté presente
+        if not any([result.get('sight'), result.get('sound'), result.get('smell'), 
+                    result.get('touch'), result.get('atmosphere')]):
+            return jsonify({'error': 'La respuesta generada está vacía. Intenta de nuevo.'}), 500
+        
         # Guardar en la base de datos
         atmosphere = Atmosphere(
             name=f"Atmósfera: {data['place']}",
@@ -43,6 +52,7 @@ def generate():
         })
     
     except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/history', methods=['GET'])

@@ -36,7 +36,12 @@ els.btnGen.addEventListener('click', async () => {
         els.btnExp.style.display = 'block';
 
         if (typeof addToHistory === 'function') {
-            addToHistory({ ...data, nombre: `Atmósfera: ${els.place.value}` }, 'atmosphere');
+            addToHistory({ 
+                ...data, 
+                place: els.place.value,
+                context: els.context.value,
+                nombre: `Atmósfera: ${els.place.value}` 
+            }, 'atmosphere');
         }
 
     } catch (err) {

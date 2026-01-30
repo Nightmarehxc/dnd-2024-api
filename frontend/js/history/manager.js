@@ -226,10 +226,23 @@ async function deleteItem(event, id) {
     if(event) event.stopPropagation(); // Evitar que se abra al borrar
     if (!confirm("¿Borrar este registro permanentemente?")) return;
 
+    console.log(`🗑️ Eliminando item ID: ${id}, tipo: ${PAGE_TYPE}`);
     try {
-        await fetch(`${HISTORY_API_BASE}/${PAGE_TYPE}/${id}`, { method: 'DELETE' });
-        loadHistory();
-    } catch(e) { console.error(e); }
+        const response = await fetch(`${HISTORY_API_BASE}/${PAGE_TYPE}/${id}`, { method: 'DELETE' });
+        const result = await response.json();
+        console.log('📥 Respuesta del servidor:', result);
+        
+        if (response.ok && result.success) {
+            console.log('✅ Item eliminado exitosamente');
+            loadHistory();
+        } else {
+            console.error('❌ Error al eliminar:', result);
+            alert('Error al eliminar el elemento');
+        }
+    } catch(e) { 
+        console.error('❌ Error de red al eliminar:', e);
+        alert('Error de conexión al eliminar');
+    }
 }
 
 // Inicializar al cargar

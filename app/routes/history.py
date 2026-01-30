@@ -36,7 +36,7 @@ def add_to_history(item_type):
 @bp.route('/<item_type>/<int:item_id>', methods=['DELETE'])
 def delete_item(item_type, item_id):
     print(f"[HISTORY-DELETE] Eliminando item {item_id} de tipo {item_type}")
-    success = history_service.delete_item(item_id)
+    success = history_service.delete_item(item_id, item_type)
     return jsonify({"success": success})
 
 

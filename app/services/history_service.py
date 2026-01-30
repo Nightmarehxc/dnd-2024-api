@@ -447,21 +447,57 @@ class HistoryService:
             model_instance.reputation = data.get('reputation') or data.get('reputacion') or data.get('reputación') or {}
             model_instance.special_features = data.get('special_features') or []
 
-    def delete_item(self, item_id):
-        """Borra un item por ID (búsqueda en todos los modelos)"""
-        # Intentar encontrar en todos los modelos únicos
+        elif isinstance(model_instance, Atmosphere):
+            model_instance.place = data.get('place') or data.get('lugar') or ''
+            model_instance.context = data.get('context') or data.get('contexto') or ''
+            model_instance.sight = data.get('sight') or data.get('vista') or ''
+            model_instance.sound = data.get('sound') or data.get('sonido') or ''
+            model_instance.smell = data.get('smell') or data.get('olfato') or ''
+            model_instance.touch = data.get('touch') or data.get('tacto') or ''
+            model_instance.atmosphere = data.get('atmosphere') or data.get('atmosfera') or ''
+
+    def delete_item(self, item_id, item_type=None):
+        """Borra un item por ID (búsqueda específica por tipo o en todos los modelos)"""
+        print(f"[DELETE] Intentando eliminar item con ID: {item_id}, tipo: {item_type}")
+        
+        # Si se especifica el tipo, buscar solo en ese modelo
+        if item_type:
+            model = self.get_model_for_type(item_type)
+            print(f"[DELETE] Buscando en modelo específico: {model.__name__}")
+            try:
+                item = model.query.get(item_id)
+                if item:
+                    print(f"[DELETE] ✅ Item encontrado en modelo {model.__name__}, eliminando...")
+                    db.session.delete(item)
+                    db.session.commit()
+                    print(f"[DELETE] ✅ Item eliminado exitosamente")
+                    return True
+                else:
+                    print(f"[DELETE] ⚠️ Item con ID {item_id} no encontrado en modelo {model.__name__}")
+                    return False
+            except Exception as e:
+                print(f"[DELETE] ❌ Error al eliminar en modelo {model.__name__}: {e}")
+                db.session.rollback()
+                return False
+        
+        # Si no se especifica tipo, buscar en todos los modelos (legacy)
+        print(f"[DELETE] ⚠️ No se especificó tipo, buscando en todos los modelos...")
         unique_models = set(MODEL_MAP.values())
         for model in unique_models:
             try:
                 item = model.query.get(item_id)
                 if item:
+                    print(f"[DELETE] ✅ Item encontrado en modelo {model.__name__}, eliminando...")
                     db.session.delete(item)
                     db.session.commit()
+                    print(f"[DELETE] ✅ Item eliminado exitosamente")
                     return True
             except Exception as e:
-                print(f"[DEBUG] Error al buscar en modelo {model.__name__}: {e}")
+                print(f"[DELETE] ❌ Error al eliminar en modelo {model.__name__}: {e}")
+                db.session.rollback()
                 continue
         
+        print(f"[DELETE] ⚠️ Item con ID {item_id} no encontrado en ningún modelo")
         return False
 
     def update_item(self, item_id, new_data, item_type=None):
